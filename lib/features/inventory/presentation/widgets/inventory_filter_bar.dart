@@ -1,0 +1,234 @@
+import 'package:billing_system/core/config/constants/categories.dart';
+import 'package:billing_system/core/config/theme/app_colors.dart';
+import 'package:billing_system/core/config/theme/app_radius.dart';
+import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
+import 'package:billing_system/features/inventory/presentation/widgets/add_product_button.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+class InventoryFilterBar extends StatefulWidget {
+  final bool compact;
+  const InventoryFilterBar({super.key, this.compact = false});
+
+  @override
+  State<InventoryFilterBar> createState() => _InventoryFilterBarState();
+}
+
+class _InventoryFilterBarState extends State<InventoryFilterBar> {
+  final _textController = TextEditingController();
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.find<InventoryController>();
+
+    final searchField = _SearchField(
+      textController: _textController,
+      onChanged: controller.updateSearch,
+      onClear: () {
+        _textController.clear();
+        controller.clearSearch();
+      },
+    );
+
+    final categoryDropdown = Obx(
+      () => _CategoryDropdown(
+        value: controller.selectedCategory.value,
+        onChanged: (v) => controller.selectCategory(v ?? 'All'),
+      ),
+    );
+
+    final actionButtons = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AddProductButton(),
+        const SizedBox(width: 8),
+        SizedBox(
+          height: 46,
+          child: ElevatedButton.icon(
+            onPressed: () {},
+            icon: const Icon(
+              Icons.qr_code_2,
+              size: 20,
+              color: AppColors.primary,
+            ),
+            label: const Text(
+              'SCAN',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.1,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              elevation: 0,
+              backgroundColor: Colors.white,
+              foregroundColor: AppColors.primary,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadius.sm),
+                side: BorderSide(color: AppColors.primary, width: .8),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+
+    if (widget.compact) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [ 
+          searchField,
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(child: categoryDropdown),
+              const SizedBox(width: 10),
+            ],
+          ),
+          const SizedBox(height: 12),
+          actionButtons,
+        ],
+      );
+    }
+
+    return Row(
+      children: [
+        Expanded(child: searchField),
+        const SizedBox(width: 14),
+        SizedBox(width: 200, child: categoryDropdown),
+        const SizedBox(width: 14),
+        actionButtons,
+      ],
+    );
+  }
+}
+
+// ─── Search field ─────────────────────────────────────────────────────────────
+
+class _SearchField extends StatelessWidget {
+  final TextEditingController textController;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onClear;
+
+  const _SearchField({
+    required this.textController,
+    required this.onChanged,
+    required this.onClear,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 46,
+      child: TextField(
+        controller: textController,
+        onChanged: onChanged,
+        textAlignVertical: TextAlignVertical.center,
+        style: const TextStyle(fontSize: 13.5),
+        decoration: InputDecoration(
+          hintText: 'Search by name, SKU, or barcode...',
+          hintStyle: TextStyle(fontSize: 13.5, color: Colors.grey.shade600),
+          filled: true,
+          fillColor: Colors.white,
+          isDense: true,
+          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+          prefixIcon: Icon(
+            Icons.search_rounded,
+            size: 20,
+            color: Colors.grey.shade600,
+          ),
+          suffixIcon: ValueListenableBuilder(
+            valueListenable: textController,
+            builder: (_, v, __) => v.text.isNotEmpty
+                ? IconButton(
+                    icon: Icon(
+                      Icons.close_rounded,
+                      size: 17,
+                      color: Colors.grey.shade600,
+                    ),
+                    onPressed: onClear,
+                  )
+                : const SizedBox.shrink(),
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppRadius.sm),
+            borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.4)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppRadius.sm),
+            borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.4)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppRadius.sm),
+            borderSide: BorderSide(
+              color: AppColors.primary.withValues(alpha: 0.6),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Category dropdown ────────────────────────────────────────────────────────
+
+class _CategoryDropdown extends StatelessWidget {
+  final String value;
+  final ValueChanged<String?> onChanged;
+
+  const _CategoryDropdown({required this.value, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 46,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.4)),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          isExpanded: true,
+          value: value,
+          dropdownColor: Colors.white,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.black,
+            fontWeight: FontWeight.w500,
+          ),
+          icon: Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: Colors.grey.shade600,
+            size: 20,
+          ),
+          borderRadius: BorderRadius.circular(12),
+          items: productCategories
+              .map(
+                (cat) => DropdownMenuItem(
+                  value: cat,
+                  child: Text(
+                    cat,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              )
+              .toList(),
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+}

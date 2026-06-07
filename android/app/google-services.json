@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "462217458182",
+    "project_id": "billing-c95f5",
+    "storage_bucket": "billing-c95f5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:462217458182:android:90bb655944daf4a53a0987",
+        "android_client_info": {
+          "package_name": "com.example.billing_system"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4oDtTMSKVrhlRbFWqtUi8r_DNWTonM0Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

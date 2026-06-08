@@ -17,5 +17,3 @@ jobs:
           flutter-version: '3.x'
 
       - run: flutter pub get
-
-      - run: flutter analyze

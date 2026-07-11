@@ -27,13 +27,14 @@ class InventoryProductModelAdapter extends TypeAdapter<InventoryProductModel> {
       stockUnit: fields[7] as String,
       supplier: fields[8] as String,
       imageUrl: fields[9] as String,
+      purchasePrice: fields[10] as double,
     );
   }
 
   @override
   void write(BinaryWriter writer, InventoryProductModel obj) {
     writer
-      ..writeByte(10)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -53,7 +54,9 @@ class InventoryProductModelAdapter extends TypeAdapter<InventoryProductModel> {
       ..writeByte(8)
       ..write(obj.supplier)
       ..writeByte(9)
-      ..write(obj.imageUrl);
+      ..write(obj.imageUrl)
+      ..writeByte(10)
+      ..write(obj.purchasePrice);
   }
 
   @override

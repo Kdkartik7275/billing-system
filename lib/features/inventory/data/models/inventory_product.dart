@@ -9,7 +9,7 @@ class InventoryProductModel extends HiveObject {
   final String id;
 
   @HiveField(1)
-  final String name;
+  final String name; 
 
   @HiveField(2)
   final String sku;
@@ -35,6 +35,9 @@ class InventoryProductModel extends HiveObject {
   @HiveField(9)
   final String imageUrl;
 
+  @HiveField(10)
+  final double purchasePrice;
+
   InventoryProductModel({
     required this.id,
     required this.name,
@@ -46,6 +49,7 @@ class InventoryProductModel extends HiveObject {
     required this.stockUnit,
     required this.supplier,
     required this.imageUrl,
+    required this.purchasePrice,
   });
 
   InventoryProduct toEntity() {
@@ -60,6 +64,7 @@ class InventoryProductModel extends HiveObject {
       stockUnit: stockUnit,
       supplier: supplier,
       imageUrl: imageUrl,
+      purchasePrice: purchasePrice,
     );
   }
 
@@ -71,6 +76,7 @@ class InventoryProductModel extends HiveObject {
       barcode: entity.barcode,
       category: entity.category,
       price: entity.price,
+      purchasePrice: entity.purchasePrice,
       stock: entity.stock,
       stockUnit: entity.stockUnit,
       supplier: entity.supplier,
@@ -86,6 +92,7 @@ class InventoryProductModel extends HiveObject {
       'barcode': barcode,
       'category': category,
       'price': price,
+      'purchasePrice': purchasePrice,
       'stock': stock,
       'stockUnit': stockUnit,
       'supplier': supplier,
@@ -101,6 +108,7 @@ class InventoryProductModel extends HiveObject {
       barcode: map['barcode'] ?? '',
       category: map['category'] ?? '',
       price: (map['price'] as num?)?.toDouble() ?? 0.0,
+      purchasePrice: (map['purchasePrice'] as num?)?.toDouble() ?? 0.0,
       stock: (map['stock'] as num?)?.toInt() ?? 0,
       stockUnit: map['stockUnit'] ?? '',
       supplier: map['supplier'] ?? '',

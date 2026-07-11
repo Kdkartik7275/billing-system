@@ -30,12 +30,14 @@ class _AddProductFormState extends State<AddProductForm> {
   final _nameCtrl = TextEditingController();
   late final TextEditingController _barcodeCtrl;
   final _priceCtrl = TextEditingController();
+  final _purchasePriceCtrl = TextEditingController();
   final _stockCtrl = TextEditingController();
   final _supplierCtrl = TextEditingController();
 
   // Per-field error messages
   String? _nameError;
   String? _priceError;
+  String? _purchasePriceError;
   String? _stockError;
   String? _categoryError;
 
@@ -50,6 +52,7 @@ class _AddProductFormState extends State<AddProductForm> {
     _nameCtrl.dispose();
     _barcodeCtrl.dispose();
     _priceCtrl.dispose();
+    _purchasePriceCtrl.dispose();
     _stockCtrl.dispose();
     _supplierCtrl.dispose();
     super.dispose();
@@ -111,7 +114,7 @@ class _AddProductFormState extends State<AddProductForm> {
   }
 
   bool _validate() {
-    String? nameErr, priceErr, stockErr, catErr;
+    String? nameErr, priceErr, purchasePriceErr, stockErr, catErr;
 
     if (_nameCtrl.text.trim().isEmpty) {
       nameErr = 'Product name is required';
@@ -123,6 +126,12 @@ class _AddProductFormState extends State<AddProductForm> {
     if (_priceCtrl.text.trim().isEmpty || price == null || price < 0) {
       priceErr = 'Enter a valid price';
     }
+    final purchasePrice = double.tryParse(_purchasePriceCtrl.text.trim());
+    if (_purchasePriceCtrl.text.trim().isEmpty ||
+        purchasePrice == null ||
+        purchasePrice < 0) {
+      purchasePriceErr = 'Enter a valid purchase price';
+    }
     final stock = int.tryParse(_stockCtrl.text.trim());
     if (_stockCtrl.text.trim().isEmpty || stock == null || stock < 0) {
       stockErr = 'Enter a valid stock qty';
@@ -132,12 +141,14 @@ class _AddProductFormState extends State<AddProductForm> {
       _nameError = nameErr;
       _categoryError = catErr;
       _priceError = priceErr;
+      _purchasePriceError = purchasePriceErr;
       _stockError = stockErr;
     });
 
     return nameErr == null &&
         catErr == null &&
         priceErr == null &&
+        purchasePriceErr == null &&
         stockErr == null;
   }
 
@@ -161,6 +172,7 @@ class _AddProductFormState extends State<AddProductForm> {
       stockUnit: _selectedUnit ?? 'piece',
       supplier: _supplierCtrl.text.trim(),
       imageUrl: '',
+      purchasePrice: double.parse(_purchasePriceCtrl.text.trim()),
     );
 
     Get.back();
@@ -265,11 +277,11 @@ class _AddProductFormState extends State<AddProductForm> {
                   ),
                   const SizedBox(height: 14),
 
-                  // Price + Stock
+                  // Price + Purchase Price
                   FormRow(
                     children: [
                       FormTextField(
-                        label: 'Price (₹) *',
+                        label: 'Selling Price (₹) *',
                         hint: '0.00',
                         controller: _priceCtrl,
                         isNumber: true,
@@ -278,6 +290,23 @@ class _AddProductFormState extends State<AddProductForm> {
                         onChanged: (_) => setState(() => _priceError = null),
                       ),
                       FormTextField(
+                        label: 'Purchase Price (₹) *',
+                        hint: '0.00',
+                        controller: _purchasePriceCtrl,
+                        isNumber: true,
+                        prefix: '₹',
+                        errorText: _purchasePriceError,
+                        onChanged: (_) =>
+                            setState(() => _purchasePriceError = null),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+
+                  // Stock qty + Unit
+                  FormRow(
+                    children: [
+                      FormTextField(
                         label: 'Stock qty *',
                         hint: '0',
                         controller: _stockCtrl,
@@ -285,13 +314,6 @@ class _AddProductFormState extends State<AddProductForm> {
                         errorText: _stockError,
                         onChanged: (_) => setState(() => _stockError = null),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-
-                  // Unit + Supplier
-                  FormRow(
-                    children: [
                       FormDropdownField(
                         label: 'Stock Unit',
                         hint: 'Select',
@@ -299,12 +321,15 @@ class _AddProductFormState extends State<AddProductForm> {
                         items: kStockUnits,
                         onChanged: (v) => setState(() => _selectedUnit = v),
                       ),
-                      FormTextField(
-                        label: 'Supplier',
-                        hint: 'Supplier name',
-                        controller: _supplierCtrl,
-                      ),
                     ],
+                  ),
+                  const SizedBox(height: 14),
+
+                  // Supplier
+                  FormTextField(
+                    label: 'Supplier',
+                    hint: 'Supplier name',
+                    controller: _supplierCtrl,
                   ),
                 ],
               ),

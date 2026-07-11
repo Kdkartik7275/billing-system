@@ -4,6 +4,7 @@ import 'package:billing_system/features/inventory/domain/usecases/sync_products.
 import 'package:billing_system/features/pos/domain/entity/bill_entity.dart';
 import 'package:billing_system/features/pos/domain/usecases/get_biils_usecase.dart';
 import 'package:billing_system/features/pos/domain/usecases/get_last_seven_days_sales.dart';
+import 'package:billing_system/features/pos/domain/usecases/get_pending_bills.dart';
 import 'package:billing_system/features/pos/domain/usecases/sync_pending_bills.dart';
 import 'package:get/get.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -13,6 +14,7 @@ class BillsController extends GetxController {
   final SyncPendingBillsUsecase syncBillsUseCase;
   final SyncProductsUsecase syncProductsUseCase;
   final GetLastSevenDaysSales getLastSevenDaysSalesUseCase;
+  final GetPendingBillsUseCase getPendingBillsUseCase;
 
   RxBool isLoading = RxBool(false);
   final isSyncing = false.obs;
@@ -26,6 +28,7 @@ class BillsController extends GetxController {
     required this.syncBillsUseCase,
     required this.syncProductsUseCase,
     required this.getLastSevenDaysSalesUseCase,
+    required this.getPendingBillsUseCase,
   });
 
   List<BillEntity> get todayBills {
@@ -48,7 +51,7 @@ class BillsController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
-    await Future.wait([getBills(), getLastSevenDaysSales()]);
+    await Future.wait([getBills(), getLastSevenDaysSales(),getPendingBills()]);
   }
 
   double get todaySales =>
@@ -73,9 +76,28 @@ class BillsController extends GetxController {
         },
         (billsList) {
           bills.value = billsList;
-          pendingSyncedBills.value = billsList
-              .where((bill) => bill.isOfflineCreated == true)
-              .toList();
+        },
+      );
+    } catch (e) {
+      AppSnackbar.error(message: 'An error occurred while fetching bills: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> getPendingBills() async {
+    try {
+      isLoading.value = true;
+      final result = await getPendingBillsUseCase.call();
+      result.fold(
+        (failure) {
+          AppSnackbar.error(
+            message:
+                'An error occurred while fetching bills: ${failure.message}',
+          );
+        },
+        (billsList) {
+          pendingSyncedBills.value = billsList;
         },
       );
     } catch (e) {

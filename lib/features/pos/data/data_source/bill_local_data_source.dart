@@ -6,6 +6,7 @@ import 'package:hive/hive.dart';
 abstract interface class BillLocalDataSource {
   Future<BillModel> saveBill(BillModel bill);
   Future<List<BillModel>> getCachedBills(DateTime date);
+  Future<List<BillModel>> getPendingBills();
   // Future<List<BillModel>> getCachedBillsLast7Days();
   Future<void> markBillsAsSynced(List<String> billIds);
 }
@@ -41,6 +42,11 @@ class BillLocalDataSourceImpl implements BillLocalDataSource {
         await box.put(billId, updatedBill);
       }
     }
+  }
+
+  @override
+  Future<List<BillModel>> getPendingBills() async {
+    return box.values.where((bill) => bill.isOfflineCreated == true).toList();
   }
 
   // @override

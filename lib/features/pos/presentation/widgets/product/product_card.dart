@@ -91,23 +91,9 @@ class ProductCard extends StatelessWidget {
                         ),
                         const Spacer(),
 
-                        // ── Price row ───────────────────────────
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              '₹${product.price.toStringAsFixed(0)}',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.primary,
-                                letterSpacing: -0.3,
-                              ),
-                            ),
-                            _StockBadge(stock: product.stock),
-                          ],
-                        ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: _StockBadge(stock: product.stock)),
                         const SizedBox(height: 8),
 
                         // ── Add / Qty ───────────────────────────

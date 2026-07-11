@@ -1,56 +1,47 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'stock_transaction_model.dart';
+part of 'stock_batch_model.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class StockTransactionModelAdapter extends TypeAdapter<StockTransactionModel> {
+class StockBatchModelAdapter extends TypeAdapter<StockBatchModel> {
   @override
-  final int typeId = 4;
+  final int typeId = 5;
 
   @override
-  StockTransactionModel read(BinaryReader reader) {
+  StockBatchModel read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return StockTransactionModel(
+    return StockBatchModel(
       id: fields[0] as String,
       productId: fields[1] as String,
-      type: fields[2] as StockTransactionType,
-      previousStock: fields[3] as int,
-      quantityChanged: fields[4] as int,
-      newStock: fields[5] as int,
-      referenceId: fields[7] as String?,
-      notes: fields[8] as String?,
-      createdAt: fields[9] as DateTime,
+      quantityRemaining: fields[2] as int,
+      purchasePrice: fields[3] as double,
+      sellingPrice: fields[4] as double,
+      receivedDate: fields[5] as DateTime,
     );
   }
 
   @override
-  void write(BinaryWriter writer, StockTransactionModel obj) {
+  void write(BinaryWriter writer, StockBatchModel obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
       ..write(obj.productId)
       ..writeByte(2)
-      ..write(obj.type)
+      ..write(obj.quantityRemaining)
       ..writeByte(3)
-      ..write(obj.previousStock)
+      ..write(obj.purchasePrice)
       ..writeByte(4)
-      ..write(obj.quantityChanged)
+      ..write(obj.sellingPrice)
       ..writeByte(5)
-      ..write(obj.newStock)
-      ..writeByte(7)
-      ..write(obj.referenceId)
-      ..writeByte(8)
-      ..write(obj.notes)
-      ..writeByte(9)
-      ..write(obj.createdAt);
+      ..write(obj.receivedDate);
   }
 
   @override
@@ -59,7 +50,7 @@ class StockTransactionModelAdapter extends TypeAdapter<StockTransactionModel> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is StockTransactionModelAdapter &&
+      other is StockBatchModelAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

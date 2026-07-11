@@ -16,7 +16,7 @@ class InventoryCardList extends StatelessWidget {
 
     return Obx(() {
       final products = controller.filteredProducts;
-
+ 
       if (products.isEmpty) {
         return const Center(
           child: Column(
@@ -144,7 +144,7 @@ class _TabletProductCard extends StatelessWidget {
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
                       color: AppColors.primary,
-                    ),
+                    )
                   ),
                   const SizedBox(height: 3),
                   Text(

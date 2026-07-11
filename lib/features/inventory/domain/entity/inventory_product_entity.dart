@@ -6,6 +6,7 @@ class InventoryProduct {
   final String sku;
   final String barcode;
   final String category;
+  final double purchasePrice;
   final double price;
   final int stock;
   final String stockUnit;
@@ -19,6 +20,7 @@ class InventoryProduct {
     required this.barcode,
     required this.category,
     required this.price,
+    required this.purchasePrice,
     required this.stock,
     required this.stockUnit,
     required this.supplier,
@@ -32,6 +34,7 @@ class InventoryProduct {
     String? barcode,
     String? category,
     double? price,
+    double? purchasePrice,
     int? stock,
     String? stockUnit,
     String? supplier,
@@ -44,6 +47,7 @@ class InventoryProduct {
       barcode: barcode ?? this.barcode,
       category: category ?? this.category,
       price: price ?? this.price,
+      purchasePrice: purchasePrice ?? this.purchasePrice,
       stock: stock ?? this.stock,
       stockUnit: stockUnit ?? this.stockUnit,
       supplier: supplier ?? this.supplier,

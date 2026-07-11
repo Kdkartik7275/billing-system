@@ -1,14 +1,20 @@
 import 'package:billing_system/features/inventory/data/models/inventory_product.dart';
+import 'package:billing_system/features/inventory/data/models/stock_batch_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock_transaction_model.dart';
 import 'package:hive/hive.dart';
 
 abstract interface class InventoryLocalDataSource {
   Future<void> cacheProducts(List<InventoryProductModel> products);
+  Future<void> cacheMovements(List<StockTransactionModel> movements);
+  Future<void> cacheStockBatches(List<StockBatchModel> batches);
 
   Future<List<InventoryProductModel>> getCachedProducts();
+  Future<List<StockTransactionModel>> getCachedMovements(String productId);
+  Future<List<StockBatchModel>> getStockBatches(String productId);
 
   Future<void> addProduct(InventoryProductModel product);
   Future<void> addStockTransaction(StockTransactionModel transaction);
+  Future<void> addStockBatch(StockBatchModel stockBatch);
   Future<void> updateProduct(InventoryProductModel product);
 
   Future<void> clearCache();
@@ -17,10 +23,12 @@ abstract interface class InventoryLocalDataSource {
 class InventoryLocalDataSourceImpl implements InventoryLocalDataSource {
   final Box<InventoryProductModel> box;
   final Box<StockTransactionModel> stockTransactionBox;
+  final Box<StockBatchModel> stockBatchBox;
 
   InventoryLocalDataSourceImpl({
     required this.box,
     required this.stockTransactionBox,
+    required this.stockBatchBox,
   });
 
   @override
@@ -55,5 +63,43 @@ class InventoryLocalDataSourceImpl implements InventoryLocalDataSource {
   @override
   Future<void> addStockTransaction(StockTransactionModel transaction) async {
     await stockTransactionBox.add(transaction);
+  }
+
+  @override
+  Future<void> cacheMovements(List<StockTransactionModel> movements) async {
+    await box.clear();
+
+    for (final movement in movements) {
+      await stockTransactionBox.put(movement.id, movement);
+    }
+  }
+
+  @override
+  Future<List<StockTransactionModel>> getCachedMovements(
+    String productId,
+  ) async {
+    return stockTransactionBox.values
+        .where((movement) => movement.productId == productId)
+        .toList();
+  }
+
+  @override
+  Future<void> addStockBatch(StockBatchModel stockBatch) async {
+    await stockBatchBox.add(stockBatch);
+  }
+
+  @override
+  Future<void> cacheStockBatches(List<StockBatchModel> batches) async {
+    await stockBatchBox.clear();
+    for (final batch in batches) {
+      await stockBatchBox.put(batch.id, batch);
+    }
+  }
+
+  @override
+  Future<List<StockBatchModel>> getStockBatches(String productId) async {
+    return stockBatchBox.values
+        .where((st) => st.productId == productId)
+        .toList();
   }
 }

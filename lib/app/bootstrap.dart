@@ -1,5 +1,6 @@
 import 'package:billing_system/core/di/init_dependencies.dart';
 import 'package:billing_system/features/inventory/data/models/inventory_product.dart';
+import 'package:billing_system/features/inventory/data/models/stock_batch_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock_transaction_model.dart';
 import 'package:billing_system/features/inventory/domain/entity/stock_transactions_entity.dart';
 import 'package:billing_system/features/pos/data/models/bill/bill_item_model.dart';
@@ -23,9 +24,11 @@ class Bootstrap {
     Hive.registerAdapter(BillModelAdapter());
     Hive.registerAdapter(StockTransactionTypeAdapter());
     Hive.registerAdapter(StockTransactionModelAdapter());
+    Hive.registerAdapter(StockBatchModelAdapter());
     await Hive.openBox<InventoryProductModel>('products');
     await Hive.openBox<BillModel>('bills');
     await Hive.openBox<StockTransactionModel>('stock_transactions');
+    await Hive.openBox<StockBatchModel>('stock_batches');
     DependencyInjection.init();
   }
 }

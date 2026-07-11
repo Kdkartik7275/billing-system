@@ -22,33 +22,53 @@ class BillRepositoryImpl implements BillingRepository {
   @override
   ResultVoid saveBill(Map<String, dynamic> billData) async {
     try {
-      if (!await connectionChecker.isConnected) {
-        final bill = BillModel(
-          id: billData['id'],
-          receiptNumber: billData['receiptNumber'],
-          createdAt: DateTime.parse(billData['createdAt']),
-          customerName: billData['customerName'],
-          customerPhone: billData['customerPhone'],
-          items: (billData['items'] as List)
-              .map((item) => BillItemModel.fromMap(item))
-              .toList(),
-          subtotal: (billData['subtotal'] as num).toDouble(),
-          taxRate: (billData['taxRate'] as num).toDouble(),
-          taxAmount: (billData['taxAmount'] as num).toDouble(),
-          grandTotal: (billData['grandTotal'] as num).toDouble(),
-          paymentMethod: billData['paymentMethod'],
-          amountTendered: (billData['amountTendered'] as num).toDouble(),
-          changeGiven: (billData['changeGiven'] as num).toDouble(),
-          status: billData['status'],
-          createdBy: billData['createdBy'],
-          isOfflineCreated: true,
-        );
-        await localDataSource.saveBill(bill);
-        return right(null);
-      }
-      final result = await remoteDataSource.saveBill(billData);
-      await localDataSource.saveBill(result);
-
+      // if (!await connectionChecker.isConnected) {
+      //   final bill = BillModel(
+      //     id: billData['id'],
+      //     receiptNumber: billData['receiptNumber'],
+      //     createdAt: DateTime.parse(billData['createdAt']),
+      //     customerName: billData['customerName'],
+      //     customerPhone: billData['customerPhone'],
+      //     items: (billData['items'] as List)
+      //         .map((item) => BillItemModel.fromMap(item))
+      //         .toList(),
+      //     subtotal: (billData['subtotal'] as num).toDouble(),
+      //     taxRate: (billData['taxRate'] as num).toDouble(),
+      //     taxAmount: (billData['taxAmount'] as num).toDouble(),
+      //     grandTotal: (billData['grandTotal'] as num).toDouble(),
+      //     paymentMethod: billData['paymentMethod'],
+      //     amountTendered: (billData['amountTendered'] as num).toDouble(),
+      //     changeGiven: (billData['changeGiven'] as num).toDouble(),
+      //     status: billData['status'],
+      //     createdBy: billData['createdBy'],
+      //     isOfflineCreated: true,
+      //   );
+      //   await localDataSource.saveBill(bill);
+      //   return right(null);
+      // }
+      // final result = await remoteDataSource.saveBill(billData);
+      // await localDataSource.saveBill(result);
+      final bill = BillModel(
+        id: billData['id'],
+        receiptNumber: billData['receiptNumber'],
+        createdAt: DateTime.parse(billData['createdAt']),
+        customerName: billData['customerName'],
+        customerPhone: billData['customerPhone'],
+        items: (billData['items'] as List)
+            .map((item) => BillItemModel.fromMap(item))
+            .toList(),
+        subtotal: (billData['subtotal'] as num).toDouble(),
+        taxRate: (billData['taxRate'] as num).toDouble(),
+        taxAmount: (billData['taxAmount'] as num).toDouble(),
+        grandTotal: (billData['grandTotal'] as num).toDouble(),
+        paymentMethod: billData['paymentMethod'],
+        amountTendered: (billData['amountTendered'] as num).toDouble(),
+        changeGiven: (billData['changeGiven'] as num).toDouble(),
+        status: billData['status'],
+        createdBy: billData['createdBy'],
+        isOfflineCreated: true,
+      );
+      await localDataSource.saveBill(bill);
       return right(null);
     } catch (e) {
       return left(FirebaseFailure(message: e.toString()));
@@ -119,6 +139,17 @@ class BillRepositoryImpl implements BillingRepository {
       }
 
       return right(allBills);
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultFuture<List<BillEntity>> getPendingBills() async {
+    try {
+      final bills = await localDataSource.getPendingBills();
+
+      return right(bills.map((bill) => bill.toEntity()).toList());
     } catch (e) {
       return left(FirebaseFailure(message: e.toString()));
     }

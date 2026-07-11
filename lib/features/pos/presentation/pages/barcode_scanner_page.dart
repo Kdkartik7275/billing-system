@@ -40,6 +40,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
       detectionSpeed: DetectionSpeed.normal,
       facing: CameraFacing.back,
       torchEnabled: false,
+      
     );
 
     _lineController = AnimationController(

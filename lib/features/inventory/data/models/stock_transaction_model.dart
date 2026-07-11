@@ -23,9 +23,6 @@ class StockTransactionModel extends HiveObject {
   @HiveField(5)
   final int newStock;
 
-  @HiveField(6)
-  final double? purchasePrice;
-
   @HiveField(7)
   final String? referenceId;
 
@@ -42,7 +39,7 @@ class StockTransactionModel extends HiveObject {
     required this.previousStock,
     required this.quantityChanged,
     required this.newStock,
-    this.purchasePrice,
+
     this.referenceId,
     this.notes,
     required this.createdAt,
@@ -56,7 +53,7 @@ class StockTransactionModel extends HiveObject {
       'previousStock': previousStock,
       'quantityChanged': quantityChanged,
       'newStock': newStock,
-      'purchasePrice': purchasePrice,
+
       'referenceId': referenceId,
       'notes': notes,
       'createdAt': createdAt.toIso8601String(),
@@ -74,7 +71,7 @@ class StockTransactionModel extends HiveObject {
       previousStock: (map['previousStock'] as num?)?.toInt() ?? 0,
       quantityChanged: (map['quantityChanged'] as num?)?.toInt() ?? 0,
       newStock: (map['newStock'] as num?)?.toInt() ?? 0,
-      purchasePrice: (map['purchasePrice'] as num?)?.toDouble(),
+
       referenceId: map['referenceId'],
       notes: map['notes'],
       createdAt: map['createdAt'] != null
@@ -90,7 +87,7 @@ class StockTransactionModel extends HiveObject {
     int? previousStock,
     int? quantityChanged,
     int? newStock,
-    double? purchasePrice,
+
     String? referenceId,
     String? notes,
     DateTime? createdAt,
@@ -102,7 +99,7 @@ class StockTransactionModel extends HiveObject {
       previousStock: previousStock ?? this.previousStock,
       quantityChanged: quantityChanged ?? this.quantityChanged,
       newStock: newStock ?? this.newStock,
-      purchasePrice: purchasePrice ?? this.purchasePrice,
+
       referenceId: referenceId ?? this.referenceId,
       notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
@@ -117,7 +114,7 @@ class StockTransactionModel extends HiveObject {
       previousStock: previousStock,
       quantityChanged: quantityChanged,
       newStock: newStock,
-      purchasePrice: purchasePrice,
+
       referenceId: referenceId,
       notes: notes,
       createdAt: createdAt,

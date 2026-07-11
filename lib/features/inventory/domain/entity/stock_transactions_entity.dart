@@ -30,7 +30,6 @@ class StockTransaction {
   final int previousStock;
   final int quantityChanged;
   final int newStock;
-  final double? purchasePrice;
   final String? referenceId;
   final String? notes;
   final DateTime createdAt;
@@ -42,7 +41,6 @@ class StockTransaction {
     required this.previousStock,
     required this.quantityChanged,
     required this.newStock,
-    this.purchasePrice,
     this.referenceId,
     this.notes,
     required this.createdAt,
@@ -55,7 +53,6 @@ class StockTransaction {
     int? previousStock,
     int? quantityChanged,
     int? newStock,
-    double? purchasePrice,
     String? referenceId,
     String? notes,
     DateTime? createdAt,
@@ -67,7 +64,6 @@ class StockTransaction {
       previousStock: previousStock ?? this.previousStock,
       quantityChanged: quantityChanged ?? this.quantityChanged,
       newStock: newStock ?? this.newStock,
-      purchasePrice: purchasePrice ?? this.purchasePrice,
       referenceId: referenceId ?? this.referenceId,
       notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,

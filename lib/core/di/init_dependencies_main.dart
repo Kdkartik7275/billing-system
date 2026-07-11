@@ -36,6 +36,8 @@ void _initHiveBoxes() async {
   sl.registerLazySingleton<Box<StockTransactionModel>>(
     () => stockTransactionBox,
   );
+  final stockBatchesBox = await Hive.openBox<StockBatchModel>('stock_batches');
+  sl.registerLazySingleton<Box<StockBatchModel>>(() => stockBatchesBox);
 }
 
 // ----------------------- AUTH -----------------------
@@ -54,7 +56,11 @@ void _initInventory() {
     () => InventoryRemoteDataSourceImpl(firestore: sl<FirebaseFirestore>()),
   );
   sl.registerLazySingleton<InventoryLocalDataSource>(
-    () => InventoryLocalDataSourceImpl(box: sl(), stockTransactionBox: sl()),
+    () => InventoryLocalDataSourceImpl(
+      box: sl(),
+      stockTransactionBox: sl(),
+      stockBatchBox: sl(),
+    ),
   );
   // USECASES
   sl.registerLazySingleton(() => AddProductUsecase(sl()));
@@ -62,6 +68,9 @@ void _initInventory() {
   sl.registerLazySingleton(() => RefreshProductsUsecase(sl()));
   sl.registerLazySingleton(() => UpdateProductUsecase(repository: sl()));
   sl.registerLazySingleton(() => SyncProductsUsecase(repository: sl()));
+  sl.registerLazySingleton(() => GetMovementLogs(repository: sl()));
+  sl.registerLazySingleton(() => GetStockBatchesUseCase(repository: sl()));
+  sl.registerLazySingleton(() => PurhcaseStockUseCase(repository: sl()));
 }
 
 void _initPOSBilling() {
@@ -86,4 +95,5 @@ void _initPOSBilling() {
   sl.registerLazySingleton(() => GetBillsUsecase(repository: sl()));
   sl.registerLazySingleton(() => SyncPendingBillsUsecase(repository: sl()));
   sl.registerLazySingleton(() => GetLastSevenDaysSales(repository: sl()));
+  sl.registerLazySingleton(() => GetPendingBillsUseCase(repository: sl()));
 }

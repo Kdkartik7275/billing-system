@@ -77,8 +77,6 @@ class PaymentController extends GetxController {
       receiptNumber: _generateReceiptNumber(),
     );
 
-    _deductStock();
-
     return result;
   }
 
@@ -117,6 +115,7 @@ class PaymentController extends GetxController {
       };
       debugPrint('Saving bill with data: $billData');
       final r = await saveBillUsecase.call(billData);
+      await _deductStock();
       _billController.getBills();
       r.fold((err) => AppSnackbar.error(message: err.message), (s) {});
     } catch (e) {
@@ -128,14 +127,19 @@ class PaymentController extends GetxController {
   }
 
   Future<void> _deductStock() async {
-    for (final cartItem in _cart.cartItems) {
+    final cartItems = List.of(_cart.cartItems);
+
+    for (final cartItem in cartItems) {
       final idx = _inventory.products.indexWhere(
         (p) => p.id == cartItem.product.id,
       );
+
       if (idx == -1) continue;
 
       final current = _inventory.products[idx];
+
       final newStock = (current.stock - cartItem.quantity).clamp(0, 999999);
+
       await _inventory.updateProduct(current.copywith(stock: newStock));
     }
   }

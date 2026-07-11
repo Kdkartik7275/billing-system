@@ -4,8 +4,8 @@ import 'package:billing_system/core/network/connection_checker.dart';
 import 'package:billing_system/features/inventory/data/data_source/inventory_local_data_source.dart';
 import 'package:billing_system/features/inventory/data/data_source/inventory_remote_data_source.dart';
 import 'package:billing_system/features/inventory/data/models/inventory_product.dart';
-import 'package:billing_system/features/inventory/data/models/stock_transaction_model.dart';
 import 'package:billing_system/features/inventory/domain/entity/inventory_product_entity.dart';
+import 'package:billing_system/features/inventory/domain/entity/stock_batch_entity.dart';
 import 'package:billing_system/features/inventory/domain/entity/stock_transactions_entity.dart';
 import 'package:billing_system/features/inventory/domain/repository/inventory_repository.dart';
 import 'package:flutter/material.dart';
@@ -32,29 +32,32 @@ class InventoryRepositoryImpl implements InventoryRepository {
         barcode: product.barcode,
         category: product.category,
         price: product.price,
+        purchasePrice: product.purchasePrice,
         stock: product.stock,
         stockUnit: product.stockUnit,
         supplier: product.supplier,
         imageUrl: product.imageUrl,
       );
 
-      await remoteDataSource.addProduct(model);
+      final result = await remoteDataSource.addProduct(model);
 
       await localDataSource.addProduct(model);
       await localDataSource.addStockTransaction(
-        StockTransactionModel(
-          id: model.id,
-          productId: model.id,
-          type: StockTransactionType.initialStock,
-          previousStock: 0,
-          quantityChanged: model.stock,
-          newStock: model.stock,
-          purchasePrice: model.price,
-          referenceId: null,
-          notes: 'Initial stock added',
-          createdAt: DateTime.now(),
-        ),
+        // StockTransactionModel(
+        //   id: model.id,
+        //   productId: model.id,
+        //   type: StockTransactionType.initialStock,
+        //   previousStock: 0,
+        //   quantityChanged: model.stock,
+        //   newStock: model.stock,
+        //   purchasePrice: model.price,
+        //   referenceId: null,
+        //   notes: 'Initial stock added',
+        //   createdAt: DateTime.now(),
+        // ),
+        result.$2,
       );
+      await localDataSource.addStockBatch(result.$1);
 
       return right(null);
     } catch (e) {
@@ -72,11 +75,12 @@ class InventoryRepositoryImpl implements InventoryRepository {
         return right(cachedProducts.map((model) => model.toEntity()).toList());
       }
 
-      final remoteProducts = await remoteDataSource.getProducts();
+      final result = await remoteDataSource.getProducts();
 
-      await localDataSource.cacheProducts(remoteProducts);
+      await localDataSource.cacheProducts(result.$1);
+      await localDataSource.cacheStockBatches(result.$2);
 
-      return right(remoteProducts.map((model) => model.toEntity()).toList());
+      return right(result.$1.map((model) => model.toEntity()).toList());
     } catch (e) {
       final cachedProducts = await localDataSource.getCachedProducts();
 
@@ -98,6 +102,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
         stockUnit: product.stockUnit,
         supplier: product.supplier,
         imageUrl: product.imageUrl,
+        purchasePrice: product.purchasePrice,
       );
 
       if (!await connectionChecker.isConnected) {
@@ -136,13 +141,72 @@ class InventoryRepositoryImpl implements InventoryRepository {
   @override
   ResultFuture<List<InventoryProduct>> refreshProducts() async {
     try {
-      final remoteProducts = await remoteDataSource.refreshProducts();
+      final result = await remoteDataSource.refreshProducts();
 
-      await localDataSource.cacheProducts(remoteProducts);
+      await localDataSource.cacheProducts(result.$1);
+      await localDataSource.cacheStockBatches(result.$2);
 
       final cachedProducts = await localDataSource.getCachedProducts();
 
       return right(cachedProducts.map((model) => model.toEntity()).toList());
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultFuture<List<StockTransaction>> getMovementLogs(String productId) async {
+    try {
+      if (!await connectionChecker.isConnected) {
+        final movements = await localDataSource.getCachedMovements(productId);
+        return right(movements.map((m) => m.toEntity()).toList());
+      }
+
+      final movements = await remoteDataSource.getMovementLogs(productId);
+      return right(movements.map((m) => m.toEntity()).toList());
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultFuture<List<StockBatch>> getStockBatches(String productId) async {
+    try {
+      final batches = await localDataSource.getStockBatches(productId);
+
+      return right(batches.map((b) => b.toEntity()).toList());
+    } catch (e) {
+      throw left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultVoid purchaseStock({
+    required int quantity,
+    required int previousStock,
+    required String productId,
+    required double purchasePrice,
+    required double sellingPrice,
+  }) async {
+    try {
+      if (!await connectionChecker.isConnected) {
+        return left(
+          FirebaseFailure(
+            message: 'No internet connection. Cannot purchase stock.',
+          ),
+        );
+      }
+
+      final result = await remoteDataSource.purchaseStock(
+        quantity: quantity,
+        previousStock: previousStock,
+        productId: productId,
+        purchasePrice: purchasePrice,
+        sellingPrice: sellingPrice,
+      );
+      await localDataSource.addStockTransaction(result.$2);
+      await localDataSource.addStockBatch(result.$1);
+      return right(null);
     } catch (e) {
       return left(FirebaseFailure(message: e.toString()));
     }

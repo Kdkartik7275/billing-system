@@ -7,5 +7,7 @@ abstract interface class BillingRepository {
   ResultFuture<List<BillEntity>> getBills(DateTime date);
   ResultFuture<List<BillEntity>> getBillsLast7Days();
 
+  ResultFuture<List<BillEntity>> getPendingBills();
+
   ResultVoid syncPendingBills(List<BillEntity> bills);
 }

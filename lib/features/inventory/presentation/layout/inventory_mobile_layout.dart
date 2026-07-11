@@ -262,20 +262,7 @@ class _MobileProductCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Text(
-                        '₹${product.price.toStringAsFixed(0)}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      StockStatusBadge(status: product.status),
-                    ],
-                  ),
+                   StockStatusBadge(status: product.status),
                 ],
               ),
             ),

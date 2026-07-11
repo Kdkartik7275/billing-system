@@ -4,7 +4,9 @@ import 'package:billing_system/core/config/theme/app_radius.dart';
 import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/add_product_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 class InventoryFilterBar extends StatefulWidget {
   final bool compact;
@@ -17,9 +19,25 @@ class InventoryFilterBar extends StatefulWidget {
 class _InventoryFilterBarState extends State<InventoryFilterBar> {
   final _textController = TextEditingController();
 
+  late final MobileScannerController _scannerController;
+  bool _isProcessing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
+    _scannerController = MobileScannerController(
+      detectionSpeed: DetectionSpeed.noDuplicates,
+      facing: CameraFacing.back,
+      torchEnabled: false,
+    );
+  }
+
   @override
   void dispose() {
     _textController.dispose();
+    _scannerController.dispose();
     super.dispose();
   }
 
@@ -51,7 +69,41 @@ class _InventoryFilterBarState extends State<InventoryFilterBar> {
         SizedBox(
           height: 46,
           child: ElevatedButton.icon(
-            onPressed: () {},
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return Dialog(
+                    child: Container(
+                      height: 200,
+                      width: 200,
+
+                      alignment: Alignment.center,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: MobileScanner(
+                          controller: _scannerController,
+                          onDetect: (capture) async {
+                            if (_isProcessing) return;
+
+                            final raw = capture.barcodes.firstOrNull?.rawValue;
+                            if (raw == null) return;
+
+                            _isProcessing = true;
+
+                            try {
+                            await  controller.productExist(raw);
+                            } finally {
+                              _isProcessing = false;
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
             icon: const Icon(
               Icons.qr_code_2,
               size: 20,
@@ -83,7 +135,7 @@ class _InventoryFilterBarState extends State<InventoryFilterBar> {
     if (widget.compact) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [ 
+        children: [
           searchField,
           const SizedBox(height: 12),
           Row(

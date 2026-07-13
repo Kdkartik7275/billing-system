@@ -47,7 +47,7 @@ class InventoryRemoteDataSourceImpl implements InventoryRemoteDataSource {
         previousStock: 0,
         quantityChanged: product.stock,
         newStock: product.stock,
-       
+
         referenceId: null,
         notes: 'Initial stock added',
         createdAt: DateTime.now(),
@@ -168,23 +168,23 @@ class InventoryRemoteDataSourceImpl implements InventoryRemoteDataSource {
     required String productId,
     required double purchasePrice,
     required double sellingPrice,
-  }) async{
+  }) async {
     try {
-       final stock = StockTransactionModel(
+      final stock = StockTransactionModel(
         id: Uuid().v4(),
         productId: productId,
         type: StockTransactionType.purchase,
         previousStock: previousStock,
         quantityChanged: quantity,
         newStock: previousStock + quantity,
-       
+
         referenceId: null,
-        notes: 'Initial stock added',
+        notes: 'Purchased stock added',
         createdAt: DateTime.now(),
       );
       final StockBatchModel stockBatch = StockBatchModel(
         id: Uuid().v4(),
-        productId:productId,
+        productId: productId,
         quantityRemaining: quantity,
         purchasePrice: purchasePrice,
         sellingPrice: sellingPrice,
@@ -199,7 +199,10 @@ class InventoryRemoteDataSourceImpl implements InventoryRemoteDataSource {
           .collection('stock_batch')
           .doc(stockBatch.id)
           .set(stockBatch.toMap());
-          return (stockBatch, stock);
+      await firestore.collection('products').doc(productId).update({
+        'stock': FieldValue.increment(quantity),
+      });
+      return (stockBatch, stock);
     } catch (e) {
       throw Exception('Error Purchasing Stock');
     }

@@ -1,10 +1,11 @@
+import 'package:billing_system/features/inventory/domain/entity/stock_batch_entity.dart';
+import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
 import 'package:billing_system/features/pos/presentation/controller/cart_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'product_card.dart';
 
 class ProductGrid extends StatelessWidget {
-  /// Cross-axis extent per card — pass a smaller value for mobile.
   final double maxCardExtent;
   final double cardHeight;
 
@@ -17,6 +18,7 @@ class ProductGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<CartController>();
+    final inventoryController = Get.find<InventoryController>();
 
     return Obx(() {
       final products = controller.filteredProducts;
@@ -42,13 +44,16 @@ class ProductGrid extends StatelessWidget {
           mainAxisSpacing: 12,
         ),
         itemCount: products.length,
+
         itemBuilder: (_, i) {
           final product = products[i];
           return Obx(
             () => ProductCard(
               product: product,
+              batches: inventoryController.productBatches[product.id] ?? [],
               qty: controller.cartQty(product.id),
-              onAdd: () => controller.addToCart(product),
+              onAddBatch: (batch, qty) => controller.addToCart(product, batch),
+              onIncrement: () => controller.incrementCartItem(product.id),
               onRemove: () => controller.removeFromCart(product.id),
             ),
           );

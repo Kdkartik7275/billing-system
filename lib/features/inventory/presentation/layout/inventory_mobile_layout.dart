@@ -262,7 +262,7 @@ class _MobileProductCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 6),
-                   StockStatusBadge(status: product.status),
+                  StockStatusBadge(status: product.status),
                 ],
               ),
             ),

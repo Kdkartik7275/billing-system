@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../data/models/cart_item_model.dart';
 
-
 class CartItemTile extends StatelessWidget {
   final CartItem item;
 
@@ -72,7 +71,7 @@ class CartItemTile extends StatelessWidget {
           Obx(
             () => QtyControl(
               qty: controller.cartQty(item.product.id),
-              onAdd: () => controller.addToCart(item.product),
+              onAdd: () => controller.addToCart(item.product, item.batch),
               onRemove: () => controller.removeFromCart(item.product.id),
             ),
           ),

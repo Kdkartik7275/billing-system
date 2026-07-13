@@ -24,6 +24,7 @@ class DashboardPage extends StatelessWidget {
         getMovementLogsUseCase: sl(),
         getStockBatchesUseCase: sl(),
         purchaseStockUseCase: sl(),
+        getProductBatchesUsecase: sl(),
       ),
     );
     Get.put<BillsController>(

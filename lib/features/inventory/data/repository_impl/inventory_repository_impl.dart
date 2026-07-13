@@ -206,9 +206,24 @@ class InventoryRepositoryImpl implements InventoryRepository {
       );
       await localDataSource.addStockTransaction(result.$2);
       await localDataSource.addStockBatch(result.$1);
+      await localDataSource.updateProductStock(
+        productId,
+        previousStock + quantity,
+      );
       return right(null);
     } catch (e) {
       return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultFuture<List<StockBatch>> getBatchesForProduct(String productId) async {
+    try {
+      final batches = await localDataSource.getCachedStockBatches(productId);
+
+      return right(batches.map((b) => b.toEntity()).toList());
+    } catch (e) {
+      throw left(FirebaseFailure(message: e.toString()));
     }
   }
 }

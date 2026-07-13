@@ -1,4 +1,6 @@
+import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/features/inventory/domain/entity/inventory_product_entity.dart';
+import 'package:billing_system/features/inventory/domain/entity/stock_batch_entity.dart';
 import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
 import 'package:get/get.dart';
 import '../../data/models/cart_item_model.dart';
@@ -59,14 +61,34 @@ class CartController extends GetxController {
   double get grandTotal => subtotal + tax;
   int get totalItemCount => cartItems.fold(0, (sum, i) => sum + i.quantity);
 
-  void addToCart(ProductModel product) {
+  void addToCart(ProductModel product, StockBatch batch) {
     final idx = cartItems.indexWhere((i) => i.product.id == product.id);
     if (idx != -1) {
-      cartItems[idx].quantity++;
-      cartItems.refresh();
+      _incrementExisting(idx);
     } else {
-      cartItems.add(CartItem(product: product));
+      cartItems.add(CartItem(product: product, batch: batch));
     }
+  }
+
+  void incrementCartItem(String productId) {
+    final idx = cartItems.indexWhere((i) => i.product.id == productId);
+    if (idx == -1) return;
+    _incrementExisting(idx);
+  }
+
+  void _incrementExisting(int idx) {
+    final item = cartItems[idx];
+    if (item.quantity >= item.batch.quantityRemaining) {
+      AppSnackbar.info(
+        message:
+            'Batch limit reached'
+            '${item.product.name}: only ${item.batch.quantityRemaining} left in this batch.',
+      );
+
+      return;
+    }
+    item.quantity++;
+    cartItems.refresh();
   }
 
   void removeFromCart(String productId) {
@@ -100,7 +122,7 @@ class CartController extends GetxController {
     _scanDebouncing = false;
   }
 
-  void onBarcodeScanned(String barcode) {
+  void onBarcodeScanned(String barcode, StockBatch batch) {
     if (barcode.trim().isEmpty) return;
     if (_scanDebouncing) return;
 
@@ -123,7 +145,7 @@ class CartController extends GetxController {
         sku: inventoryProduct.sku,
       );
 
-      addToCart(product);
+      addToCart(product, batch);
 
       scanSuccess.value = true;
       scanFeedbackMessage.value = '${inventoryProduct.name} added to cart';

@@ -9,7 +9,7 @@ class InventoryProductModel extends HiveObject {
   final String id;
 
   @HiveField(1)
-  final String name; 
+  final String name;
 
   @HiveField(2)
   final String sku;
@@ -113,6 +113,34 @@ class InventoryProductModel extends HiveObject {
       stockUnit: map['stockUnit'] ?? '',
       supplier: map['supplier'] ?? '',
       imageUrl: map['imageUrl'] ?? '',
+    );
+  }
+
+  InventoryProductModel copyWith({
+    String? id,
+    String? name,
+    String? sku,
+    String? barcode,
+    String? category,
+    double? price,
+    double? purchasePrice,
+    int? stock,
+    String? stockUnit,
+    String? supplier,
+    String? imageUrl,
+  }) {
+    return InventoryProductModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      sku: sku ?? this.sku,
+      barcode: barcode ?? this.barcode,
+      category: category ?? this.category,
+      price: price ?? this.price,
+      purchasePrice: purchasePrice ?? this.purchasePrice,
+      stock: stock ?? this.stock,
+      stockUnit: stockUnit ?? this.stockUnit,
+      supplier: supplier ?? this.supplier,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 }

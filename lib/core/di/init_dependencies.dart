@@ -9,6 +9,7 @@ import 'package:billing_system/features/inventory/data/repository_impl/inventory
 import 'package:billing_system/features/inventory/domain/repository/inventory_repository.dart';
 import 'package:billing_system/features/inventory/domain/usecases/add_product_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/get_movement_logs.dart';
+import 'package:billing_system/features/inventory/domain/usecases/get_product_batches.dart';
 import 'package:billing_system/features/inventory/domain/usecases/get_products_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/get_stock_batches.dart';
 import 'package:billing_system/features/inventory/domain/usecases/purhcase_stock.dart';

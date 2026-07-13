@@ -25,6 +25,7 @@ class OverviewTab extends GetView<InventoryController> {
   @override
   Widget build(BuildContext context) {
     final p = product;
+    final stock = batches.fold<double>(0, (sum, batch) => sum + batch.quantityRemaining);
     return ListView(
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 100),
       children: [
@@ -39,7 +40,7 @@ class OverviewTab extends GetView<InventoryController> {
             const SizedBox(width: 10),
             QuickStat(
               label: 'Stock',
-              value: '${p.stock} ${p.stockUnit}',
+              value: '${stock.toInt()} ${p.stockUnit}',
               icon: Icons.inventory_outlined,
               color: p.statusColor,
             ),
@@ -69,7 +70,7 @@ class OverviewTab extends GetView<InventoryController> {
           title: 'Stock',
           icon: Icons.local_offer_outlined,
           rows: [
-            InfoRow('Current Stock', '${p.stock} ${p.stockUnit}'),
+            InfoRow('Current Stock', '${stock.toInt()} ${p.stockUnit}'),
             InfoRow('Total Stock Value', fmt(controller.totalStockValue())),
             InfoRow('Stock Status', p.statusLabel, valueColor: p.statusColor),
           ],

@@ -77,7 +77,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
 
     HapticFeedback.mediumImpact();
 
-    _cart.onBarcodeScanned(raw);
+   // _cart.onBarcodeScanned(raw);
 
     final existing = _sessionLog.firstWhereOrNull((e) => e.barcode == raw);
 

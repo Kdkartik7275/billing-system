@@ -94,7 +94,7 @@ class StockBatchesCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Batch #${index + 1}',
+                          'Batch #${batches.length - index}',
                           style: const TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 13,

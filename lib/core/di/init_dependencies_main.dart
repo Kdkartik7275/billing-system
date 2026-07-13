@@ -71,6 +71,7 @@ void _initInventory() {
   sl.registerLazySingleton(() => GetMovementLogs(repository: sl()));
   sl.registerLazySingleton(() => GetStockBatchesUseCase(repository: sl()));
   sl.registerLazySingleton(() => PurhcaseStockUseCase(repository: sl()));
+  sl.registerLazySingleton(() => GetProductBatchesUsecase(repository: sl()));
 }
 
 void _initPOSBilling() {

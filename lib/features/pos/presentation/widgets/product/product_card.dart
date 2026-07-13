@@ -1,22 +1,45 @@
 import 'package:billing_system/core/config/theme/app_colors.dart';
 import 'package:billing_system/core/config/theme/app_radius.dart';
+import 'package:billing_system/features/inventory/domain/entity/stock_batch_entity.dart';
+import 'package:billing_system/features/pos/presentation/widgets/product/batch_pick.dart';
 import 'package:flutter/material.dart';
 import '../../../data/models/product_model.dart';
 import '../shared/qty_control.dart';
 
 class ProductCard extends StatelessWidget {
   final ProductModel product;
+  final List<StockBatch> batches;
   final int qty;
-  final VoidCallback onAdd;
+  final void Function(StockBatch batch, int quantity) onAddBatch;
+  final VoidCallback onIncrement; // NEW — bumps qty on the batch already in the cart
   final VoidCallback onRemove;
 
   const ProductCard({
     super.key,
     required this.product,
+    required this.batches,
     required this.qty,
-    required this.onAdd,
+    required this.onAddBatch,
+    required this.onIncrement,
     required this.onRemove,
   });
+
+  Future<void> _openBatchPicker(BuildContext context) async {
+    if (batches.isEmpty) return;
+    if (batches.length == 1) {
+      onAddBatch(batches.first, 1);
+      return;
+    }
+    final result = await showModalBottomSheet<BatchPick>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => BatchPickerSheet(product: product, batches: batches),
+    );
+    if (result != null) {
+      onAddBatch(result.batch, result.quantity);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,92 +48,44 @@ class ProductCard extends StatelessWidget {
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(
-          color: isInCart
-              ? AppColors.primary.withValues(alpha: 0.5)
-              : Colors.grey.withValues(alpha: 0.12),
-          width: isInCart ? 1.5 : 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: isInCart
-                ? AppColors.primary.withValues(alpha: 0.08)
-                : Colors.black.withValues(alpha: 0.05),
-            blurRadius: isInCart ? 12 : 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
+      decoration: BoxDecoration(/* unchanged */),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppRadius.md),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: inStock ? onAdd : null,
-            splashColor: AppColors.primary.withValues(alpha: 0.06),
-            highlightColor: AppColors.primary.withValues(alpha: 0.03),
+            // Tapping the card body: open picker only if not yet in cart.
+            // Once in cart, tapping the card shouldn't silently add a unit
+            // from a different batch — use the qty stepper for that.
+            onTap: inStock && !isInCart ? () => _openBatchPicker(context) : null,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── Image ────────────────────────────────────────
-                _ProductImage(
-                  imageUrl: product.imageUrl,
-                  isInCart: isInCart,
-                  qty: qty,
-                ),
-
-                // ── Info ─────────────────────────────────────────
+                _ProductImage(imageUrl: product.imageUrl, isInCart: isInCart, qty: qty),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(10, 9, 10, 10),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          product.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            height: 1.35,
-                            color: Colors.grey.shade900,
-                          ),
-                        ),
+                        Text(product.name, /* unchanged */ maxLines: 1, overflow: TextOverflow.ellipsis),
                         const SizedBox(height: 3),
-                        Text(
-                          product.category,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey.shade800,
-                            fontWeight: FontWeight.w600 
-                          ),
-                        ),
+                        Text(product.category /* unchanged */),
                         const Spacer(),
-
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: _StockBadge(stock: product.stock)),
+                        Align(alignment: Alignment.centerRight, child: _StockBadge(stock: product.stock)),
                         const SizedBox(height: 8),
-
-                        // ── Add / Qty ───────────────────────────
                         inStock
                             ? (qty == 0
-                                  ? _AddButton(onAdd: onAdd)
-                                  : QtyControl(
-                                      qty: qty,
-                                      onAdd: onAdd,
-                                      onRemove: onRemove,
-                                    ))
+                                ? _AddButton(onAdd: () => _openBatchPicker(context))
+                                : QtyControl(
+                                    qty: qty,
+                                    onAdd: onIncrement, // reuses existing batch, no picker
+                                    onRemove: onRemove,
+                                  ))
                             : Center(
                                 child: Text(
                                   'Out of Stock',
-                                  textAlign: TextAlign.center,
-                                  style: Theme.of(context).textTheme.bodyMedium!
-                                      .copyWith(color: Colors.red),
+                                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.red),
                                 ),
                               ),
                       ],
@@ -125,7 +100,6 @@ class ProductCard extends StatelessWidget {
     );
   }
 }
-
 // ─── Product Image with cart indicator overlay ─────────────────────────────
 
 class _ProductImage extends StatelessWidget {

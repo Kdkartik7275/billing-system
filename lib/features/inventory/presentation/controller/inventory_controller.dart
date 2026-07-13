@@ -6,6 +6,7 @@ import 'package:billing_system/features/inventory/domain/entity/stock_batch_enti
 import 'package:billing_system/features/inventory/domain/entity/stock_transactions_entity.dart';
 import 'package:billing_system/features/inventory/domain/usecases/add_product_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/get_movement_logs.dart';
+import 'package:billing_system/features/inventory/domain/usecases/get_product_batches.dart';
 import 'package:billing_system/features/inventory/domain/usecases/get_products_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/get_stock_batches.dart';
 import 'package:billing_system/features/inventory/domain/usecases/purhcase_stock.dart';
@@ -23,9 +24,12 @@ class InventoryController extends GetxController {
   final GetMovementLogs getMovementLogsUseCase;
   final GetStockBatchesUseCase getStockBatchesUseCase;
   final PurhcaseStockUseCase purchaseStockUseCase;
+  final GetProductBatchesUsecase getProductBatchesUsecase;
 
   final RxList<InventoryProduct> products = <InventoryProduct>[].obs;
   final RxList<StockTransaction> transactions = <StockTransaction>[].obs;
+  final RxMap<String, List<StockBatch>> productBatches =
+    <String, List<StockBatch>>{}.obs;
   final RxList<StockBatch> batches = <StockBatch>[].obs;
   final RxString searchQuery = ''.obs;
   final RxString selectedCategory = 'All'.obs;
@@ -43,6 +47,7 @@ class InventoryController extends GetxController {
     required this.getMovementLogsUseCase,
     required this.getStockBatchesUseCase,
     required this.purchaseStockUseCase,
+    required this.getProductBatchesUsecase,
   });
 
   List<InventoryProduct> get filteredProducts {
@@ -129,6 +134,9 @@ class InventoryController extends GetxController {
         debugPrint('Products fetched: ${productsList.length}');
         products.value = productsList;
       });
+      for (final product in products) {
+          await loadProductBatches(product.id);
+        }
     } catch (e) {
       debugPrint('Error fetching products: $e');
       AppSnackbar.error(message: 'Failed to get products');
@@ -244,7 +252,7 @@ class InventoryController extends GetxController {
     required double sellingPrice,
   }) async {
     try {
-    final resul =   await purchaseStockUseCase.call(
+      final resul = await purchaseStockUseCase.call(
         PurhcaseStockParams(
           quantity: quantity,
           previousStock: previousStock,
@@ -253,18 +261,28 @@ class InventoryController extends GetxController {
           sellingPrice: sellingPrice,
         ),
       );
-      resul.fold((err) => throw err.message, (m) async{
+      resul.fold((err) => throw err.message, (m) async {
         debugPrint("Stock purchased successfully");
         AppSnackbar.success(message: 'Stock purchased successfully');
-         await getProductMovementLogs(productId);
-      await getProductStockBatches(productId);
+        await getProductMovementLogs(productId);
+        await getProductStockBatches(productId);
       });
-     
     } catch (e) {
       debugPrint('Error purchasing stock: $e');
       AppSnackbar.error(message: 'Failed to purchase stock');
     }
   }
+
+  Future<void> loadProductBatches(String productId) async {
+  if (productBatches.containsKey(productId)) return;
+
+  final result = await getProductBatchesUsecase.call(productId);
+
+  result.fold(
+    (_) {},
+    (batches) => productBatches[productId] = batches,
+  );
+}
 
   double totalStockValue() {
     return batches.fold(

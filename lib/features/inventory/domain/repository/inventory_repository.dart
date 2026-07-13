@@ -25,4 +25,6 @@ abstract interface class InventoryRepository {
     required double purchasePrice,
     required double sellingPrice,
   });
+  ResultFuture<List<StockBatch>> getBatchesForProduct(String productId);
+
 }

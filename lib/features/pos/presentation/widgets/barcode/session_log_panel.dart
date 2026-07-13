@@ -188,18 +188,18 @@ class _SessionLogTile extends StatelessWidget {
                         (p) => p.id == entry.productId,
                       );
                       if (product != null) {
-                        cart.addToCart(
-                          ProductModel(
-                            id: product.id,
-                            name: product.name,
-                            category: product.category,
-                            price: product.price,
-                            stock: product.stock,
-                            imageUrl: product.imageUrl,
-                            barcode: product.barcode,
-                            sku: product.sku,
-                          ),
-                        );
+                        // cart.addToCart(
+                        //   ProductModel(
+                        //     id: product.id,
+                        //     name: product.name,
+                        //     category: product.category,
+                        //     price: product.price,
+                        //     stock: product.stock,
+                        //     imageUrl: product.imageUrl,
+                        //     barcode: product.barcode,
+                        //     sku: product.sku,
+                        //   ),
+                        // );
                       }
                     },
                   ),

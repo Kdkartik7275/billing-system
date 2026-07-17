@@ -50,7 +50,7 @@ class InfoCard extends StatelessWidget {
               ],
             ),
           ),
-          const Divider(height: 1),
+          Divider(height: 1, color: Colors.grey.shade200),
           ...rows,
           ?customChild,
         ],

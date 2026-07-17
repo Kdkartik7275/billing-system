@@ -1,0 +1,62 @@
+class ShopEntity {
+  final String id;
+
+  final String shopName;
+
+  final String ownerUid;
+  final String ownerName;
+  final String ownerEmail;
+  final String ownerPhone;
+
+  final String address;
+
+  final bool isActive;
+
+  final String plan;
+  final DateTime? subscriptionExpiry;
+
+  final FirebaseConfigEntity firebaseConfig;
+
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  const ShopEntity({
+    required this.id,
+    required this.shopName,
+    required this.ownerUid,
+    required this.ownerName,
+    required this.ownerEmail,
+    required this.ownerPhone,
+    required this.address,
+    required this.isActive,
+    required this.plan,
+    required this.subscriptionExpiry,
+    required this.firebaseConfig,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+}
+
+class FirebaseConfigEntity {
+  final String androidApiKey;
+  final String iosApiKey;
+
+  final String androidAppId;
+  final String iosAppId;
+
+  final String projectId;
+  final String messagingSenderId;
+  final String storageBucket;
+  final String? databaseURL;
+
+  const FirebaseConfigEntity({
+    required this.androidApiKey,
+    required this.iosApiKey,
+    required this.androidAppId,
+    required this.iosAppId,
+    required this.projectId,
+    required this.messagingSenderId,
+    required this.storageBucket,
+    this.databaseURL,
+  });
+}

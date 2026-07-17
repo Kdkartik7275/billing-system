@@ -9,6 +9,7 @@ abstract interface class InventoryRepository {
   ResultVoid addProduct(InventoryProduct product);
 
   ResultFuture<List<InventoryProduct>> getProducts();
+  ResultFuture<List<InventoryProduct>> getProductsByIds(List<String> productIds);
   ResultFuture<List<InventoryProduct>> refreshProducts();
 
   ResultFuture<InventoryProduct> updateProduct(InventoryProduct product);
@@ -24,5 +25,10 @@ abstract interface class InventoryRepository {
     required String productId,
     required double purchasePrice,
     required double sellingPrice,
+  });
+  ResultVoid sellStock({
+    required int quantity,
+    required int previousStock,
+    required String productId,
   });
 }

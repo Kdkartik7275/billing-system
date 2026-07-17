@@ -204,11 +204,66 @@ class InventoryRepositoryImpl implements InventoryRepository {
         purchasePrice: purchasePrice,
         sellingPrice: sellingPrice,
       );
-      await localDataSource.addStockTransaction(result.$2);
-      await localDataSource.addStockBatch(result.$1);
+      Future.wait([
+        localDataSource.addStockTransaction(result.$2),
+        localDataSource.addStockBatch(result.$1),
+        localDataSource.updateProductStock(productId, previousStock + quantity),
+      ]);
+
       return right(null);
     } catch (e) {
       return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultVoid sellStock({
+    required int quantity,
+    required int previousStock,
+    required String productId,
+  }) async {
+    try {
+      if (!await connectionChecker.isConnected) {
+        return left(
+          FirebaseFailure(
+            message: 'No internet connection. Cannot sell stock.',
+          ),
+        );
+      }
+
+      final result = await remoteDataSource.sellStock(
+        quantity: quantity,
+        previousStock: previousStock,
+        productId: productId,
+      );
+
+      Future.wait([
+        localDataSource.addStockTransaction(result),
+        localDataSource.updateProductStock(productId, previousStock - quantity),
+      ]);
+
+      return right(null);
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultFuture<List<InventoryProduct>> getProductsByIds(
+    List<String> productIds,
+  ) async {
+    try {
+      final cachedProducts = await localDataSource.getCachedProductsByIds(
+        productIds,
+      );
+
+      return right(cachedProducts.map((model) => model.toEntity()).toList());
+    } catch (e) {
+      final cachedProducts = await localDataSource.getCachedProductsByIds(
+        productIds,
+      );
+
+      return right(cachedProducts.map((model) => model.toEntity()).toList());
     }
   }
 }

@@ -33,6 +33,8 @@ class DashboardPage extends StatelessWidget {
         syncProductsUseCase: sl(),
         getLastSevenDaysSalesUseCase: sl(),
         getPendingBillsUseCase: sl(),
+        getProductsByIdsUseCase: sl(),
+        sellStockUseCase: sl()
       ),
     );
 

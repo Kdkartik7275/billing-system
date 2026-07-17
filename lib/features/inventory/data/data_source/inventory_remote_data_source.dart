@@ -24,6 +24,11 @@ abstract interface class InventoryRemoteDataSource {
     required double purchasePrice,
     required double sellingPrice,
   });
+  Future<StockTransactionModel> sellStock({
+    required int quantity,
+    required int previousStock,
+    required String productId,
+  });
 }
 
 class InventoryRemoteDataSourceImpl implements InventoryRemoteDataSource {
@@ -47,7 +52,7 @@ class InventoryRemoteDataSourceImpl implements InventoryRemoteDataSource {
         previousStock: 0,
         quantityChanged: product.stock,
         newStock: product.stock,
-       
+
         referenceId: null,
         notes: 'Initial stock added',
         createdAt: DateTime.now(),
@@ -91,6 +96,7 @@ class InventoryRemoteDataSourceImpl implements InventoryRemoteDataSource {
           .toList();
       return (products, stockBatches);
     } catch (e) {
+      debugPrint('Error fetching products: $e');
       throw Exception('Failed to get products: $e');
     }
   }
@@ -130,6 +136,7 @@ class InventoryRemoteDataSourceImpl implements InventoryRemoteDataSource {
   Future<(List<InventoryProductModel>, List<StockBatchModel>)>
   refreshProducts() async {
     try {
+      
       final productsRef = await firestore.collection('products').get();
       final products = productsRef.docs
           .map((doc) => InventoryProductModel.fromMap(doc.data()))
@@ -142,6 +149,8 @@ class InventoryRemoteDataSourceImpl implements InventoryRemoteDataSource {
       debugPrint("Stock batches length: ${stockBatches.length}");
       return (products, stockBatches);
     } catch (e) {
+            debugPrint('Error fetching products: $e');
+
       throw Exception('Failed to get products: $e');
     }
   }
@@ -168,23 +177,23 @@ class InventoryRemoteDataSourceImpl implements InventoryRemoteDataSource {
     required String productId,
     required double purchasePrice,
     required double sellingPrice,
-  }) async{
+  }) async {
     try {
-       final stock = StockTransactionModel(
+      final stock = StockTransactionModel(
         id: Uuid().v4(),
         productId: productId,
         type: StockTransactionType.purchase,
         previousStock: previousStock,
         quantityChanged: quantity,
         newStock: previousStock + quantity,
-       
+
         referenceId: null,
         notes: 'Initial stock added',
         createdAt: DateTime.now(),
       );
       final StockBatchModel stockBatch = StockBatchModel(
         id: Uuid().v4(),
-        productId:productId,
+        productId: productId,
         quantityRemaining: quantity,
         purchasePrice: purchasePrice,
         sellingPrice: sellingPrice,
@@ -199,9 +208,53 @@ class InventoryRemoteDataSourceImpl implements InventoryRemoteDataSource {
           .collection('stock_batch')
           .doc(stockBatch.id)
           .set(stockBatch.toMap());
-          return (stockBatch, stock);
+      await firestore.collection('products').doc(productId).update({
+        'stock': FieldValue.increment(quantity),
+      });
+      return (stockBatch, stock);
     } catch (e) {
       throw Exception('Error Purchasing Stock');
+    }
+  }
+
+  @override
+  Future<StockTransactionModel> sellStock({
+    required int quantity,
+    required int previousStock,
+    required String productId,
+  }) async {
+    try {
+      final newStock = previousStock - quantity;
+
+      final stock = StockTransactionModel(
+        id: Uuid().v4(),
+        productId: productId,
+        type: StockTransactionType.sale,
+        previousStock: previousStock,
+        quantityChanged: -quantity,
+        newStock: newStock,
+        referenceId: null,
+        notes:
+            'Sale on ${DateTime.now().toLocal().toString().split(' ').first}',
+        createdAt: DateTime.now(),
+      );
+
+      final writeBatch = firestore.batch();
+
+      writeBatch.set(
+        firestore.collection('stock_transactions').doc(stock.id),
+        stock.toMap(),
+      );
+
+      writeBatch.update(firestore.collection('products').doc(productId), {
+        'stock': newStock,
+      });
+
+      await writeBatch.commit();
+
+      return stock;
+    } catch (e) {
+      throw Exception('Error Selling Stock: $e');
     }
   }
 }

@@ -9,6 +9,9 @@ abstract interface class InventoryLocalDataSource {
   Future<void> cacheStockBatches(List<StockBatchModel> batches);
 
   Future<List<InventoryProductModel>> getCachedProducts();
+  Future<List<InventoryProductModel>> getCachedProductsByIds(
+    List<String> productIds,
+  );
   Future<List<StockTransactionModel>> getCachedMovements(String productId);
   Future<List<StockBatchModel>> getStockBatches(String productId);
 
@@ -16,6 +19,7 @@ abstract interface class InventoryLocalDataSource {
   Future<void> addStockTransaction(StockTransactionModel transaction);
   Future<void> addStockBatch(StockBatchModel stockBatch);
   Future<void> updateProduct(InventoryProductModel product);
+  Future<void> updateProductStock(String productId, int newStock);
 
   Future<void> clearCache();
 }
@@ -100,6 +104,24 @@ class InventoryLocalDataSourceImpl implements InventoryLocalDataSource {
   Future<List<StockBatchModel>> getStockBatches(String productId) async {
     return stockBatchBox.values
         .where((st) => st.productId == productId)
+        .toList();
+  }
+
+  @override
+  Future<void> updateProductStock(String productId, int newStock) async {
+    final product = box.get(productId);
+    if (product != null) {
+      final updatedProduct = product.copyWith(stock: newStock);
+      await box.put(productId, updatedProduct);
+    }
+  }
+
+  @override
+  Future<List<InventoryProductModel>> getCachedProductsByIds(
+    List<String> productIds,
+  ) async {
+    return box.values
+        .where((product) => productIds.contains(product.id))
         .toList();
   }
 }

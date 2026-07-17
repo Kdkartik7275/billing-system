@@ -214,6 +214,7 @@ class InventoryController extends GetxController {
       result.fold((err) => throw err.message, (m) {
         debugPrint("Movement Logs Length: ${m.length}");
         transactions.value = m;
+        m.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       });
     } catch (e) {
       //
@@ -244,7 +245,7 @@ class InventoryController extends GetxController {
     required double sellingPrice,
   }) async {
     try {
-    final resul =   await purchaseStockUseCase.call(
+      final resul = await purchaseStockUseCase.call(
         PurhcaseStockParams(
           quantity: quantity,
           previousStock: previousStock,
@@ -253,13 +254,12 @@ class InventoryController extends GetxController {
           sellingPrice: sellingPrice,
         ),
       );
-      resul.fold((err) => throw err.message, (m) async{
+      resul.fold((err) => throw err.message, (m) async {
         debugPrint("Stock purchased successfully");
         AppSnackbar.success(message: 'Stock purchased successfully');
-         await getProductMovementLogs(productId);
-      await getProductStockBatches(productId);
+        await getProductMovementLogs(productId);
+        await getProductStockBatches(productId);
       });
-     
     } catch (e) {
       debugPrint('Error purchasing stock: $e');
       AppSnackbar.error(message: 'Failed to purchase stock');

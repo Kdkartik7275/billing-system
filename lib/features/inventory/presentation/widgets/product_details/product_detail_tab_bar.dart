@@ -15,6 +15,7 @@ class ProductDetailTabBar extends StatelessWidget {
         controller: controller,
         labelColor: AppColors.primary,
         unselectedLabelColor: Colors.grey.shade500,
+        dividerColor: Colors.transparent,
         indicatorColor: AppColors.primary,
         indicatorWeight: 2.5,
         labelStyle: Theme.of(context).textTheme.titleSmall,

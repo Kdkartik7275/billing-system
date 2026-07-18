@@ -3,6 +3,7 @@ import 'package:billing_system/core/config/theme/app_radius.dart';
 import 'package:billing_system/core/config/theme/app_spacing.dart';
 import 'package:billing_system/features/dashboard/presentation/controller/dashboard_shell_controller.dart';
 import 'package:billing_system/features/dashboard/presentation/models/dashboard_menu.dart';
+import 'package:billing_system/features/user/presentation/controller/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -208,62 +209,67 @@ class _NavItem extends StatelessWidget {
 
 // ── User card ─────────────────────────────────────────────────────────────────
 
-class _DrawerUserCard extends StatelessWidget {
+class _DrawerUserCard extends GetView<UserController> {
   const _DrawerUserCard();
 
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
-    return Container(
-      margin: const EdgeInsets.all(AppSpacing.sm),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Color(0xFF2563EB),
-            ),
-            child: const Center(
-              child: Text(
-                'AM',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
+    return Obx(
+       () {
+        final user = controller.user.value;
+        return Container(
+          margin: const EdgeInsets.all(AppSpacing.sm),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF3F4F6),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFF2563EB),
+                ),
+                child:  Center(
+                  child: Text(
+                    user?.name.substring(0,2).toUpperCase() ?? 'OW' ,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Arjun Mehta',
-                  overflow: TextOverflow.ellipsis,
-                  style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      user?.name ?? 'Shop User',
+                      overflow: TextOverflow.ellipsis,
+                      style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      user?.role.name ?? 'Owner',
+                      style: tt.labelLarge?.copyWith(color: Colors.black87),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 1),
-                Text(
-                  'Store Manager',
-                  style: tt.labelSmall?.copyWith(color: Colors.grey),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      }
     );
   }
 }

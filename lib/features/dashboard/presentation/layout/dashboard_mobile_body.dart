@@ -1,3 +1,5 @@
+import 'package:billing_system/core/config/theme/app_colors.dart';
+import 'package:billing_system/features/dashboard/presentation/controller/dashboard_shell_controller.dart';
 import 'package:billing_system/features/dashboard/presentation/models/dashboard_card_model.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/category_pie_chart.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/chart_card.dart';
@@ -13,69 +15,77 @@ class MobileDashboardBody extends GetView<BillsController> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        Obx(() {
-          final cards = [
-            DashboardCardModel(
-              title: "Today's Sales",
-              value: "₹${controller.todaySales.toStringAsFixed(0)}",
-              growth: "${controller.todayOrderCount} orders today",
-              icon: Icons.attach_money,
-              iconColor: Colors.green,
-            ),
-            DashboardCardModel(
-              title: "Total Orders",
-              value: "${controller.todayOrderCount}",
-              growth: "bills today",
-              icon: Icons.shopping_cart_outlined,
-              iconColor: Colors.blue,
-            ),
-            DashboardCardModel(
-              title: "Revenue",
-              value: "₹${controller.todayRevenue.toStringAsFixed(0)}",
-              growth: "excl. tax",
-              icon: Icons.show_chart,
-              iconColor: Colors.deepPurple,
-            ),
-            DashboardCardModel(
-              title: "Pending Sync",
-              value: "${controller.pendingSyncCount}",
-              growth: controller.pendingSyncCount == 0
-                  ? "No pending bills"
-                  : "${controller.pendingSyncCount} need sync",
-              icon: Icons.pending_actions_outlined,
-              iconColor: Colors.orange,
-            ),
-          ];
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              final cardWidth = (constraints.maxWidth - 10) / 2;
-              final cardHeight = cardWidth * 0.55;
-              return GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: cardWidth / cardHeight,
-                children: cards
-                    .map((c) => _MobileSummaryCard(data: c))
-                    .toList(),
-              );
-            },
-          );
-        }),
-        const SizedBox(height: 14),
-        const SalesLineChart(height: 260),
-        const SizedBox(height: 16),
-        const CategoryPieChart(height: 280),
-        const SizedBox(height: 16),
-        const _RecentTransactions(),
-        const SizedBox(height: 24),
-        LowStockAlerts(),
-      ],
+    return RefreshIndicator(
+      onRefresh: ()async{
+        final dashboardController = Get.find<DashboardShellController>();
+       await dashboardController.refreshDashboard();
+      },
+      backgroundColor: Colors.white,
+      color: AppColors.primary,
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Obx(() {
+            final cards = [
+              DashboardCardModel(
+                title: "Today's Sales",
+                value: "₹${controller.todaySales.toStringAsFixed(0)}",
+                growth: "${controller.todayOrderCount} orders today",
+                icon: Icons.attach_money,
+                iconColor: Colors.green,
+              ),
+              DashboardCardModel(
+                title: "Total Orders",
+                value: "${controller.todayOrderCount}",
+                growth: "bills today",
+                icon: Icons.shopping_cart_outlined,
+                iconColor: Colors.blue,
+              ),
+              DashboardCardModel(
+                title: "Revenue",
+                value: "₹${controller.todayRevenue.toStringAsFixed(0)}",
+                growth: "excl. tax",
+                icon: Icons.show_chart,
+                iconColor: Colors.deepPurple,
+              ),
+              DashboardCardModel(
+                title: "Pending Sync",
+                value: "${controller.pendingSyncCount}",
+                growth: controller.pendingSyncCount == 0
+                    ? "No pending bills"
+                    : "${controller.pendingSyncCount} need sync",
+                icon: Icons.pending_actions_outlined,
+                iconColor: Colors.orange,
+              ),
+            ];
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final cardWidth = (constraints.maxWidth - 10) / 2;
+                final cardHeight = cardWidth * 0.55;
+                return GridView.count(
+                  crossAxisCount: 2,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: cardWidth / cardHeight,
+                  children: cards
+                      .map((c) => _MobileSummaryCard(data: c))
+                      .toList(),
+                );
+              },
+            );
+          }),
+          const SizedBox(height: 14),
+          const SalesLineChart(height: 260),
+          const SizedBox(height: 16),
+          const CategoryPieChart(height: 280),
+          const SizedBox(height: 16),
+          const _RecentTransactions(),
+          const SizedBox(height: 24),
+          LowStockAlerts(),
+        ],
+      ),
     );
   }
 }

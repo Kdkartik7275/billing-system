@@ -122,6 +122,7 @@ class InventoryController extends GetxController {
   Future<void> getProducts() async {
     loading.value = true;
     try {
+      debugPrint("Get Products called........");
       final result = await getProductsUseCase.call();
       result.fold((failure) => AppSnackbar.error(message: failure.message), (
         productsList,

@@ -2,29 +2,12 @@ import 'package:billing_system/core/config/theme/app_radius.dart';
 import 'package:billing_system/features/dashboard/presentation/models/dashboard_card_model.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/category_pie_chart.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/chart_card.dart';
+import 'package:billing_system/features/dashboard/presentation/widgets/low_stocks.dart';
+import 'package:billing_system/features/dashboard/presentation/widgets/recent_transactions.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/sales_line_chart.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:billing_system/features/pos/presentation/controller/bills_controller.dart';
 import 'package:flutter/material.dart';
-
-const kCategories = [
-  CategoryData('Grocery', 35, Color(0xFF4A90D9)),
-  CategoryData('Fruit & Veg', 25, Color(0xFF2ECC71)),
-  CategoryData('Dairy', 20, Color(0xFFF5A623)),
-  CategoryData('Beverages', 12, Color(0xFFE74C3C)),
-  CategoryData('Others', 8, Color(0xFF9B59B6)),
-];
-
-const kWeekSpots = [
-  FlSpot(0, 45000),
-  FlSpot(1, 52000),
-  FlSpot(2, 48000),
-  FlSpot(3, 62000),
-  FlSpot(4, 75000),
-  FlSpot(5, 85000),
-  FlSpot(6, 125000),
-];
-
-const kDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+import 'package:get/get.dart';
 
 const kTransactions = [
   TransactionData('INV-2026-001', 'Rajesh Kumar', '₹2,450', true),
@@ -33,7 +16,7 @@ const kTransactions = [
   TransactionData('INV-2026-004', 'Amit Verma', '₹1,240', false),
 ];
 
-class DashboardBody extends StatelessWidget {
+class DashboardBody extends GetView<BillsController> {
   const DashboardBody({super.key});
 
   @override
@@ -42,7 +25,7 @@ class DashboardBody extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          _WebSummaryCards(cards: kCardData),
+          _WebSummaryCards(),
           const SizedBox(height: 24),
           const Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,238 +38,10 @@ class DashboardBody extends StatelessWidget {
           SizedBox(height: 22),
           Row(
             children: [
-              Expanded(
-                child: Container(
-                  height: 300,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.06),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Header
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Recent Transactions',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF1A1A2E),
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(
-                                  0xFF6C63FF,
-                                ).withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                '${kTransactions.length} today',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xFF6C63FF),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      // Table Header
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Row(
-                          children: const [
-                            Expanded(
-                              flex: 3,
-                              child: Text(
-                                'Invoice',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xFF9E9E9E),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 3,
-                              child: Text(
-                                'Customer',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xFF9E9E9E),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                'Amount',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xFF9E9E9E),
-                                ),
-                                textAlign: TextAlign.right,
-                              ),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                'Status',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xFF9E9E9E),
-                                ),
-                                textAlign: TextAlign.right,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 6),
-                      const Divider(height: 1, color: Color(0xFFF0F0F0)),
-
-                      // Transaction Rows
-                      Expanded(
-                        child: ListView.separated(
-                          physics: const NeverScrollableScrollPhysics(),
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          itemCount: kTransactions.length,
-                          separatorBuilder: (_, _) => const Divider(
-                            height: 1,
-                            color: Color(0xFFF5F5F5),
-                          ),
-                          itemBuilder: (context, index) {
-                            final tx = kTransactions[index];
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    flex: 3,
-                                    child: Text(
-                                      tx.invoice,
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w500,
-                                        color: Color(0xFF3D3D3D),
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 3,
-                                    child: Text(
-                                      tx.customer,
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        color: Color(0xFF5A5A5A),
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 2,
-                                    child: Text(
-                                      tx.amount,
-                                      textAlign: TextAlign.right,
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                        color: Color(0xFF1A1A2E),
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 2,
-                                    child: Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 3,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: tx.completed
-                                              ? const Color(
-                                                  0xFF22C55E,
-                                                ).withValues(alpha: 0.12)
-                                              : const Color(
-                                                  0xFFEF4444,
-                                                ).withValues(alpha: 0.12),
-                                          borderRadius: BorderRadius.circular(
-                                            20,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          tx.completed
-                                              ? 'Completed'
-                                              : 'Pending',
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w500,
-                                            color: tx.completed
-                                                ? const Color(0xFF16A34A)
-                                                : const Color(0xFFDC2626),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(width: 16),
-              Expanded(
-                child: Container(
-                  height: 300,
-                  width: double.infinity,
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.06),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: _LowStockAlertsWeb(),
-                ),
-              ),
+              Expanded(child: RecentTransactions()),
+              const SizedBox(width: 16),
+              Expanded(child: LowStockAlerts()),
+              
             ],
           ),
         ],
@@ -295,9 +50,8 @@ class DashboardBody extends StatelessWidget {
   }
 }
 
-class _WebSummaryCards extends StatelessWidget {
-  const _WebSummaryCards({required this.cards});
-  final List<DashboardCardModel> cards;
+class _WebSummaryCards extends GetView<BillsController> {
+  const _WebSummaryCards();
 
   @override
   Widget build(BuildContext context) {
@@ -312,18 +66,52 @@ class _WebSummaryCards extends StatelessWidget {
             ? 3
             : 4;
         final itemWidth = (w - (perRow - 1) * 16) / perRow;
-        return Wrap(
-          spacing: 16,
-          runSpacing: 16,
-          children: cards
-              .map(
-                (c) => SizedBox(
-                  width: itemWidth,
-                  child: _WebSummaryCard(data: c),
-                ),
-              )
-              .toList(),
-        );
+        return Obx(() {
+          return Wrap(
+            spacing: 16,
+            runSpacing: 16,
+            children:
+                [
+                      DashboardCardModel(
+                        title: "Today's Sales",
+                        value: "₹${controller.todaySales.toStringAsFixed(0)}",
+                        growth: "${controller.todayOrderCount} orders today",
+                        icon: Icons.attach_money,
+                        iconColor: Colors.green,
+                      ),
+                      DashboardCardModel(
+                        title: "Total Orders",
+                        value: "${controller.todayOrderCount}",
+                        growth: "bills today",
+                        icon: Icons.shopping_cart_outlined,
+                        iconColor: Colors.blue,
+                      ),
+                      DashboardCardModel(
+                        title: "Revenue",
+                        value: "₹${controller.todayRevenue.toStringAsFixed(0)}",
+                        growth: "excl. tax",
+                        icon: Icons.show_chart,
+                        iconColor: Colors.deepPurple,
+                      ),
+                      DashboardCardModel(
+                        title: "Pending Sync",
+                        value: "${controller.pendingSyncCount}",
+                        growth: controller.pendingSyncCount == 0
+                            ? "No pending bills"
+                            : "${controller.pendingSyncCount} need sync",
+                        icon: Icons.pending_actions_outlined,
+                        iconColor: Colors.orange,
+                      ),
+                    ]
+                    .map(
+                      (c) => SizedBox(
+                        width: itemWidth,
+                        child: _WebSummaryCard(data: c),
+                      ),
+                    )
+                    .toList(),
+          );
+        });
       },
     );
   }
@@ -381,65 +169,6 @@ class _WebSummaryCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _LowStockAlertsWeb extends StatelessWidget {
-  const _LowStockAlertsWeb();
-
-  @override
-  Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Low Stock Alerts',
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF1A1A2E),
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.amber.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                '0 Items',
-                style: tt.bodySmall?.copyWith(
-                  color: Colors.orange,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Container(
-          height: 80,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.amber.withValues(alpha: 0.10),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Center(
-            child: Text(
-              'All stocks are sufficient',
-              style: tt.bodyMedium?.copyWith(
-                color: Colors.amber.shade800,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

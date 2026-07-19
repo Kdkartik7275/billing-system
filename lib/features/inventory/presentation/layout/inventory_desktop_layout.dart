@@ -15,94 +15,96 @@ class InventoryDesktopLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.find<InventoryController>();
 
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    return RefreshIndicator(
+      onRefresh:()async=> await controller.refreshProducts(),
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Obx(() {
+              final products = controller.products;
+              final total = products.length;
+              final totalValue = products.fold<double>(
+                0,
+                (s, p) => s + p.totalValue,
+              );
+              final lowStock = products
+                  .where((p) => p.status == StockStatus.lowStock)
+                  .length;
+              final categories =
+                  products.map((p) => p.category).toSet().length;
 
-          Obx(() {
-            final products = controller.products;
-            final total = products.length;
-            final totalValue =
-                products.fold<double>(0, (s, p) => s + p.totalValue);
-            final lowStock = products
-                .where((p) => p.status == StockStatus.lowStock)
-                .length;
-            final categories =
-                products.map((p) => p.category).toSet().length;
+              return Row(
+                children: [
+                  Expanded(
+                    child: InventoryStatCard(
+                      title: 'Total Products',
+                      value: '$total',
+                      icon: Icons.inventory_2_outlined,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: InventoryStatCard(
+                      title: 'Total Value',
+                      value: '₹${_formatNumber(totalValue)}',
+                      icon: Icons.currency_rupee_rounded,
+                      valueColor: AppColors.primary,
+                      iconBgColor: AppColors.primary.withValues(alpha: 0.08),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: InventoryStatCard(
+                      title: 'Low Stock',
+                      value: '$lowStock',
+                      icon: Icons.warning_amber_rounded,
+                      valueColor: Colors.orange.shade700,
+                      iconBgColor: Colors.orange.withValues(alpha: 0.08),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: InventoryStatCard(
+                      title: 'Categories',
+                      value: '$categories',
+                      icon: Icons.category_outlined,
+                      valueColor: Colors.purple.shade600,
+                      iconBgColor: Colors.purple.withValues(alpha: 0.08),
+                    ),
+                  ),
+                ],
+              );
+            }),
+            const SizedBox(height: 20),
 
-            return Row(
-              children: [
-                Expanded(
-                  child: InventoryStatCard(
-                    title: 'Total Products',
-                    value: '$total',
-                    icon: Icons.inventory_2_outlined,
+            // ── Filter bar ─────────────────────────────────────────────
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                border:
+                    Border.all(color: Colors.grey.withValues(alpha: 0.12)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
                   ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: InventoryStatCard(
-                    title: 'Total Value',
-                    value: '₹${_formatNumber(totalValue)}',
-                    icon: Icons.currency_rupee_rounded,
-                    valueColor: AppColors.primary,
-                    iconBgColor:
-                        AppColors.primary.withValues(alpha: 0.08),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: InventoryStatCard(
-                    title: 'Low Stock',
-                    value: '$lowStock',
-                    icon: Icons.warning_amber_rounded,
-                    valueColor: Colors.orange.shade700,
-                    iconBgColor:
-                        Colors.orange.withValues(alpha: 0.08),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: InventoryStatCard(
-                    title: 'Categories',
-                    value: '$categories',
-                    icon: Icons.category_outlined,
-                    valueColor: Colors.purple.shade600,
-                    iconBgColor:
-                        Colors.purple.withValues(alpha: 0.08),
-                  ),
-                ),
-              ],
-            );
-          }),
-          const SizedBox(height: 20),
-
-          // ── Filter bar ─────────────────────────────────────────────
-          Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              border:
-                  Border.all(color: Colors.grey.withValues(alpha: 0.12)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+                ],
+              ),
+              child: const InventoryFilterBar(),
             ),
-            child: const InventoryFilterBar(),
-          ),
-          const SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-          // ── Data table ─────────────────────────────────────────────
-          const Expanded(child: InventoryDataTable()),
-        ],
+            // ── Data table ─────────────────────────────────────────────
+            const InventoryDataTable(),
+          ],
+        ),
       ),
     );
   }

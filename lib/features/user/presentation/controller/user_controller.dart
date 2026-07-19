@@ -164,16 +164,6 @@ class UserController extends GetxController {
       }
 
       statusMessage.value = 'Initializing shop...';
-      debugPrint(shop.value!.firebaseConfig.androidApiKey);
-      debugPrint(shop.value!.firebaseConfig.androidAppId);
-      debugPrint(shop.value!.firebaseConfig.authDomain);
-      debugPrint(shop.value!.firebaseConfig.iosApiKey);
-      debugPrint(shop.value!.firebaseConfig.iosAppId);
-      debugPrint(shop.value!.firebaseConfig.messagingSenderId);
-      debugPrint(shop.value!.firebaseConfig.projectId);
-      debugPrint(shop.value!.firebaseConfig.storageBucket);
-      debugPrint(shop.value!.firebaseConfig.webApiKey);
-      debugPrint(shop.value!.firebaseConfig.webAppId);
 
       await _shopFirebaseService.initialize(shop.value!.firebaseConfig);
 
@@ -191,25 +181,25 @@ class UserController extends GetxController {
   }
 
   Future<String> checkSession() async {
-  final authUser = FirebaseAuth.instance.currentUser;
+    final authUser = FirebaseAuth.instance.currentUser;
 
-  if (authUser == null) {
+    if (authUser == null) {
+      return AppRoutes.login;
+    }
+
+    final restored = await restoreSession();
+
+    if (restored) {
+      return AppRoutes.dashboard;
+    }
+
+    final loaded = await fetchAccountDetails(userId: authUser.uid);
+
+    if (loaded) {
+      return AppRoutes.dashboard;
+    }
+
+    await FirebaseAuth.instance.signOut();
     return AppRoutes.login;
   }
-
-  final restored = await restoreSession();
-
-  if (restored) {
-    return AppRoutes.dashboard;
-  }
-
-  final loaded = await fetchAccountDetails(userId: authUser.uid);
-
-  if (loaded) {
-    return AppRoutes.dashboard;
-  }
-
-  await FirebaseAuth.instance.signOut();
-  return AppRoutes.login;
-}
 }

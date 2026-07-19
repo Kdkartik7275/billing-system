@@ -3,12 +3,13 @@ import 'package:billing_system/features/dashboard/presentation/controller/dashbo
 import 'package:billing_system/features/dashboard/presentation/models/dashboard_menu.dart';
 import 'package:billing_system/features/dashboard/presentation/layout/dashboard_web_body.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/dashboard_drawer_navigation.dart';
+import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
 import 'package:billing_system/features/inventory/presentation/views/inventory_page.dart';
 import 'package:billing_system/features/pos/presentation/pages/pos_biiling_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class DashboardWebLayout extends StatelessWidget {
+class DashboardWebLayout extends StatefulWidget {
   const DashboardWebLayout({super.key});
 
   static const Map<DashboardMenu, Widget> _pages = {
@@ -24,8 +25,22 @@ class DashboardWebLayout extends StatelessWidget {
   };
 
   @override
+  State<DashboardWebLayout> createState() => _DashboardWebLayoutState();
+}
+
+class _DashboardWebLayoutState extends State<DashboardWebLayout> {
+
+   final controller = Get.find<DashboardShellController>();
+
+  final inventoryController = Get.find<InventoryController>();
+  @override
+  void initState() {
+    super.initState();
+    inventoryController.getProducts();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final controller = Get.find<DashboardShellController>();
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Row(
@@ -44,7 +59,7 @@ class DashboardWebLayout extends StatelessWidget {
                 _WebTopBar(),
                 Expanded(
                   child: Obx(
-                    () => _pages[controller.selectedMenu.value] ??
+                    () => DashboardWebLayout._pages[controller.selectedMenu.value] ??
                         const Center(child: Text('Dashboard')),
                   ),
                 ),

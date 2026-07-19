@@ -14,7 +14,7 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //DummyDart.seedProducts(RetailStoreDummyProducts.getDummyProducts());
+   // DummyDart.seedProducts(RetailStoreDummyProducts.getDummyProducts());
     Get.put<InventoryController>(
       InventoryController(
         addProductUseCase: sl(),

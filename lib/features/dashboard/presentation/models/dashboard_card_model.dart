@@ -34,34 +34,3 @@ class TransactionData {
   final String amount;
   final bool completed;
 }
-
-const kCardData = [
-  DashboardCardModel(
-    title: "Today's Sales",
-    value: "₹125,680",
-    growth: "+12.5% from yesterday",
-    icon: Icons.attach_money,
-    iconColor: Colors.green,
-  ),
-  DashboardCardModel(
-    title: "Total Orders",
-    value: "186",
-    growth: "+8.2% from yesterday",
-    icon: Icons.shopping_cart_outlined,
-    iconColor: Colors.blue,
-  ),
-  DashboardCardModel(
-    title: "Revenue",
-    value: "₹112,340",
-    growth: "+15.3% from yesterday",
-    icon: Icons.show_chart,
-    iconColor: Colors.deepPurple,
-  ),
-  DashboardCardModel(
-    title: "Pending Sync Bills",
-    value: "0",
-    growth: "No pending bills",
-    icon: Icons.pending_actions_outlined,
-    iconColor: Colors.orange,
-  ),
-];

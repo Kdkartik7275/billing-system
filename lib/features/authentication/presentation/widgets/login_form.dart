@@ -4,8 +4,7 @@ import 'package:get/get.dart';
 
 import '../controller/login_controller.dart';
 
-/// The core email/password form, shared across mobile, tablet and desktop
-/// layouts so validation and styling stay in one place.
+
 class LoginForm extends StatelessWidget {
   const LoginForm({super.key, required this.controller});
 
@@ -24,14 +23,14 @@ class LoginForm extends StatelessWidget {
             () => controller.errorMessage.value == null
                 ? const SizedBox.shrink()
                 : Container(
-                    margin: const EdgeInsets.only(bottom: 16),
+                    margin: const EdgeInsets.only(bottom: 18),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 14,
                       vertical: 12,
                     ),
                     decoration: BoxDecoration(
                       color: AppColors.error.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                         color: AppColors.error.withValues(alpha: 0.4),
                       ),
@@ -57,7 +56,13 @@ class LoginForm extends StatelessWidget {
                   ),
           ),
 
-          Text('Email', style: textTheme.labelLarge),
+          Text(
+            'Email',
+            style: textTheme.labelLarge?.copyWith(
+              color: Colors.black87,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(height: 6),
           TextFormField(
             controller: controller.emailController,
@@ -72,7 +77,13 @@ class LoginForm extends StatelessWidget {
           ),
           const SizedBox(height: 18),
 
-          Text('Password', style: textTheme.labelLarge),
+          Text(
+            'Password',
+            style: textTheme.labelLarge?.copyWith(
+              color: Colors.black87,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(height: 6),
           Obx(
             () => TextFormField(
@@ -86,12 +97,13 @@ class LoginForm extends StatelessWidget {
                 hint: '••••••••',
                 icon: Icons.lock_outline,
                 suffix: IconButton(
+                  splashRadius: 18,
                   icon: Icon(
                     controller.obscurePassword.value
                         ? Icons.visibility_outlined
                         : Icons.visibility_off_outlined,
                     size: 20,
-                    color: Colors.black45,
+                    color: AppColors.primary.withValues(alpha: 0.55),
                   ),
                   onPressed: controller.toggleObscurePassword,
                 ),
@@ -99,7 +111,7 @@ class LoginForm extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 14),
           Row(
             children: [
               Obx(
@@ -112,13 +124,16 @@ class LoginForm extends StatelessWidget {
                     activeColor: AppColors.primary,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(5),
                     ),
                   ),
                 ),
               ),
               const SizedBox(width: 8),
-              Text('Remember me', style: textTheme.bodyMedium),
+              Text(
+                'Remember me',
+                style: textTheme.bodyMedium?.copyWith(color: Colors.black87),
+              ),
               const Spacer(),
               TextButton(
                 onPressed: () {
@@ -140,48 +155,55 @@ class LoginForm extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 26),
+          const SizedBox(height: 28),
           Obx(
             () => SizedBox(
               height: 52,
               child: ElevatedButton(
-                //  onPressed: () => controller.registerShopOwner(),
                 onPressed: controller.isLoading.value ? null : controller.login,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
-                  disabledBackgroundColor: AppColors.primary.withOpacity(0.6),
+                  disabledBackgroundColor: AppColors.primary.withValues(
+                    alpha: 0.6,
+                  ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   elevation: 0,
                 ),
-                child: controller.isLoading.value
-                    ? const SizedBox(
-                        height: 22,
-                        width: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.4,
-                          color: Colors.white,
-                        ),
-                      )
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Sign in',
-                            style: textTheme.titleMedium?.copyWith(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 180),
+                  child: controller.isLoading.value
+                      ? const SizedBox(
+                          key: ValueKey('loading'),
+                          height: 22,
+                          width: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.4,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Row(
+                          key: const ValueKey('label'),
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Sign in',
+                              style: textTheme.titleMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(
+                              Icons.arrow_forward,
+                              size: 18,
                               color: Colors.white,
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          const Icon(
-                            Icons.arrow_forward,
-                            size: 18,
-                            color: AppColors.secondary,
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
+                ),
               ),
             ),
           ),
@@ -196,16 +218,20 @@ class LoginForm extends StatelessWidget {
     Widget? suffix,
   }) {
     final border = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-      borderSide: const BorderSide(color: Color(0xFFDDE1E8)),
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(color: Color(0xFFE1E5EC)),
     );
     return InputDecoration(
       hintText: hint,
       hintStyle: const TextStyle(color: Colors.black38),
-      prefixIcon: Icon(icon, size: 20, color: Colors.black45),
+      prefixIcon: Icon(
+        icon,
+        size: 20,
+        color: AppColors.primary.withValues(alpha: 0.55),
+      ),
       suffixIcon: suffix,
       filled: true,
-      fillColor: const Color(0xFFF7F8FA),
+      fillColor: const Color(0xFFF8F9FB),
       contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
       border: border,
       enabledBorder: border,

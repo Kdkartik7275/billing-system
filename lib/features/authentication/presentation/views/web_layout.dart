@@ -9,7 +9,6 @@ import '../widgets/register_shop_link.dart';
 class LoginWebLayout extends StatelessWidget {
   const LoginWebLayout({super.key});
 
-
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<LoginController>();
@@ -20,7 +19,11 @@ class LoginWebLayout extends StatelessWidget {
         children: [
           Expanded(
             flex: 5,
-            child: _BrandPanel(navy: AppColors.primary, navyDeep: AppColors.darkBackground, amber: AppColors.secondary),
+            child: _BrandPanel(
+              navy: AppColors.primary,
+              navyDeep: AppColors.darkBackground,
+              amber: AppColors.secondary,
+            ),
           ),
           Expanded(
             flex: 4,
@@ -32,14 +35,16 @@ class LoginWebLayout extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Welcome back', style: Theme.of(context).textTheme.headlineMedium),
+                      Text(
+                        'Welcome back',
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
                       const SizedBox(height: 8),
                       Text(
                         'Sign in to manage today\'s sales and stock.',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyLarge
-                            ?.copyWith(color: Colors.black54),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodyLarge?.copyWith(color: Colors.black54),
                       ),
                       const SizedBox(height: 34),
                       LoginForm(controller: controller),
@@ -56,11 +61,16 @@ class LoginWebLayout extends StatelessWidget {
   }
 }
 
-/// The signature element for this screen: a stylised receipt ticket,
-/// grounding the brand panel in what the product actually is (a POS)
-/// rather than a generic gradient hero.
+/// ---------------------------------------------------------------------
+/// Redesigned brand panel
+/// ---------------------------------------------------------------------
+
 class _BrandPanel extends StatelessWidget {
-  const _BrandPanel({required this.navy, required this.navyDeep, required this.amber});
+  const _BrandPanel({
+    required this.navy,
+    required this.navyDeep,
+    required this.amber,
+  });
   final Color navy;
   final Color navyDeep;
   final Color amber;
@@ -75,56 +85,135 @@ class _BrandPanel extends StatelessWidget {
           colors: [navyDeep, navy],
         ),
       ),
-      padding: const EdgeInsets.fromLTRB(56, 56, 56, 56),
       child: Stack(
+        fit: StackFit.expand,
         children: [
+          // Soft glow blobs for depth
           Positioned(
-            right: -60,
-            top: -60,
-            child: _DotGrid(color: Colors.white.withOpacity(0.06)),
+            top: -120,
+            left: -80,
+            child: _GlowBlob(color: amber.withValues(alpha: .18), size: 320),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    height: 42,
-                    width: 42,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.white24),
+          Positioned(
+            bottom: -140,
+            right: -100,
+            child: _GlowBlob(
+              color: Colors.white.withValues(alpha: .06),
+              size: 380,
+            ),
+          ),
+          // Faint grid texture
+          Positioned.fill(
+            child: CustomPaint(painter: _GridPainter(Colors.white.withValues(alpha: .04))),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.fromLTRB(56, 56, 56, 56),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Logo
+                Row(
+                  children: [
+                    Container(
+                      height: 42,
+                      width: 42,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.white24),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.point_of_sale_rounded,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                      ),
                     ),
-                    child: Center(
-                      child: Icon(Icons.point_of_sale_rounded, color: amber, size: 22),
+                    const SizedBox(width: 12),
+                    Text(
+                      'SmartPOS',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.titleLarge?.copyWith(color: Colors.white),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    'SmartPOS',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge
-                        ?.copyWith(color: Colors.white),
-                  ),
-                ],
-              ),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: _ReceiptTicket(amber: amber),
+                  ],
                 ),
-              ),
-              Text(
-                'Every sale, every stock movement, one register.',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(color: Colors.white70, fontWeight: FontWeight.w500),
-              ),
-            ],
+
+                // Headline + feature list
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: amber.withValues(alpha: .14),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: amber.withValues(alpha: .4)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.bolt_rounded, size: 14, color: amber),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Built for busy counters',
+                            style: TextStyle(
+                              color: amber,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: .2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Run your\nentire store\nfrom one screen',
+                      style: Theme.of(context).textTheme.headlineLarge
+                          ?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            height: 1.15,
+                          ),
+                    ),
+                    const SizedBox(height: 28),
+                    _FeatureRow(
+                      icon: Icons.receipt_long_rounded,
+                      label: 'Instant billing & invoices',
+                      amber: amber,
+                    ),
+                    const SizedBox(height: 14),
+                    _FeatureRow(
+                      icon: Icons.inventory_2_rounded,
+                      label: 'Real-time stock tracking',
+                      amber: amber,
+                    ),
+                    const SizedBox(height: 14),
+                    _FeatureRow(
+                      icon: Icons.insights_rounded,
+                      label: 'Sales insights at a glance',
+                      amber: amber,
+                    ),
+                  ],
+                ),
+
+                // Bottom stat strip
+                Row(
+                  children: [
+                    _StatChip(value: '12k+', label: 'Shops onboarded', amber: amber),
+                    const SizedBox(width: 28),
+                    _StatChip(value: '99.9%', label: 'Uptime', amber: amber),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -132,119 +221,114 @@ class _BrandPanel extends StatelessWidget {
   }
 }
 
-class _ReceiptTicket extends StatelessWidget {
-  const _ReceiptTicket({required this.amber});
+class _FeatureRow extends StatelessWidget {
+  const _FeatureRow({
+    required this.icon,
+    required this.label,
+    required this.amber,
+  });
+  final IconData icon;
+  final String label;
   final Color amber;
 
   @override
   Widget build(BuildContext context) {
-    final lineStyle = TextStyle(
-      fontFamily: 'Inter',
-      fontSize: 13,
-      color: Colors.black54,
-      height: 1.6,
-    );
-
-    return Container(
-      width: 260,
-      padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(4),
-        boxShadow: const [
-          BoxShadow(color: Colors.black26, blurRadius: 24, offset: Offset(0, 16)),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'DAILY SUMMARY',
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.2,
-              color: Colors.black87,
-            ),
+    return Row(
+      children: [
+        Container(
+          height: 32,
+          width: 32,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: .08),
+            borderRadius: BorderRadius.circular(9),
           ),
-          const SizedBox(height: 10),
-          Container(height: 1, color: Colors.black12),
-          const SizedBox(height: 12),
-          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            Text('Items sold', style: lineStyle),
-            Text('184', style: lineStyle.copyWith(color: Colors.black87, fontWeight: FontWeight.w600)),
-          ]),
-          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            Text('Low stock alerts', style: lineStyle),
-            Text('3', style: lineStyle.copyWith(color: Colors.black87, fontWeight: FontWeight.w600)),
-          ]),
-          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            Text('Pending bills', style: lineStyle),
-            Text('7', style: lineStyle.copyWith(color: Colors.black87, fontWeight: FontWeight.w600)),
-          ]),
-          const SizedBox(height: 12),
-          Container(height: 1, color: Colors.black12),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'NET SALES',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1,
-                  color: Colors.black87,
-                ),
-              ),
-              Text(
-                '₹42,180',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.primary,
-                ),
-              ),
-            ],
+          child: Icon(icon, size: 16, color: amber),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white70,
+            fontSize: 14.5,
+            fontWeight: FontWeight.w500,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
 
-class _DotGrid extends StatelessWidget {
-  const _DotGrid({required this.color});
-  final Color color;
+class _StatChip extends StatelessWidget {
+  const _StatChip({
+    required this.value,
+    required this.label,
+    required this.amber,
+  });
+  final String value;
+  final String label;
+  final Color amber;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 220,
-      height: 220,
-      child: CustomPaint(painter: _DotGridPainter(color)),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            color: amber,
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: const TextStyle(color: Colors.white54, fontSize: 12),
+        ),
+      ],
     );
   }
 }
 
-class _DotGridPainter extends CustomPainter {
-  _DotGridPainter(this.color);
+class _GlowBlob extends StatelessWidget {
+  const _GlowBlob({required this.color, required this.size});
+  final Color color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: size,
+      width: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          colors: [color, color.withValues(alpha: 0)],
+        ),
+      ),
+    );
+  }
+}
+
+class _GridPainter extends CustomPainter {
+  _GridPainter(this.color);
   final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = color;
-    const spacing = 18.0;
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1;
+    const spacing = 40.0;
+    for (double x = 0; x < size.width; x += spacing) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
     for (double y = 0; y < size.height; y += spacing) {
-      for (double x = 0; x < size.width; x += spacing) {
-        canvas.drawCircle(Offset(x, y), 2, paint);
-      }
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
     }
   }
 
   @override
-  bool shouldRepaint(covariant _DotGridPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _GridPainter oldDelegate) => false;
 }

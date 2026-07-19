@@ -31,18 +31,36 @@ class InventoryDataTable extends StatelessWidget {
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               // ── Header ───────────────────────────────────────
               Obx(
                 () => Padding(
                   padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
-                  child: Text(
-                    'Products (${controller.filteredProducts.length})',
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.2,
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Products (${controller.filteredProducts.length})',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () => controller.refreshProducts(),
+                        borderRadius: BorderRadius.circular(6),
+                        child: Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: Icon(
+                            Icons.refresh_rounded,
+                            size: 18,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -50,63 +68,65 @@ class InventoryDataTable extends StatelessWidget {
               Divider(height: 1, color: Colors.grey.withValues(alpha: 0.12)),
 
               // ── Table Area ──────────────────────────────────
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: SizedBox(
-                    width: constraints.maxWidth < 1200
-                        ? 1200
-                        : constraints.maxWidth,
-                    child: Column(
-                      children: [
-                        // Header Row
-                        const _TableHeader(),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SizedBox(
+                  width: constraints.maxWidth < 1200
+                      ? 1200
+                      : constraints.maxWidth,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Header Row
+                      const _TableHeader(),
 
-                        Divider(
-                          height: 1,
-                          color: Colors.grey.withValues(alpha: 0.1),
-                        ),
+                      Divider(
+                        height: 1,
+                        color: Colors.grey.withValues(alpha: 0.1),
+                      ),
 
-                        // Data Rows
-                        Expanded(
-                          child: Obx(() {
-                            final products = controller.filteredProducts;
+                      // Data Rows
+                      Obx(() {
+                        final products = controller.filteredProducts;
 
-                            if (products.isEmpty) {
-                              return const Center(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.search_off_rounded,
-                                      size: 40,
-                                      color: Colors.grey,
-                                    ),
-                                    SizedBox(height: 10),
-                                    Text(
-                                      'No products found',
-                                      style: TextStyle(color: Colors.grey),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }
-
-                            return ListView.separated(
-                              itemCount: products.length,
-                              separatorBuilder: (_, __) => Divider(
-                                height: 1,
-                                color: Colors.grey.withValues(alpha: 0.08),
-                                indent: 20,
-                                endIndent: 20,
+                        if (products.isEmpty) {
+                          return const SizedBox(
+                            height: 220,
+                            child: Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.search_off_rounded,
+                                    size: 40,
+                                    color: Colors.grey,
+                                  ),
+                                  SizedBox(height: 10),
+                                  Text(
+                                    'No products found',
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                ],
                               ),
-                              itemBuilder: (_, i) =>
-                                  _ProductRow(product: products[i]),
-                            );
-                          }),
-                        ),
-                      ],
-                    ),
+                            ),
+                          );
+                        }
+
+                        return ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: products.length,
+                          separatorBuilder: (_, __) => Divider(
+                            height: 1,
+                            color: Colors.grey.withValues(alpha: 0.08),
+                            indent: 20,
+                            endIndent: 20,
+                          ),
+                          itemBuilder: (_, i) =>
+                              _ProductRow(product: products[i]),
+                        );
+                      }),
+                    ],
                   ),
                 ),
               ),
@@ -170,14 +190,6 @@ class _TableHeader extends StatelessWidget {
           _HeaderCell(
             'Status',
             flex: 2,
-            column: '',
-            controller: controller,
-            sortable: false,
-          ),
-
-          _HeaderCell(
-            'Actions',
-            flex: 1,
             column: '',
             controller: controller,
             sortable: false,
@@ -264,10 +276,6 @@ class _HeaderCell extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// PRODUCT ROW
-// ─────────────────────────────────────────────────────────────
-
 class _ProductRow extends StatelessWidget {
   final InventoryProduct product;
 
@@ -275,8 +283,6 @@ class _ProductRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<InventoryController>();
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
       child: Row(
@@ -400,97 +406,7 @@ class _ProductRow extends StatelessWidget {
 
           // STATUS
           Expanded(flex: 2, child: StockStatusBadge(status: product.status)),
-
-          // ACTIONS
-          Expanded(
-            flex: 1,
-            child: Row(
-              children: [
-                _ActionIcon(
-                  icon: Icons.edit_outlined,
-                  color: Colors.blue.shade400,
-                  onTap: () {},
-                ),
-
-                const SizedBox(width: 6),
-
-                _ActionIcon(
-                  icon: Icons.delete_outline_rounded,
-                  color: Colors.red.shade400,
-                  onTap: () => _confirmDelete(context, controller),
-                ),
-              ],
-            ),
-          ),
         ],
-      ),
-    );
-  }
-
-  void _confirmDelete(BuildContext context, InventoryController controller) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
-          'Delete Product',
-          style: TextStyle(fontWeight: FontWeight.w700),
-        ),
-        content: Text('Remove "${product.name}" from inventory?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-
-          ElevatedButton(
-            onPressed: () {
-              controller.deleteProduct(product.id);
-              Navigator.of(context).pop();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red.shade500,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-// ACTION ICON
-// ─────────────────────────────────────────────────────────────
-
-class _ActionIcon extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _ActionIcon({
-    required this.icon,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(6),
-      child: Container(
-        padding: const EdgeInsets.all(6),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Icon(icon, size: 16, color: color),
       ),
     );
   }

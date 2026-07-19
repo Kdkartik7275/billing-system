@@ -51,7 +51,7 @@ flutter_native_splash:
   image: assets/images/pos.png
   android: true
   ios: true
-  web: false
+  web: true
 
 
 

@@ -19,35 +19,41 @@ class FirebaseConfigModelAdapter extends TypeAdapter<FirebaseConfigModel> {
     return FirebaseConfigModel(
       androidApiKey: fields[0] as String,
       iosApiKey: fields[1] as String,
-      androidAppId: fields[2] as String,
-      iosAppId: fields[3] as String,
-      projectId: fields[4] as String,
-      messagingSenderId: fields[5] as String,
-      storageBucket: fields[6] as String,
-      databaseURL: fields[7] as String?,
+      webApiKey: fields[2] as String,
+      androidAppId: fields[3] as String,
+      iosAppId: fields[4] as String,
+      webAppId: fields[5] as String,
+      projectId: fields[6] as String,
+      messagingSenderId: fields[7] as String,
+      storageBucket: fields[8] as String,
+      authDomain: fields[9] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, FirebaseConfigModel obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.androidApiKey)
       ..writeByte(1)
       ..write(obj.iosApiKey)
       ..writeByte(2)
-      ..write(obj.androidAppId)
+      ..write(obj.webApiKey)
       ..writeByte(3)
-      ..write(obj.iosAppId)
+      ..write(obj.androidAppId)
       ..writeByte(4)
-      ..write(obj.projectId)
+      ..write(obj.iosAppId)
       ..writeByte(5)
-      ..write(obj.messagingSenderId)
+      ..write(obj.webAppId)
       ..writeByte(6)
-      ..write(obj.storageBucket)
+      ..write(obj.projectId)
       ..writeByte(7)
-      ..write(obj.databaseURL);
+      ..write(obj.messagingSenderId)
+      ..writeByte(8)
+      ..write(obj.storageBucket)
+      ..writeByte(9)
+      ..write(obj.authDomain);
   }
 
   @override

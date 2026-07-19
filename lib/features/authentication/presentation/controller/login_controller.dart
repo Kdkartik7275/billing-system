@@ -65,8 +65,7 @@ class LoginController extends GetxController {
                   debugPrint(
                     "✅ User and Shop details fetched successfully. Proceeding to the next step.",
                   );
-                         Get.offAllNamed(AppRoutes.dashboard);
-
+                  Get.offAllNamed(AppRoutes.dashboard);
                 },
               ),
             );
@@ -127,18 +126,18 @@ class LoginController extends GetxController {
         "firebaseConfig": {
           "androidApiKey": "AIzaSyDur5N2OwxLW6Axo3tPwAIad7_Af4Ur_Pw",
           "iosApiKey": "AIzaSyBFDa_I0NqYbhzpr9VGnZ1lurURQXLAeuY",
+          "webApiKey": "AIzaSyCLWuIxPrC175MxJaq-O4zs1sD5fxXHHsU",
 
           "androidAppId": "1:762462200109:android:119d167c728d47e57e73a4",
-
           "iosAppId": "1:762462200109:ios:b8b0e4a3f6aa30f87e73a4",
-
+          "webAppId": "1:762462200109:web:c5d984eb2c32dc017e73a4",
           "projectId": "shopmarket-92dec",
 
           "messagingSenderId": "762462200109",
 
           "storageBucket": "shopmarket-92dec.firebasestorage.app",
 
-          "databaseURL": "",
+          "authDomain": "shopmarket-92dec.firebaseapp.com",
         },
 
         "createdAt": DateTime.now(),

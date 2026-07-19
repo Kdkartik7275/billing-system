@@ -40,23 +40,28 @@ class ShopEntity {
 class FirebaseConfigEntity {
   final String androidApiKey;
   final String iosApiKey;
+  final String webApiKey;
 
   final String androidAppId;
   final String iosAppId;
+  final String webAppId;
 
   final String projectId;
   final String messagingSenderId;
   final String storageBucket;
-  final String? databaseURL;
-
+  final String authDomain;
   const FirebaseConfigEntity({
     required this.androidApiKey,
     required this.iosApiKey,
+    required this.webApiKey,
+
     required this.androidAppId,
     required this.iosAppId,
+    required this.webAppId,
+
     required this.projectId,
     required this.messagingSenderId,
     required this.storageBucket,
-    this.databaseURL,
+    required this.authDomain,
   });
 }

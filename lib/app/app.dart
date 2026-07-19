@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Retail POS',
+      title: 'SmartPOS',
 
       debugShowCheckedModeBanner: false,
 
@@ -25,6 +25,7 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.light,
 
       initialRoute: AppRoutes.splash,
+      unknownRoute: GetPage(name: '/notfound', page: () => const SplashPage()),
 
       getPages: AppPages.pages,
 
@@ -61,9 +62,13 @@ class _SplashPageState extends State<SplashPage> {
     _userController = Get.find<UserController>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      Future.delayed(Duration(milliseconds: 500), () async {
-        await _userController.checkSession();
-      });
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      final route = await _userController.checkSession();
+
+      if (!mounted) return;
+
+      Get.offAllNamed(route);
     });
   }
 
@@ -79,7 +84,11 @@ class _SplashPageState extends State<SplashPage> {
                 const Spacer(),
 
                 // Logo Container
-                Image.asset("assets/images/pos.png", fit: BoxFit.cover),
+                Image.asset(
+                  "assets/images/pos.png",
+                  fit: BoxFit.cover,
+                  height: MediaQuery.of(context).size.height * .5,
+                ),
 
                 const SizedBox(height: 30),
 

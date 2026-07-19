@@ -12,44 +12,54 @@ class FirebaseConfigModel {
   final String iosApiKey;
 
   @HiveField(2)
-  final String androidAppId;
+  final String webApiKey;
 
   @HiveField(3)
-  final String iosAppId;
+  final String androidAppId;
 
   @HiveField(4)
-  final String projectId;
+  final String iosAppId;
 
   @HiveField(5)
-  final String messagingSenderId;
+  final String webAppId;
 
   @HiveField(6)
-  final String storageBucket;
+  final String projectId;
 
   @HiveField(7)
-  final String? databaseURL;
+  final String messagingSenderId;
+
+  @HiveField(8)
+  final String storageBucket;
+
+  @HiveField(9)
+  final String authDomain;
 
   const FirebaseConfigModel({
     required this.androidApiKey,
     required this.iosApiKey,
+    required this.webApiKey,
     required this.androidAppId,
     required this.iosAppId,
+    required this.webAppId,
     required this.projectId,
     required this.messagingSenderId,
     required this.storageBucket,
-    this.databaseURL,
+    required this.authDomain,
   });
 
   factory FirebaseConfigModel.fromJson(Map<String, dynamic> json) {
     return FirebaseConfigModel(
       androidApiKey: json['androidApiKey'] ?? '',
       iosApiKey: json['iosApiKey'] ?? '',
+      webApiKey: json['webApiKey'] ?? '',
       androidAppId: json['androidAppId'] ?? '',
       iosAppId: json['iosAppId'] ?? '',
+      webAppId: json['webAppId'] ?? '',
       projectId: json['projectId'] ?? '',
       messagingSenderId: json['messagingSenderId'] ?? '',
       storageBucket: json['storageBucket'] ?? '',
-      databaseURL: json['databaseURL'],
+      authDomain: json['authDomain'] ?? '',
     );
   }
 
@@ -57,12 +67,14 @@ class FirebaseConfigModel {
     return {
       'androidApiKey': androidApiKey,
       'iosApiKey': iosApiKey,
+      'webApiKey': webApiKey,
       'androidAppId': androidAppId,
       'iosAppId': iosAppId,
+      'webAppId': webAppId,
       'projectId': projectId,
       'messagingSenderId': messagingSenderId,
       'storageBucket': storageBucket,
-      'databaseURL': databaseURL,
+      'authDomain': authDomain,
     };
   }
 
@@ -70,12 +82,14 @@ class FirebaseConfigModel {
     return FirebaseConfigEntity(
       androidApiKey: androidApiKey,
       iosApiKey: iosApiKey,
+      webApiKey: webApiKey,
       androidAppId: androidAppId,
       iosAppId: iosAppId,
+      webAppId: webAppId,
       projectId: projectId,
       messagingSenderId: messagingSenderId,
       storageBucket: storageBucket,
-      databaseURL: databaseURL,
+      authDomain: authDomain,
     );
   }
 
@@ -83,12 +97,18 @@ class FirebaseConfigModel {
     return FirebaseConfigModel(
       androidApiKey: entity.androidApiKey,
       iosApiKey: entity.iosApiKey,
+      webApiKey: entity.webApiKey,
       androidAppId: entity.androidAppId,
       iosAppId: entity.iosAppId,
+      webAppId: entity.webAppId,
       projectId: entity.projectId,
       messagingSenderId: entity.messagingSenderId,
       storageBucket: entity.storageBucket,
-      databaseURL: entity.databaseURL,
+      authDomain: entity.authDomain,
     );
   }
 }
+
+
+
+

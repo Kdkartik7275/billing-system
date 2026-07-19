@@ -35,6 +35,7 @@ class ProductGrid extends StatelessWidget {
       }
 
       return GridView.builder(
+        cacheExtent: 800,
         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: maxCardExtent,
           mainAxisExtent: cardHeight,
@@ -44,14 +45,7 @@ class ProductGrid extends StatelessWidget {
         itemCount: products.length,
         itemBuilder: (_, i) {
           final product = products[i];
-          return Obx(
-            () => ProductCard(
-              product: product,
-              qty: controller.cartQty(product.id),
-              onAdd: () => controller.addToCart(product),
-              onRemove: () => controller.removeFromCart(product.id),
-            ),
-          );
+          return ProductCard(product: product);
         },
       );
     });

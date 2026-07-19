@@ -41,95 +41,71 @@ class _InventoryFilterBarState extends State<InventoryFilterBar> {
     super.dispose();
   }
 
+  void _openScanner() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          child: RepaintBoundary(
+            child: Container(
+              height: 200,
+              width: 200,
+              alignment: Alignment.center,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: MobileScanner(
+                  controller: _scannerController,
+                  onDetect: _onBarcodeDetected,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _onBarcodeDetected(BarcodeCapture capture) async {
+    if (_isProcessing) return;
+
+    final raw = capture.barcodes.firstOrNull?.rawValue;
+    if (raw == null) return;
+
+    _isProcessing = true;
+    final controller = Get.find<InventoryController>();
+    try {
+      await controller.productExist(raw);
+    } finally {
+      _isProcessing = false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<InventoryController>();
 
-    final searchField = _SearchField(
-      textController: _textController,
-      onChanged: controller.updateSearch,
-      onClear: () {
-        _textController.clear();
-        controller.clearSearch();
-      },
-    );
-
-    final categoryDropdown = Obx(
-      () => _CategoryDropdown(
-        value: controller.selectedCategory.value,
-        onChanged: (v) => controller.selectCategory(v ?? 'All'),
+    final searchField = RepaintBoundary(
+      child: _SearchField(
+        textController: _textController,
+        onChanged: controller.updateSearch,
+        onClear: () {
+          _textController.clear();
+          controller.clearSearch();
+        },
       ),
     );
 
-    final actionButtons = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        AddProductButton(),
-        const SizedBox(width: 8),
-        SizedBox(
-          height: 46,
-          child: ElevatedButton.icon(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return Dialog(
-                    child: Container(
-                      height: 200,
-                      width: 200,
-
-                      alignment: Alignment.center,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: MobileScanner(
-                          controller: _scannerController,
-                          onDetect: (capture) async {
-                            if (_isProcessing) return;
-
-                            final raw = capture.barcodes.firstOrNull?.rawValue;
-                            if (raw == null) return;
-
-                            _isProcessing = true;
-
-                            try {
-                            await  controller.productExist(raw);
-                            } finally {
-                              _isProcessing = false;
-                            }
-                          },
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
-            icon: const Icon(
-              Icons.qr_code_2,
-              size: 20,
-              color: AppColors.primary,
-            ),
-            label: const Text(
-              'SCAN',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.1,
-              ),
-            ),
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              backgroundColor: Colors.white,
-              foregroundColor: AppColors.primary,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppRadius.sm),
-                side: BorderSide(color: AppColors.primary, width: .8),
-              ),
-            ),
-          ),
+    final categoryDropdown = RepaintBoundary(
+      child: Obx(
+        () => _CategoryDropdown(
+          value: controller.selectedCategory.value,
+          onChanged: (v) => controller.selectCategory(v ?? 'All'),
         ),
-      ],
+      ),
+    );
+
+    final actionButtons = RepaintBoundary(
+      child: _ActionButtons(onScanTap: _openScanner),
     );
 
     if (widget.compact) {
@@ -162,6 +138,56 @@ class _InventoryFilterBarState extends State<InventoryFilterBar> {
   }
 }
 
+// ─── Action buttons (static besides the onTap callback) ───────────────────
+
+class _ActionButtons extends StatelessWidget {
+  final VoidCallback onScanTap;
+
+  const _ActionButtons({required this.onScanTap});
+
+  static final ButtonStyle _scanButtonStyle = ElevatedButton.styleFrom(
+    elevation: 0,
+    backgroundColor: Colors.white,
+    foregroundColor: AppColors.primary,
+    padding: const EdgeInsets.symmetric(horizontal: 20),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(AppRadius.sm),
+      side: const BorderSide(color: AppColors.primary, width: .8),
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const AddProductButton(),
+        const SizedBox(width: 8),
+        SizedBox(
+          height: 46,
+          child: ElevatedButton.icon(
+            onPressed: onScanTap,
+            icon: const Icon(
+              Icons.qr_code_2,
+              size: 20,
+              color: AppColors.primary,
+            ),
+            label: const Text(
+              'SCAN',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.1,
+              ),
+            ),
+            style: _scanButtonStyle,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 // ─── Search field ─────────────────────────────────────────────────────────────
 
 class _SearchField extends StatelessWidget {
@@ -174,6 +200,16 @@ class _SearchField extends StatelessWidget {
     required this.onChanged,
     required this.onClear,
   });
+
+  static final OutlineInputBorder _border = OutlineInputBorder(
+    borderRadius: BorderRadius.circular(AppRadius.sm),
+    borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.4)),
+  );
+
+  static final OutlineInputBorder _focusedBorder = OutlineInputBorder(
+    borderRadius: BorderRadius.circular(AppRadius.sm),
+    borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.6)),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -209,20 +245,9 @@ class _SearchField extends StatelessWidget {
                   )
                 : const SizedBox.shrink(),
           ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppRadius.sm),
-            borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.4)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppRadius.sm),
-            borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.4)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppRadius.sm),
-            borderSide: BorderSide(
-              color: AppColors.primary.withValues(alpha: 0.6),
-            ),
-          ),
+          border: _border,
+          enabledBorder: _border,
+          focusedBorder: _focusedBorder,
         ),
       ),
     );
@@ -237,47 +262,46 @@ class _CategoryDropdown extends StatelessWidget {
 
   const _CategoryDropdown({required this.value, required this.onChanged});
 
+  static final BoxDecoration _decoration = BoxDecoration(
+    color: Colors.white,
+    border: Border.all(color: Colors.grey.withValues(alpha: 0.4)),
+    borderRadius: BorderRadius.circular(AppRadius.sm),
+  );
+
+  static const TextStyle _itemStyle = TextStyle(
+    fontSize: 14,
+    color: Colors.black,
+    fontWeight: FontWeight.w500,
+  );
+
+  static final List<DropdownMenuItem<String>> _items = productCategories
+      .map(
+        (cat) => DropdownMenuItem(
+          value: cat,
+          child: Text(cat, style: _itemStyle),
+        ),
+      )
+      .toList();
+
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 46,
       padding: const EdgeInsets.symmetric(horizontal: 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.4)),
-        borderRadius: BorderRadius.circular(AppRadius.sm),
-      ),
+      decoration: _decoration,
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           isExpanded: true,
           value: value,
           dropdownColor: Colors.white,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.black,
-            fontWeight: FontWeight.w500,
-          ),
+          style: _itemStyle,
           icon: Icon(
             Icons.keyboard_arrow_down_rounded,
             color: Colors.grey.shade600,
             size: 20,
           ),
           borderRadius: BorderRadius.circular(12),
-          items: productCategories
-              .map(
-                (cat) => DropdownMenuItem(
-                  value: cat,
-                  child: Text(
-                    cat,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              )
-              .toList(),
+          items: _items,
           onChanged: onChanged,
         ),
       ),

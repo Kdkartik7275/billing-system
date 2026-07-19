@@ -1,128 +1,133 @@
 import 'package:billing_system/core/config/theme/app_colors.dart';
 import 'package:billing_system/core/config/theme/app_radius.dart';
+import 'package:billing_system/features/pos/presentation/controller/cart_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../../data/models/product_model.dart';
 import '../shared/qty_control.dart';
 
 class ProductCard extends StatelessWidget {
   final ProductModel product;
-  final int qty;
-  final VoidCallback onAdd;
-  final VoidCallback onRemove;
 
-  const ProductCard({
-    super.key,
-    required this.product,
-    required this.qty,
-    required this.onAdd,
-    required this.onRemove,
-  });
+  const ProductCard({super.key, required this.product});
 
   @override
   Widget build(BuildContext context) {
-    final isInCart = qty > 0;
+    final controller = Get.find<CartController>();
     final inStock = product.stock > 0;
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(
-          color: isInCart
-              ? AppColors.primary.withValues(alpha: 0.5)
-              : Colors.grey.withValues(alpha: 0.12),
-          width: isInCart ? 1.5 : 1,
-        ),
-        boxShadow: [
-          BoxShadow(
+    return Obx(() {
+      final qty = controller.cartQty(product.id);
+      final isInCart = qty > 0;
+
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(
             color: isInCart
-                ? AppColors.primary.withValues(alpha: 0.08)
-                : Colors.black.withValues(alpha: 0.05),
-            blurRadius: isInCart ? 12 : 8,
-            offset: const Offset(0, 3),
+                ? AppColors.primary.withValues(alpha: 0.5)
+                : Colors.grey.withValues(alpha: 0.12),
+            width: isInCart ? 1.5 : 1,
           ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: inStock ? onAdd : null,
-            splashColor: AppColors.primary.withValues(alpha: 0.06),
-            highlightColor: AppColors.primary.withValues(alpha: 0.03),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ── Image ────────────────────────────────────────
-                _ProductImage(
-                  imageUrl: product.imageUrl,
-                  isInCart: isInCart,
-                  qty: qty,
-                ),
+          boxShadow: [
+            BoxShadow(
+              color: isInCart
+                  ? AppColors.primary.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: 0.05),
+              blurRadius: isInCart ? 12 : 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: inStock ? () => controller.addToCart(product) : null,
+              splashColor: AppColors.primary.withValues(alpha: 0.06),
+              highlightColor: AppColors.primary.withValues(alpha: 0.03),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── Image ────────────────────────────────────────
+                  _ProductImage(
+                    imageUrl: product.imageUrl,
+                    isInCart: isInCart,
+                    qty: qty,
+                  ),
 
-                // ── Info ─────────────────────────────────────────
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(10, 9, 10, 10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          product.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            height: 1.35,
-                            color: Colors.grey.shade900,
+                  // ── Info ─────────────────────────────────────────
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(10, 9, 10, 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            product.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              height: 1.35,
+                              color: Colors.grey.shade900,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          product.category,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey.shade800,
-                            fontWeight: FontWeight.w600 
+                          const SizedBox(height: 3),
+                          Text(
+                            product.category,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade800,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        const Spacer(),
+                          const Spacer(),
 
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: _StockBadge(stock: product.stock)),
-                        const SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: _StockBadge(stock: product.stock),
+                          ),
+                          const SizedBox(height: 8),
 
-                        // ── Add / Qty ───────────────────────────
-                        inStock
-                            ? (qty == 0
-                                  ? _AddButton(onAdd: onAdd)
-                                  : QtyControl(
-                                      qty: qty,
-                                      onAdd: onAdd,
-                                      onRemove: onRemove,
-                                    ))
-                            : Center(
-                                child: Text(
-                                  'Out of Stock',
-                                  textAlign: TextAlign.center,
-                                  style: Theme.of(context).textTheme.bodyMedium!
-                                      .copyWith(color: Colors.red),
+                          // ── Add / Qty ───────────────────────────
+                          inStock
+                              ? (qty == 0
+                                    ? _AddButton(
+                                        onAdd: () =>
+                                            controller.addToCart(product),
+                                      )
+                                    : QtyControl(
+                                        qty: qty,
+                                        onAdd: () =>
+                                            controller.addToCart(product),
+                                        onRemove: () => controller
+                                            .removeFromCart(product.id),
+                                      ))
+                              : Center(
+                                  child: Text(
+                                    'Out of Stock',
+                                    textAlign: TextAlign.center,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium!
+                                        .copyWith(color: Colors.red),
+                                  ),
                                 ),
-                              ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 }
 

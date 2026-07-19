@@ -15,108 +15,120 @@ class CartPanel extends StatelessWidget {
     final controller = Get.find<CartController>();
     final tt = Theme.of(context).textTheme;
 
-    return Column(
-      children: [
-        Obx(
-          () => Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-            child: Row(
-              children: [
-                Text(
-                  'Cart (${controller.cartItems.length} '
-                  '${controller.cartItems.length == 1 ? 'item' : 'items'})',
-                  style: tt.titleSmall!,
-                ),
-                const Spacer(),
-                if (controller.cartItems.isNotEmpty)
-                  TextButton(
-                    onPressed: controller.clearCart,
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
+    return RepaintBoundary(
+      child: Column(
+        children: [
+          Obx(() {
+            final itemCount = controller.cartItems.length;
+
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+              child: Row(
+                children: [
+                  Text(
+                    'Cart ($itemCount ${itemCount == 1 ? 'item' : 'items'})',
+                    style: tt.titleSmall,
+                  ),
+                  const Spacer(),
+                  if (itemCount > 0)
+                    TextButton(
+                      onPressed: controller.clearCart,
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        minimumSize: Size.zero,
                       ),
-                      minimumSize: Size.zero,
-                    ),
-                    child: Text(
-                      'Clear all',
-                      style: tt.titleMedium!.copyWith(color: Colors.redAccent),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-        Divider(height: 1, color: Colors.grey.withValues(alpha: 0.2)),
-
-        // ── Item list or empty state ─────────────────────────────
-        Expanded(
-          child: Obx(
-            () => controller.cartItems.isEmpty
-                ? const _CartEmptyState()
-                : ListView.separated(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    itemCount: controller.cartItems.length,
-                    separatorBuilder: (_, __) => Divider(
-                      height: 1,
-                      color: Colors.grey.withValues(alpha: 0.15),
-                    ),
-                    itemBuilder: (_, i) {
-                      final item = controller.cartItems[i];
-                      return CartItemTile(item: item);
-                    },
-                  ),
-          ),
-        ),
-
-        // ── Summary + checkout ───────────────────────────────────
-        Obx(
-          () => controller.cartItems.isNotEmpty
-              ? Column(
-                  children: [
-                    Divider(
-                      height: 1,
-                      color: Colors.grey.withValues(alpha: 0.2),
-                    ),
-                    CartSummary(
-                      subtotal: controller.subtotal,
-                      tax: controller.tax,
-                      grandTotal: controller.grandTotal,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: 48,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Get.back();
-                            PaymentDialog.show();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            elevation: 0,
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(AppRadius.sm),
-                            ),
-                          ),
-                          child: const Text(
-                            'Proceed to Payment',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
+                      child: Text(
+                        'Clear all',
+                        style: tt.titleMedium?.copyWith(
+                          color: Colors.redAccent,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 8),
-                  ],
-                )
-              : const SizedBox.shrink(),
-        ),
-      ],
+                ],
+              ),
+            );
+          }),
+
+          Divider(height: 1, color: Colors.grey.withValues(alpha: 0.2)),
+
+          /// Cart Items
+          Expanded(
+            child: Obx(() {
+              final items = controller.cartItems;
+
+              if (items.isEmpty) {
+                return const _CartEmptyState();
+              }
+
+              return ListView.separated(
+                cacheExtent: 800,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                itemCount: items.length,
+                separatorBuilder: (_, _) => Divider(
+                  height: 1,
+                  color: Colors.grey.withValues(alpha: 0.15),
+                ),
+                itemBuilder: (_, index) {
+                  return CartItemTile(item: items[index]);
+                },
+              );
+            }),
+          ),
+
+          /// Footer
+          Obx(() {
+            if (controller.cartItems.isEmpty) {
+              return const SizedBox.shrink();
+            }
+
+            return Column(
+              children: [
+                Divider(height: 1, color: Colors.grey.withValues(alpha: 0.2)),
+
+                CartSummary(
+                  subtotal: controller.subtotal,
+                  tax: controller.tax,
+                  grandTotal: controller.grandTotal,
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Get.back();
+                        PaymentDialog.show();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.sm),
+                        ),
+                      ),
+                      child: const Text(
+                        'Proceed to Payment',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+              ],
+            );
+          }),
+        ],
+      ),
     );
   }
 }
@@ -127,31 +139,33 @@ class _CartEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.shopping_bag_outlined,
-            size: 52,
-            color: Colors.grey.shade300,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Cart is empty',
-            style: Theme.of(  context).textTheme.titleMedium!.copyWith(
-                  color: Colors.grey.shade500,
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Add products to start billing',
-            style: Theme.of(  context).textTheme.titleSmall!.copyWith(
-              color: Colors.grey.shade500,
-              fontWeight: FontWeight.w400,
+      child: RepaintBoundary(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.shopping_bag_outlined,
+              size: 52,
+              color: Colors.grey.shade300,
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            Text(
+              'Cart is empty',
+              style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                color: Colors.grey.shade500,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Add products to start billing',
+              style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                color: Colors.grey.shade500,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

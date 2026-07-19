@@ -24,7 +24,7 @@ class PosWebLayout extends StatelessWidget {
                 SizedBox(height: 16),
                 CategoryTabs(),
                 SizedBox(height: 16),
-                Expanded(child: ProductGrid()),
+                Expanded(child: RepaintBoundary(child: ProductGrid())),
               ],
             ),
           ),
@@ -37,11 +37,9 @@ class PosWebLayout extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(
-                color: Colors.grey.withValues(alpha: 0.3),
-              ),
+              border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
             ),
-            child: const CartPanel(),
+            child: RepaintBoundary(child: const CartPanel()),
           ),
         ],
       ),

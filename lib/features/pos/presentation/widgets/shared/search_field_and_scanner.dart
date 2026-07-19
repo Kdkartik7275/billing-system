@@ -5,14 +5,32 @@ import 'package:billing_system/features/pos/presentation/pages/barcode_scanner_p
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class SearchFieldAndScanner extends StatelessWidget {
+class SearchFieldAndScanner extends StatefulWidget {
   const SearchFieldAndScanner({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.find<CartController>();
-    final textController = TextEditingController();
+  State<SearchFieldAndScanner> createState() => _SearchFieldAndScannerState();
+}
 
+class _SearchFieldAndScannerState extends State<SearchFieldAndScanner> {
+  late CartController controller;
+  late TextEditingController textController;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.find<CartController>();
+    textController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    textController.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       children: [
         Expanded(

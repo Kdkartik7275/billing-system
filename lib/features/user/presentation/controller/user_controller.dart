@@ -1,8 +1,6 @@
 import 'package:billing_system/core/config/routes/app_routes.dart';
 import 'package:billing_system/core/di/init_dependencies.dart';
 import 'package:billing_system/core/firebase/shop_firebase_service.dart';
-import 'package:billing_system/features/authentication/presentation/views/login_page.dart';
-import 'package:billing_system/features/inventory/domain/usecases/get_products_usecase.dart';
 import 'package:billing_system/features/user/data/models/shop_model.dart';
 import 'package:billing_system/features/user/data/models/user_model.dart';
 import 'package:billing_system/features/user/domain/entity/shop_entity.dart';
@@ -120,19 +118,19 @@ class UserController extends GetxController {
       debugPrint(stackTrace.toString());
     }
 
-    final productsResult = await sl<GetProductsUsecase>().call();
-    productsResult.fold(
-      (failure) {
-        debugPrint('Error fetching products: $failure');
-        errorMessage.value =
-            'We couldn\'t load your products. Please try again.';
-        isLoading.value = false;
-        return false;
-      },
-      (fetchedProducts) {
-        debugPrint('Fetched products: ${fetchedProducts.length}');
-      },
-    );
+    // final productsResult = await sl<GetProductsUsecase>().call();
+    // productsResult.fold(
+    //   (failure) {
+    //     debugPrint('Error fetching products: $failure');
+    //     errorMessage.value =
+    //         'We couldn\'t load your products. Please try again.';
+    //     isLoading.value = false;
+    //     return false;
+    //   },
+    //   (fetchedProducts) {
+    //     debugPrint('Fetched products: ${fetchedProducts.length}');
+    //   },
+    // );
     statusMessage.value = 'All set!';
     isLoading.value = false;
 

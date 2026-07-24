@@ -1,82 +1,75 @@
-import 'package:billing_system/core/config/theme/app_colors.dart';
-import 'package:billing_system/core/config/theme/app_radius.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/config/theme/app_radius.dart';
+import '../../../../core/config/theme/app_spacing.dart';
+
+/// A single statistic tile used in the inventory dashboard header row.
 class InventoryStatCard extends StatelessWidget {
   final String title;
   final String value;
   final IconData icon;
-  final Color? valueColor;
-  final Color? iconBgColor;
+  final Color? accent;
 
   const InventoryStatCard({
     super.key,
     required this.title,
     required this.value,
     required this.icon,
-    this.valueColor,
-    this.iconBgColor,
+    this.accent,
   });
 
   @override
   Widget build(BuildContext context) {
-    final color = valueColor ?? Colors.grey.shade900;
-    final bgColor = iconBgColor ?? AppColors.primary.withValues(alpha: 0.08);
-    final iconColor = valueColor ?? AppColors.primary;
+    final colorScheme = Theme.of(context).colorScheme;
+    final effectiveAccent = accent ?? colorScheme.primary;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+      padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 16,
+            spreadRadius: 2,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Icon box
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: bgColor,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: iconColor, size: 22),
-          ),
-          const SizedBox(width: 14),
-          // Text
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   title,
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    color: Colors.grey.shade500,
-                    fontWeight: FontWeight.w500,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.sm),
                 Text(
                   value,
-                  style: TextStyle(
-                    fontSize: 22,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w800,
-                    color: color,
-                    letterSpacing: -0.5,
+                    letterSpacing: -0.3,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.sm),
+            decoration: BoxDecoration(
+              color: effectiveAccent.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
+            ),
+            child: Icon(icon, color: effectiveAccent, size: 20),
           ),
         ],
       ),

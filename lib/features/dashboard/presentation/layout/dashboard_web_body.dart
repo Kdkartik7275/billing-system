@@ -5,7 +5,6 @@ import 'package:billing_system/features/dashboard/presentation/widgets/chart_car
 import 'package:billing_system/features/dashboard/presentation/widgets/low_stocks.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/recent_transactions.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/sales_line_chart.dart';
-import 'package:billing_system/features/pos/presentation/controller/bills_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -16,7 +15,7 @@ const kTransactions = [
   TransactionData('INV-2026-004', 'Amit Verma', '₹1,240', false),
 ];
 
-class DashboardBody extends GetView<BillsController> {
+class DashboardBody extends StatelessWidget {
   const DashboardBody({super.key});
 
   @override
@@ -30,18 +29,17 @@ class DashboardBody extends GetView<BillsController> {
           const Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(child: SalesLineChart()),
-              SizedBox(width: 16),
-              CategoryPieChart(width: 400, height: 300),
+              // Expanded(child: SalesLineChart()),
+              // SizedBox(width: 16),
+          //   CategoryPieChart(width: 400, height: 300),
             ],
           ),
           SizedBox(height: 22),
           Row(
             children: [
-              Expanded(child: RecentTransactions()),
-              const SizedBox(width: 16),
-              Expanded(child: LowStockAlerts()),
-              
+              // Expanded(child: RecentTransactions()),
+              // const SizedBox(width: 16),
+              // Expanded(child: LowStockAlerts()),
             ],
           ),
         ],
@@ -50,7 +48,7 @@ class DashboardBody extends GetView<BillsController> {
   }
 }
 
-class _WebSummaryCards extends GetView<BillsController> {
+class _WebSummaryCards extends StatelessWidget {
   const _WebSummaryCards();
 
   @override
@@ -74,31 +72,29 @@ class _WebSummaryCards extends GetView<BillsController> {
                 [
                       DashboardCardModel(
                         title: "Today's Sales",
-                        value: "₹${controller.todaySales.toStringAsFixed(0)}",
-                        growth: "${controller.todayOrderCount} orders today",
+                        value: "₹${0}",
+                        growth: "${0} orders today",
                         icon: Icons.attach_money,
                         iconColor: Colors.green,
                       ),
                       DashboardCardModel(
                         title: "Total Orders",
-                        value: "${controller.todayOrderCount}",
+                        value: "${0}",
                         growth: "bills today",
                         icon: Icons.shopping_cart_outlined,
                         iconColor: Colors.blue,
                       ),
                       DashboardCardModel(
                         title: "Revenue",
-                        value: "₹${controller.todayRevenue.toStringAsFixed(0)}",
+                        value: "₹${0}",
                         growth: "excl. tax",
                         icon: Icons.show_chart,
                         iconColor: Colors.deepPurple,
                       ),
                       DashboardCardModel(
                         title: "Pending Sync",
-                        value: "${controller.pendingSyncCount}",
-                        growth: controller.pendingSyncCount == 0
-                            ? "No pending bills"
-                            : "${controller.pendingSyncCount} need sync",
+                        value: "${0}",
+                        growth: "No pending bills",
                         icon: Icons.pending_actions_outlined,
                         iconColor: Colors.orange,
                       ),

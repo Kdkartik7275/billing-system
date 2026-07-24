@@ -8,8 +8,8 @@ class DependencyInjection {
     _initUser();
     _initFirebase();
     await _initHiveBoxes();
-    _initInventory();
-    _initPOSBilling();
+    // _initInventory();
+    // _initPOSBilling();
   }
 }
 
@@ -29,19 +29,19 @@ void _initFirebase() {
 
 // ----------------------- CORE -----------------------
 Future<void> _initHiveBoxes() async {
-  final productsBox = await Hive.openBox<InventoryProductModel>('products');
+  // final productsBox = await Hive.openBox<InventoryProductModel>('products');
 
-  sl.registerLazySingleton<Box<InventoryProductModel>>(() => productsBox);
-  final billsBox = await Hive.openBox<BillModel>('bills');
-  sl.registerLazySingleton<Box<BillModel>>(() => billsBox);
-  final stockTransactionBox = await Hive.openBox<StockTransactionModel>(
-    'stock_transactions',
-  );
-  sl.registerLazySingleton<Box<StockTransactionModel>>(
-    () => stockTransactionBox,
-  );
-  final stockBatchesBox = await Hive.openBox<StockBatchModel>('stock_batches');
-  sl.registerLazySingleton<Box<StockBatchModel>>(() => stockBatchesBox);
+  // sl.registerLazySingleton<Box<InventoryProductModel>>(() => productsBox);
+  // final billsBox = await Hive.openBox<BillModel>('bills');
+  // sl.registerLazySingleton<Box<BillModel>>(() => billsBox);
+  // final stockTransactionBox = await Hive.openBox<StockTransactionModel>(
+  //   'stock_transactions',
+  // );
+  // sl.registerLazySingleton<Box<StockTransactionModel>>(
+  //   () => stockTransactionBox,
+  // );
+  // final stockBatchesBox = await Hive.openBox<StockBatchModel>('stock_batches');
+  // sl.registerLazySingleton<Box<StockBatchModel>>(() => stockBatchesBox);
 
   final userBox = await Hive.openBox<UserModel>('current_user');
   sl.registerLazySingleton<Box<UserModel>>(() => userBox);
@@ -97,65 +97,65 @@ void _initUser() {
 }
 
 // ----------------------- INVENTORY -----------------------
-void _initInventory() {
-  // DATASOURCE
-  sl.registerLazySingleton<InventoryRepository>(
-    () => InventoryRepositoryImpl(
-      remoteDataSource: sl<InventoryRemoteDataSource>(),
-      localDataSource: sl<InventoryLocalDataSource>(),
-      connectionChecker: sl<ConnectionChecker>(),
-    ),
-  );
+// void _initInventory() {
+//   // DATASOURCE
+//   sl.registerLazySingleton<InventoryRepository>(
+//     () => InventoryRepositoryImpl(
+//       remoteDataSource: sl<InventoryRemoteDataSource>(),
+//       localDataSource: sl<InventoryLocalDataSource>(),
+//       connectionChecker: sl<ConnectionChecker>(),
+//     ),
+//   );
 
-  // REPOSITORY
-  sl.registerLazySingleton<InventoryRemoteDataSource>(
-    () => InventoryRemoteDataSourceImpl(
-      firestore: sl<ShopFirebaseService>().firestore,
-    ),
-  );
-  sl.registerLazySingleton<InventoryLocalDataSource>(
-    () => InventoryLocalDataSourceImpl(
-      box: sl(),
-      stockTransactionBox: sl(),
-      stockBatchBox: sl(),
-    ),
-  );
-  // USECASES
-  sl.registerLazySingleton(() => AddProductUsecase(sl()));
-  sl.registerLazySingleton(() => GetProductsUsecase(sl()));
-  sl.registerLazySingleton(() => RefreshProductsUsecase(sl()));
-  sl.registerLazySingleton(() => UpdateProductUsecase(repository: sl()));
-  sl.registerLazySingleton(() => SyncProductsUsecase(repository: sl()));
-  sl.registerLazySingleton(() => GetMovementLogs(repository: sl()));
-  sl.registerLazySingleton(() => GetStockBatchesUseCase(repository: sl()));
-  sl.registerLazySingleton(() => PurhcaseStockUseCase(repository: sl()));
-  sl.registerLazySingleton(() => SellStockUseCase(repository: sl()));
-  sl.registerLazySingleton(() => GetProductsByids(repository: sl()));
-}
+//   // REPOSITORY
+//   sl.registerLazySingleton<InventoryRemoteDataSource>(
+//     () => InventoryRemoteDataSourceImpl(
+//       firestore: sl<ShopFirebaseService>().firestore,
+//     ),
+//   );
+//   sl.registerLazySingleton<InventoryLocalDataSource>(
+//     () => InventoryLocalDataSourceImpl(
+//       box: sl(),
+//       stockTransactionBox: sl(),
+//       stockBatchBox: sl(),
+//     ),
+//   );
+//   // USECASES
+//   sl.registerLazySingleton(() => AddProductUsecase(sl()));
+//   sl.registerLazySingleton(() => GetProductsUsecase(sl()));
+//   sl.registerLazySingleton(() => RefreshProductsUsecase(sl()));
+//   sl.registerLazySingleton(() => UpdateProductUsecase(repository: sl()));
+//   sl.registerLazySingleton(() => SyncProductsUsecase(repository: sl()));
+//   sl.registerLazySingleton(() => GetMovementLogs(repository: sl()));
+//   sl.registerLazySingleton(() => GetStockBatchesUseCase(repository: sl()));
+//   sl.registerLazySingleton(() => PurhcaseStockUseCase(repository: sl()));
+//   sl.registerLazySingleton(() => SellStockUseCase(repository: sl()));
+//   sl.registerLazySingleton(() => GetProductsByids(repository: sl()));
+// }
 
-void _initPOSBilling() {
-  // DATASOURCE
-  sl.registerLazySingleton<BillingRepository>(
-    () => BillRepositoryImpl(
-      remoteDataSource: sl<BillRemoteDataSource>(),
-      localDataSource: sl<BillLocalDataSource>(),
-      connectionChecker: sl<ConnectionChecker>(),
-    ),
-  );
+// void _initPOSBilling() {
+//   // DATASOURCE
+//   sl.registerLazySingleton<BillingRepository>(
+//     () => BillRepositoryImpl(
+//       remoteDataSource: sl<BillRemoteDataSource>(),
+//       localDataSource: sl<BillLocalDataSource>(),
+//       connectionChecker: sl<ConnectionChecker>(),
+//     ),
+//   );
 
-  // REPOSITORY
-  sl.registerLazySingleton<BillRemoteDataSource>(
-    () => BillRemoteDataSourceImpl(
-      firestore: sl<ShopFirebaseService>().firestore,
-    ),
-  );
-  sl.registerLazySingleton<BillLocalDataSource>(
-    () => BillLocalDataSourceImpl(box: sl()),
-  );
-  // USECASES
-  sl.registerLazySingleton(() => SaveBill(sl()));
-  sl.registerLazySingleton(() => GetBillsUsecase(repository: sl()));
-  sl.registerLazySingleton(() => SyncPendingBillsUsecase(repository: sl()));
-  sl.registerLazySingleton(() => GetLastSevenDaysSales(repository: sl()));
-  sl.registerLazySingleton(() => GetPendingBillsUseCase(repository: sl()));
-}
+//   // REPOSITORY
+//   sl.registerLazySingleton<BillRemoteDataSource>(
+//     () => BillRemoteDataSourceImpl(
+//       firestore: sl<ShopFirebaseService>().firestore,
+//     ),
+//   );
+//   sl.registerLazySingleton<BillLocalDataSource>(
+//     () => BillLocalDataSourceImpl(box: sl()),
+//   );
+//   // USECASES
+//   sl.registerLazySingleton(() => SaveBill(sl()));
+//   sl.registerLazySingleton(() => GetBillsUsecase(repository: sl()));
+//   sl.registerLazySingleton(() => SyncPendingBillsUsecase(repository: sl()));
+//   sl.registerLazySingleton(() => GetLastSevenDaysSales(repository: sl()));
+//   sl.registerLazySingleton(() => GetPendingBillsUseCase(repository: sl()));
+// }

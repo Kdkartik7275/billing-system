@@ -1,15 +1,28 @@
-import 'package:billing_system/core/config/constants/typedefs.dart';
-import 'package:billing_system/core/usecases/usecases.dart';
-import 'package:billing_system/features/inventory/domain/entity/inventory_product_entity.dart';
-import 'package:billing_system/features/inventory/domain/repository/inventory_repository.dart';
+import '../entities/product_entity.dart';
+import '../repositories/product_repository.dart';
+import 'usecase.dart';
 
-class AddProductUsecase implements UseCaseWithParams<void, InventoryProduct> {
-  final InventoryRepository repository;
+class AddProductUseCase implements UseCase<ProductEntity, ProductEntity> {
+  final ProductRepository repository;
 
-  AddProductUsecase(this.repository);
+  const AddProductUseCase(this.repository);
 
   @override
-  ResultFuture<void> call(InventoryProduct params) async {
+  Future<ProductEntity> call(ProductEntity params) async {
+    final existingByBarcode = await repository.getProductByBarcode(
+      params.barcode,
+    );
+    if (existingByBarcode != null) {
+      throw StateError(
+        'A product with barcode "${params.barcode}" already exists.',
+      );
+    }
+
+    final existingBySku = await repository.getProductBySku(params.sku);
+    if (existingBySku != null) {
+      throw StateError('A product with SKU "${params.sku}" already exists.');
+    }
+
     return repository.addProduct(params);
   }
 }

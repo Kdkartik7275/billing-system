@@ -2,9 +2,8 @@ import 'package:billing_system/core/config/theme/app_colors.dart';
 import 'package:billing_system/features/dashboard/presentation/controller/dashboard_shell_controller.dart';
 import 'package:billing_system/features/dashboard/presentation/layout/dashboard_tablet_body.dart';
 import 'package:billing_system/features/dashboard/presentation/models/dashboard_menu.dart';
-import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
 import 'package:billing_system/features/inventory/presentation/views/inventory_page.dart';
-import 'package:billing_system/features/pos/presentation/pages/pos_biiling_page.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -13,7 +12,7 @@ class DashboardTabletLayout extends StatefulWidget {
 
   static const Map<DashboardMenu, Widget> _pages = {
     DashboardMenu.dashboard: TabletDashboardBody(),
-    DashboardMenu.pos: POSBillingPage(),
+    DashboardMenu.pos: Center(child: Text('Sales')),
     DashboardMenu.inventory: InventoryPage(),
     DashboardMenu.sales: Center(child: Text('Sales')),
     DashboardMenu.customers: Center(child: Text('Customers')),
@@ -30,12 +29,12 @@ class DashboardTabletLayout extends StatefulWidget {
 class _DashboardTabletLayoutState extends State<DashboardTabletLayout> {
   final controller = Get.find<DashboardShellController>();
 
-  final inventoryController = Get.find<InventoryController>();
-  @override
-  void initState() {
-    super.initState();
-    inventoryController.getProducts();
-  }
+  // final inventoryController = Get.find<InventoryController>();
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   inventoryController.getProducts();
+  // }
 
   @override
   Widget build(BuildContext context) {

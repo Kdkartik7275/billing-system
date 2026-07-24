@@ -3,13 +3,11 @@ import 'package:billing_system/features/dashboard/presentation/widgets/category_
 import 'package:billing_system/features/dashboard/presentation/widgets/chart_card.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/low_stocks.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/sales_line_chart.dart';
-import 'package:billing_system/features/pos/domain/entity/bill_entity.dart';
-import 'package:billing_system/features/pos/presentation/controller/bills_controller.dart';
 import 'package:billing_system/core/config/theme/app_radius.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class TabletDashboardBody extends GetView<BillsController> {
+class TabletDashboardBody extends StatelessWidget {
   const TabletDashboardBody({super.key});
 
   @override
@@ -23,31 +21,30 @@ class TabletDashboardBody extends GetView<BillsController> {
             final cards = [
               DashboardCardModel(
                 title: "Today's Sales",
-                value: "₹${controller.todaySales.toStringAsFixed(0)}",
-                growth: "${controller.todayOrderCount} orders today",
+                value: "₹${0}",
+                growth: "${0} orders today",
                 icon: Icons.attach_money,
                 iconColor: Colors.green,
               ),
               DashboardCardModel(
                 title: "Total Orders",
-                value: "${controller.todayOrderCount}",
+                value: "${0}",
                 growth: "bills today",
                 icon: Icons.shopping_cart_outlined,
                 iconColor: Colors.blue,
               ),
               DashboardCardModel(
                 title: "Revenue",
-                value: "₹${controller.todayRevenue.toStringAsFixed(0)}",
+                value: "₹${0}",
                 growth: "excl. tax",
                 icon: Icons.show_chart,
                 iconColor: Colors.deepPurple,
               ),
               DashboardCardModel(
                 title: "Pending Sync",
-                value: "${controller.pendingSyncCount}",
-                growth: controller.pendingSyncCount == 0
-                    ? "No pending bills"
-                    : "${controller.pendingSyncCount} need sync",
+                value: "${0}",
+                growth:  "No pending bills"
+                    ,
                 icon: Icons.pending_actions_outlined,
                 iconColor: Colors.orange,
               ),
@@ -71,15 +68,15 @@ class TabletDashboardBody extends GetView<BillsController> {
             );
           }),
           const SizedBox(height: 12),
-          const SalesLineChart(height: 260),
-          const SizedBox(height: 12),
+          // const SalesLineChart(height: 260),
+          // const SizedBox(height: 12),
           LayoutBuilder(
             builder: (context, constraints) {
               if (constraints.maxWidth >= 480) {
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Expanded(child: CategoryPieChart(height: 300)),
+                  //  const Expanded(child: CategoryPieChart(height: 300)),
                     const SizedBox(width: 10),
                     Expanded(child: _TabletTransactions()),
                   ],
@@ -87,7 +84,7 @@ class TabletDashboardBody extends GetView<BillsController> {
               }
               return Column(
                 children: [
-                  const CategoryPieChart(height: 280),
+                 // const CategoryPieChart(height: 280),
                   const SizedBox(height: 12),
                   _TabletTransactions(),
                 ],
@@ -95,8 +92,8 @@ class TabletDashboardBody extends GetView<BillsController> {
             },
           ),
           const SizedBox(height: 24),
-          const LowStockAlerts(),
-          const SizedBox(height: 12),
+          // const LowStockAlerts(),
+          // const SizedBox(height: 12),
         ],
       ),
     );
@@ -171,7 +168,7 @@ class _TabletSummaryCard extends StatelessWidget {
   }
 }
 
-class _TabletTransactions extends GetView<BillsController> {
+class _TabletTransactions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
@@ -211,7 +208,7 @@ class _TabletTransactions extends GetView<BillsController> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      '${controller.todayOrderCount} today',
+                      '${0} today',
                       style: const TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
@@ -224,23 +221,23 @@ class _TabletTransactions extends GetView<BillsController> {
             ),
           ),
           const SizedBox(height: 8),
-          Obx(() {
-            final todayBills = controller.todayBills.take(5).toList();
-            if (todayBills.isEmpty) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Center(
-                  child: Text(
-                    'No transactions today',
-                    style: tt.bodyMedium?.copyWith(color: Colors.grey.shade500),
-                  ),
-                ),
-              );
-            }
-            return Column(
-              children: todayBills.map((tx) => _TxRow(tx: tx)).toList(),
-            );
-          }),
+          // Obx(() {
+          //   final todayBills = controller.todayBills.take(5).toList();
+          //   if (todayBills.isEmpty) {
+          //     return Padding(
+          //       padding: const EdgeInsets.symmetric(vertical: 24),
+          //       child: Center(
+          //         child: Text(
+          //           'No transactions today',
+          //           style: tt.bodyMedium?.copyWith(color: Colors.grey.shade500),
+          //         ),
+          //       ),
+          //     );
+          //   }
+          //   return Column(
+          //     children: todayBills.map((tx) => _TxRow(tx: tx)).toList(),
+          //   );
+          // }),
           const SizedBox(height: 4),
         ],
       ),
@@ -248,100 +245,100 @@ class _TabletTransactions extends GetView<BillsController> {
   }
 }
 
-class _TxRow extends StatelessWidget {
-  const _TxRow({required this.tx});
-  final BillEntity tx;
+// class _TxRow extends StatelessWidget {
+//   const _TxRow({required this.tx});
+//   final BillEntity tx;
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const Divider(height: 1, color: Color(0xFFF0F0F0)),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-          child: Row(
-            children: [
-              Container(
-                height: 32,
-                width: 32,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  Icons.receipt_outlined,
-                  size: 15,
-                  color: Colors.grey.shade500,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      tx.receiptNumber,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black,
-                      ),
-                    ),
-                    Text(
-                      tx.createdAt.toString().substring(0, 16),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.grey.shade800,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    (tx.subtotal + tx.taxAmount).toStringAsFixed(2),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF1A1A2E),
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 7,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: tx.status == BillStatus.completed
-                          ? const Color(0xFF22C55E).withValues(alpha: 0.12)
-                          : const Color(0xFFEF4444).withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      tx.status == BillStatus.completed ? 'Done' : 'Pending',
-                      style: TextStyle(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w600,
-                        color: tx.status == BillStatus.completed
-                            ? const Color(0xFF16A34A)
-                            : const Color(0xFFDC2626),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Column(
+//       children: [
+//         const Divider(height: 1, color: Color(0xFFF0F0F0)),
+//         Padding(
+//           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+//           child: Row(
+//             children: [
+//               Container(
+//                 height: 32,
+//                 width: 32,
+//                 decoration: BoxDecoration(
+//                   color: Colors.grey.shade100,
+//                   borderRadius: BorderRadius.circular(8),
+//                 ),
+//                 child: Icon(
+//                   Icons.receipt_outlined,
+//                   size: 15,
+//                   color: Colors.grey.shade500,
+//                 ),
+//               ),
+//               const SizedBox(width: 8),
+//               Expanded(
+//                 child: Column(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     Text(
+//                       tx.receiptNumber,
+//                       maxLines: 1,
+//                       overflow: TextOverflow.ellipsis,
+//                       style: const TextStyle(
+//                         fontSize: 12,
+//                         fontWeight: FontWeight.w600,
+//                         color: Colors.black,
+//                       ),
+//                     ),
+//                     Text(
+//                       tx.createdAt.toString().substring(0, 16),
+//                       maxLines: 1,
+//                       overflow: TextOverflow.ellipsis,
+//                       style: TextStyle(
+//                         fontSize: 11,
+//                         color: Colors.grey.shade800,
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//               const SizedBox(width: 8),
+//               Column(
+//                 crossAxisAlignment: CrossAxisAlignment.end,
+//                 children: [
+//                   Text(
+//                     (tx.subtotal + tx.taxAmount).toStringAsFixed(2),
+//                     style: const TextStyle(
+//                       fontSize: 12,
+//                       fontWeight: FontWeight.w700,
+//                       color: Color(0xFF1A1A2E),
+//                     ),
+//                   ),
+//                   const SizedBox(height: 3),
+//                   Container(
+//                     padding: const EdgeInsets.symmetric(
+//                       horizontal: 7,
+//                       vertical: 2,
+//                     ),
+//                     decoration: BoxDecoration(
+//                       color: tx.status == BillStatus.completed
+//                           ? const Color(0xFF22C55E).withValues(alpha: 0.12)
+//                           : const Color(0xFFEF4444).withValues(alpha: 0.12),
+//                       borderRadius: BorderRadius.circular(20),
+//                     ),
+//                     child: Text(
+//                       tx.status == BillStatus.completed ? 'Done' : 'Pending',
+//                       style: TextStyle(
+//                         fontSize: 9,
+//                         fontWeight: FontWeight.w600,
+//                         color: tx.status == BillStatus.completed
+//                             ? const Color(0xFF16A34A)
+//                             : const Color(0xFFDC2626),
+//                       ),
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ],
+//           ),
+//         ),
+//       ],
+//     );
+//   }
+// }

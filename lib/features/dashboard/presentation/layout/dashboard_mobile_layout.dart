@@ -17,12 +17,7 @@ class DashboardMobileLayout extends StatefulWidget {
     DashboardMenu.dashboard: MobileDashboardBody(),
     DashboardMenu.pos: POSBillingPage(),
     DashboardMenu.inventory: InventoryPage(),
-    DashboardMenu.sales: Center(child: Text('Sales')),
-    DashboardMenu.customers: Center(child: Text('Customers')),
-    DashboardMenu.employees: Center(child: Text('Employees')),
-    DashboardMenu.suppliers: Center(child: Text('Suppliers')),
-    DashboardMenu.reports: Center(child: Text('Reports')),
-    DashboardMenu.settings: Center(child: Text('Settings')),
+
   };
 
   @override

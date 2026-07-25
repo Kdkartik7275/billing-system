@@ -15,12 +15,6 @@ class DashboardTabletLayout extends StatefulWidget {
     DashboardMenu.dashboard: TabletDashboardBody(),
     DashboardMenu.pos: POSBillingPage(),
     DashboardMenu.inventory: InventoryPage(),
-    DashboardMenu.sales: Center(child: Text('Sales')),
-    DashboardMenu.customers: Center(child: Text('Customers')),
-    DashboardMenu.employees: Center(child: Text('Employees')),
-    DashboardMenu.suppliers: Center(child: Text('Suppliers')),
-    DashboardMenu.reports: Center(child: Text('Reports')),
-    DashboardMenu.settings: Center(child: Text('Settings')),
   };
 
   @override
@@ -41,7 +35,7 @@ class _DashboardTabletLayoutState extends State<DashboardTabletLayout> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      
+
       body: Row(
         children: [
           // Icon-only sidebar
@@ -90,36 +84,6 @@ class _TabletSidebar extends StatelessWidget {
       icon: Icons.inventory_2_outlined,
       menu: DashboardMenu.inventory,
       label: 'Inventory',
-    ),
-    (
-      icon: Icons.show_chart_outlined,
-      menu: DashboardMenu.sales,
-      label: 'Sales',
-    ),
-    (
-      icon: Icons.people_outline,
-      menu: DashboardMenu.customers,
-      label: 'Customers',
-    ),
-    (
-      icon: Icons.badge_outlined,
-      menu: DashboardMenu.employees,
-      label: 'Employees',
-    ),
-    (
-      icon: Icons.local_shipping_outlined,
-      menu: DashboardMenu.suppliers,
-      label: 'Suppliers',
-    ),
-    (
-      icon: Icons.bar_chart_outlined,
-      menu: DashboardMenu.reports,
-      label: 'Reports',
-    ),
-    (
-      icon: Icons.settings_outlined,
-      menu: DashboardMenu.settings,
-      label: 'Settings',
     ),
   ];
 
@@ -226,7 +190,6 @@ class _TabletTopBar extends StatelessWidget {
       height: 52,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: const BoxDecoration(
-       
         border: Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
       ),
       child: Row(

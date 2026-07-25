@@ -93,36 +93,6 @@ class _DrawerMenu extends StatelessWidget {
       title: 'Inventory',
       menu: DashboardMenu.inventory,
     ),
-    (
-      icon: Icons.show_chart_outlined,
-      title: 'Sales',
-      menu: DashboardMenu.sales,
-    ),
-    (
-      icon: Icons.people_outline,
-      title: 'Customers',
-      menu: DashboardMenu.customers,
-    ),
-    (
-      icon: Icons.badge_outlined,
-      title: 'Employees',
-      menu: DashboardMenu.employees,
-    ),
-    (
-      icon: Icons.local_shipping_outlined,
-      title: 'Suppliers',
-      menu: DashboardMenu.suppliers,
-    ),
-    (
-      icon: Icons.bar_chart_outlined,
-      title: 'Reports',
-      menu: DashboardMenu.reports,
-    ),
-    (
-      icon: Icons.settings_outlined,
-      title: 'Settings',
-      menu: DashboardMenu.settings,
-    ),
   ];
 
   @override
@@ -215,61 +185,59 @@ class _DrawerUserCard extends GetView<UserController> {
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
-    return Obx(
-       () {
-        final user = controller.user.value;
-        return Container(
-          margin: const EdgeInsets.all(AppSpacing.sm),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
-          ),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF3F4F6),
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xFF2563EB),
-                ),
-                child:  Center(
-                  child: Text(
-                    user?.name.substring(0,2).toUpperCase() ?? 'OW' ,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                    ),
+    return Obx(() {
+      final user = controller.user.value;
+      return Container(
+        margin: const EdgeInsets.all(AppSpacing.sm),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF3F4F6),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Color(0xFF2563EB),
+              ),
+              child: Center(
+                child: Text(
+                  user?.name.substring(0, 2).toUpperCase() ?? 'OW',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      user?.name ?? 'Shop User',
-                      overflow: TextOverflow.ellipsis,
-                      style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w700),
-                    ),
-                    const SizedBox(height: 1),
-                    Text(
-                      user?.role.name ?? 'Owner',
-                      style: tt.labelLarge?.copyWith(color: Colors.black87),
-                    ),
-                  ],
-                ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    user?.name ?? 'Shop User',
+                    overflow: TextOverflow.ellipsis,
+                    style: tt.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 1),
+                  Text(
+                    user?.role.name ?? 'Owner',
+                    style: tt.labelLarge?.copyWith(color: Colors.black87),
+                  ),
+                ],
               ),
-            ],
-          ),
-        );
-      }
-    );
+            ),
+          ],
+        ),
+      );
+    });
   }
 }

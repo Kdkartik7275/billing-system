@@ -1,9 +1,3 @@
-/// A single received lot/batch of a product at a warehouse, used for
-/// FEFO (first-expiry-first-out) picking and expiry tracking.
-///
-/// Only created/consulted when [ProductSettings.trackBatches] is enabled
-/// on the product. Several [StockBatchEntity] rows can sum up to the
-/// aggregate [StockEntity.quantity] for the same product+warehouse.
 class StockBatchEntity {
   final String id;
   final String productId;
@@ -13,9 +7,6 @@ class StockBatchEntity {
   final DateTime? manufactureDate;
   final DateTime? expiryDate;
 
-  /// Purchase price for this specific batch — can differ from the
-  /// product's current [ProductPrice.purchasePrice] if costs changed
-  /// between purchases.
   final double purchasePrice;
 
   final DateTime receivedAt;
@@ -35,8 +26,6 @@ class StockBatchEntity {
   bool get isExpired =>
       expiryDate != null && expiryDate!.isBefore(DateTime.now());
 
-  /// True when the batch expires within the given [withinDays] window
-  /// (defaults to 30), used to surface "expiring soon" alerts.
   bool isExpiringSoon({int withinDays = 30}) {
     if (expiryDate == null) return false;
     final cutoff = DateTime.now().add(Duration(days: withinDays));

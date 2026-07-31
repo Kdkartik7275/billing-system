@@ -8,7 +8,7 @@ part of 'user_entity.dart';
 
 class UserRoleAdapter extends TypeAdapter<UserRole> {
   @override
-  final int typeId = 21;
+  final int typeId = 2;
 
   @override
   UserRole read(BinaryReader reader) {

@@ -1,8 +1,5 @@
 import 'package:billing_system/features/dashboard/presentation/models/dashboard_card_model.dart';
-import 'package:billing_system/features/dashboard/presentation/widgets/category_pie_chart.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/chart_card.dart';
-import 'package:billing_system/features/dashboard/presentation/widgets/low_stocks.dart';
-import 'package:billing_system/features/dashboard/presentation/widgets/sales_line_chart.dart';
 import 'package:billing_system/core/config/theme/app_radius.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

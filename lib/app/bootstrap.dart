@@ -1,4 +1,14 @@
 import 'package:billing_system/core/di/init_dependencies.dart';
+import 'package:billing_system/features/inventory/data/models/brand/brand_model.dart';
+import 'package:billing_system/features/inventory/data/models/category/category_model.dart';
+import 'package:billing_system/features/inventory/data/models/product_image_model.dart';
+import 'package:billing_system/features/inventory/data/models/product_model.dart';
+import 'package:billing_system/features/inventory/data/models/product_price_model.dart';
+import 'package:billing_system/features/inventory/data/models/product_settings_model.dart';
+import 'package:billing_system/features/inventory/data/models/product_tax_model.dart';
+import 'package:billing_system/features/inventory/data/models/product_variant_model.dart';
+import 'package:billing_system/features/inventory/data/models/stock/stock_model.dart';
+import 'package:billing_system/features/inventory/data/models/tax_type.dart';
 
 import 'package:billing_system/features/user/data/models/firebase_config_model.dart';
 import 'package:billing_system/features/user/data/models/shop_model.dart';
@@ -20,25 +30,30 @@ class Bootstrap {
 
     await Hive.initFlutter();
 
-    // Hive.registerAdapter(InventoryProductModelAdapter());
-    // Hive.registerAdapter(BillItemModelAdapter());
-    // Hive.registerAdapter(BillModelAdapter());
-    // Hive.registerAdapter(StockTransactionTypeAdapter());
-    // Hive.registerAdapter(StockTransactionModelAdapter());
-    // Hive.registerAdapter(StockBatchModelAdapter());
-    Hive.registerAdapter(UserModelAdapter());
-    Hive.registerAdapter(ShopModelAdapter());
-    Hive.registerAdapter(UserRoleAdapter());
-    Hive.registerAdapter(FirebaseConfigModelAdapter());
-    // await Hive.openBox<InventoryProductModel>('products');
-    // await Hive.openBox<BillModel>('bills');
-    // await Hive.openBox<StockTransactionModel>('stock_transactions');
-    // await Hive.openBox<StockBatchModel>('stock_batches');
+    Hive
+      ..registerAdapter(UserModelAdapter())
+      ..registerAdapter(UserRoleAdapter())
+      ..registerAdapter(FirebaseConfigModelAdapter())
+      ..registerAdapter(ShopModelAdapter())
+      ..registerAdapter(ProductModelAdapter())
+      ..registerAdapter(ProductPriceModelAdapter())
+      ..registerAdapter(ProductTaxModelAdapter())
+      ..registerAdapter(ProductSettingsModelAdapter())
+      ..registerAdapter(ProductVariantModelAdapter())
+      ..registerAdapter(ProductImageModelAdapter())
+      ..registerAdapter(TaxTypeModelAdapter())
+      ..registerAdapter(CategoryModelAdapter())
+      ..registerAdapter(BrandModelAdapter())
+      ..registerAdapter(StockModelAdapter());
+    await Hive.openBox<ProductModel>('products');
+    await Hive.openBox<CategoryModel>('categories');
+    await Hive.openBox<BrandModel>('brands');
+
     await Hive.openBox<UserModel>('current_user');
     await Hive.openBox<ShopModel>('current_shop');
     await Hive.openBox<FirebaseConfigModel>('firebase_config');
     await DependencyInjection.init();
-    final userController = Get.put(
+    Get.put(
       UserController(
         getUserByIdUseCase: sl(),
         getShopByIdUseCase: sl(),
@@ -46,7 +61,5 @@ class Bootstrap {
       ),
       permanent: true,
     );
-
-   // await userController.checkSession();
   }
 }

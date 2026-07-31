@@ -93,12 +93,7 @@ class ProductEntity {
     );
   }
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) || (other is ProductEntity && other.id == id);
-
-  @override
-  int get hashCode => id.hashCode;
+  bool isSameRecordAs(ProductEntity other) => other.id == id;
 
   @override
   String toString() => 'ProductEntity(id: $id, name: $name, sku: $sku)';

@@ -29,6 +29,11 @@ class DashboardTabletLayout extends StatefulWidget {
 class _DashboardTabletLayoutState extends State<DashboardTabletLayout> {
   final controller = Get.find<DashboardShellController>();
 
+  static const double _collapsedWidth = 72;
+  static const double _expandedWidth = 216;
+
+  bool _isSidebarExpanded = false;
+
   // final inventoryController = Get.find<InventoryController>();
   // @override
   // void initState() {
@@ -36,26 +41,36 @@ class _DashboardTabletLayoutState extends State<DashboardTabletLayout> {
   //   inventoryController.getProducts();
   // }
 
+  void _toggleSidebar() {
+    setState(() => _isSidebarExpanded = !_isSidebarExpanded);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      
+
       body: Row(
         children: [
-          // Icon-only sidebar
-          const SizedBox(width: 72, child: _TabletSidebar()),
+          // Icon-only / expandable sidebar
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeInOut,
+            width: _isSidebarExpanded ? _expandedWidth : _collapsedWidth,
+            child: ClipRect(
+              child: _TabletSidebar(
+                expanded: _isSidebarExpanded,
+                onToggleExpanded: _toggleSidebar,
+              ),
+            ),
+          ),
           const VerticalDivider(
             width: 1,
             thickness: 1,
             color: Color(0xFFE5E7EB),
           ),
           // Main content
-          Expanded(
-            child: Column(
-              children: [
-                _TabletTopBar(),
-                Expanded(
+           Expanded(
                   child: Obx(
                     () =>
                         DashboardTabletLayout._pages[controller
@@ -64,19 +79,21 @@ class _DashboardTabletLayoutState extends State<DashboardTabletLayout> {
                         const Center(child: Text('Dashboard')),
                   ),
                 ),
-              ],
-            ),
-          ),
         ],
       ),
     );
   }
 }
 
-// ── Icon-only sidebar ────────────────────────────────────────────────────────
 
 class _TabletSidebar extends StatelessWidget {
-  const _TabletSidebar();
+  final bool expanded;
+  final VoidCallback onToggleExpanded;
+
+  const _TabletSidebar({
+    required this.expanded,
+    required this.onToggleExpanded,
+  });
 
   static const _items = [
     (
@@ -130,24 +147,50 @@ class _TabletSidebar extends StatelessWidget {
       child: SafeArea(
         child: Column(
           children: [
-            // Mini logo
             const SizedBox(height: 12),
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: const Color(0xFF2563EB),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(
-                Icons.storefront_outlined,
-                color: Colors.white,
-                size: 20,
+
+            // Logo + collapse/expand toggle
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                mainAxisAlignment: expanded
+                    ? MainAxisAlignment.spaceBetween
+                    : MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2563EB),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.storefront_outlined,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  if (expanded)
+                    _ToggleButton(
+                      icon: Icons.chevron_left_rounded,
+                      onTap: onToggleExpanded,
+                    ),
+                ],
               ),
             ),
-            const SizedBox(height: 12),
+
+            if (!expanded) ...[
+              const SizedBox(height: 8),
+              _ToggleButton(
+                icon: Icons.chevron_right_rounded,
+                onTap: onToggleExpanded,
+              ),
+            ],
+
+            const SizedBox(height: 8),
             const Divider(height: 1, color: Color(0xFFE5E7EB)),
             const SizedBox(height: 8),
+
             Expanded(
               child: Obx(
                 () => ListView(
@@ -157,58 +200,147 @@ class _TabletSidebar extends StatelessWidget {
                   ),
                   children: _items.map((e) {
                     final selected = controller.selectedMenu.value == e.menu;
-                    return Tooltip(
-                      message: e.label,
-                      preferBelow: false,
-                      child: GestureDetector(
-                        onTap: () => controller.changeMenu(e.menu),
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 4),
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: selected
-                                ? const Color(0xFF2563EB)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Icon(
-                            e.icon,
-                            size: 20,
-                            color: selected
-                                ? Colors.white
-                                : const Color(0xFF6B7280),
-                          ),
+
+                    final row = Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          e.icon,
+                          size: 20,
+                          color: selected
+                              ? Colors.white
+                              : const Color(0xFF6B7280),
                         ),
+                        if (expanded) ...[
+                          const SizedBox(width: 12),
+                          Flexible(
+                            child: Text(
+                              e.label,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: selected
+                                    ? Colors.white
+                                    : const Color(0xFF374151),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    );
+
+                    final tile = GestureDetector(
+                      onTap: () => controller.changeMenu(e.menu),
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 4),
+                        height: 44,
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: expanded ? 12 : 0,
+                        ),
+                        alignment: expanded
+                            ? Alignment.centerLeft
+                            : Alignment.center,
+                        decoration: BoxDecoration(
+                          color: selected
+                              ? const Color(0xFF2563EB)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: row,
                       ),
                     );
+
+                    // Tooltip only makes sense when labels aren't visible.
+                    return expanded
+                        ? tile
+                        : Tooltip(
+                            message: e.label,
+                            preferBelow: false,
+                            child: tile,
+                          );
                   }).toList(),
                 ),
               ),
             ),
+
             // User avatar at the bottom
             Padding(
-              padding: const EdgeInsets.all(8),
-              child: Container(
-                width: 36,
-                height: 36,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xFF2563EB),
-                ),
-                child: const Center(
-                  child: Text(
-                    'AM',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: expanded
+                    ? MainAxisAlignment.start
+                    : MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0xFF2563EB),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'AM',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  if (expanded) ...[
+                    const SizedBox(width: 10),
+                    const Flexible(
+                      child: Text(
+                        'Admin',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF374151),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
             const SizedBox(height: 8),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ToggleButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _ToggleButton({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          height: 28,
+          width: 28,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: const Color(0xFFF3F4F6),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 18, color: const Color(0xFF6B7280)),
         ),
       ),
     );
@@ -225,7 +357,6 @@ class _TabletTopBar extends StatelessWidget {
       height: 52,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: const BoxDecoration(
-       
         border: Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
       ),
       child: Row(

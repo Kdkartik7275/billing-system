@@ -1,26 +1,15 @@
-/// How GST/tax is applied to a product's [ProductPrice.sellingPrice].
 enum TaxType {
-  /// Selling price does not include tax; tax is added on top at billing.
   exclusive,
 
-  /// Selling price already includes tax.
   inclusive,
 
-  /// Product is tax-exempt (e.g. certain unbranded staples).
   exempt,
 }
 
-/// Value object holding GST/tax configuration for a product.
-///
-/// Embedded inside [ProductEntity] — tax rules have no independent
-/// lifecycle of their own for a single product.
 class ProductTax {
-  /// GST percentage, e.g. 5, 12, 18, 28. Ignored when [type] is [TaxType.exempt].
   final double gstPercent;
   final TaxType type;
 
-  /// HSN (Harmonized System of Nomenclature) code, required for GST filing
-  /// on most goods above the turnover threshold.
   final String? hsnCode;
 
   const ProductTax({
@@ -64,17 +53,5 @@ class ProductTax {
     );
   }
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is ProductTax &&
-          other.gstPercent == gstPercent &&
-          other.type == type &&
-          other.hsnCode == hsnCode);
-
-  @override
-  int get hashCode => Object.hash(gstPercent, type, hsnCode);
-
-  @override
-  String toString() => 'ProductTax(gst: $gstPercent%, type: $type)';
+ 
 }

@@ -12,13 +12,6 @@ enum StockMovementType {
   expired,
 }
 
-/// An immutable, append-only audit record of a single stock change.
-///
-/// Every mutation to a [StockEntity]'s quantity — from a purchase, a sale,
-/// a transfer between warehouses, or a manual correction — should be
-/// accompanied by writing one of these. This is what makes stock levels
-/// auditable/explainable after the fact, independent of the current
-/// snapshot held in [StockEntity].
 class StockMovementEntity {
   final String id;
   final String productId;

@@ -1,10 +1,11 @@
+import 'package:billing_system/core/config/constants/typedefs.dart';
+
 import '../entities/warehouse_entity.dart';
 
 abstract class WarehouseRepository {
-  Future<List<WarehouseEntity>> getAllWarehouses();
-  Future<WarehouseEntity?> getWarehouseById(String id);
-  Future<WarehouseEntity> addWarehouse(WarehouseEntity warehouse);
-  Future<WarehouseEntity> updateWarehouse(WarehouseEntity warehouse);
-  Future<void> deleteWarehouse(String id);
-  Stream<List<WarehouseEntity>> watchWarehouses();
+  ResultFuture<List<WarehouseEntity>> getAllWarehouses();
+  ResultFuture<WarehouseEntity?> getWarehouseById(String id);
+  ResultFuture<WarehouseEntity> addWarehouse(WarehouseEntity warehouse);
+  ResultFuture<WarehouseEntity> updateWarehouse(WarehouseEntity warehouse);
+  ResultFuture<void> deleteWarehouse(String id);
 }

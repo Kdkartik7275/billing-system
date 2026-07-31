@@ -1,37 +1,16 @@
-/// A single attribute/value pair that differentiates one variant of a
-/// product from another, e.g. ("Size", "1L") or ("Color", "Red").
 class VariantAttribute {
   final String name;
   final String value;
 
   const VariantAttribute({required this.name, required this.value});
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is VariantAttribute && other.name == name && other.value == value);
-
-  @override
-  int get hashCode => Object.hash(name, value);
-
-  @override
-  String toString() => '$name: $value';
 }
 
-/// Value object representing one purchasable variant of a product
-/// (e.g. a specific pack size or flavor of "Coca Cola").
-///
-/// Embedded as a list inside [ProductEntity]. A product with no variations
-/// simply has a single default [ProductVariant] (or an empty list, handled
-/// by [ProductEntity.hasVariants]).
 class ProductVariant {
   final String id;
   final String sku;
   final String? barcode;
   final List<VariantAttribute> attributes;
 
-  /// Optional price override for this specific variant. When null, the
-  /// parent [ProductEntity]'s base [ProductPrice] applies.
   final double? sellingPriceOverride;
 
   final bool isActive;
@@ -67,13 +46,5 @@ class ProductVariant {
     );
   }
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) || (other is ProductVariant && other.id == id);
-
-  @override
-  int get hashCode => id.hashCode;
-
-  @override
-  String toString() => 'ProductVariant(id: $id, label: $displayLabel)';
+  
 }

@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 
 part 'firebase_config_model.g.dart';
 
-@HiveType(typeId: 31)
+@HiveType(typeId: 3)
 class FirebaseConfigModel {
   @HiveField(0)
   final String androidApiKey;

@@ -2,45 +2,27 @@
 class BrandEntity {
   final String id;
   final String name;
-  final String? logoUrl;
-  final String? country;
-  final bool isActive;
+  final String searchName;
   final DateTime createdAt;
 
   const BrandEntity({
     required this.id,
     required this.name,
-    this.logoUrl,
-    this.country,
-    this.isActive = true,
+    required this.searchName,
     required this.createdAt,
   });
 
   BrandEntity copyWith({
     String? id,
     String? name,
-    String? logoUrl,
-    String? country,
-    bool? isActive,
     DateTime? createdAt,
+    String? searchName,
   }) {
     return BrandEntity(
       id: id ?? this.id,
       name: name ?? this.name,
-      logoUrl: logoUrl ?? this.logoUrl,
-      country: country ?? this.country,
-      isActive: isActive ?? this.isActive,
+      searchName: searchName ?? this.searchName,
       createdAt: createdAt ?? this.createdAt,
     );
   }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) || (other is BrandEntity && other.id == id);
-
-  @override
-  int get hashCode => id.hashCode;
-
-  @override
-  String toString() => 'BrandEntity(id: $id, name: $name)';
 }

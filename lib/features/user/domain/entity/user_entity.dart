@@ -2,7 +2,7 @@ import 'package:hive/hive.dart';
 
 part 'user_entity.g.dart';
 
-@HiveType(typeId: 21)
+@HiveType(typeId: 2)
 enum UserRole {
   @HiveField(0)
   owner,

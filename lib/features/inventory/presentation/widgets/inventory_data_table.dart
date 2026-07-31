@@ -9,6 +9,47 @@ import '../../domain/entities/stock_entity.dart';
 import '../controller/inventory_controller.dart';
 import 'status_chip.dart';
 
+/// Below this width a table (even scrollable) is a poor fit — switch to a
+/// stacked card list instead of forcing horizontal scroll on a phone.
+const double _cardBreakpoint = 640.0;
+
+/// Fixed pixel width for each column. Using fixed widths instead of flex
+/// ratios means header/cell text always gets the room it needs — no more
+/// ellipsis-truncated headers on narrower screens. Anything narrower than
+/// the resulting total table width just scrolls horizontally.
+class _ColW {
+  static const double thumb = 42;
+  static const double product = 220;
+  static const double barcode = 130;
+  static const double sku = 120;
+  static const double category = 130;
+  static const double brand = 120;
+  static const double supplier = 150;
+  static const double purchase = 100;
+  static const double selling = 100;
+  static const double stock = 100;
+  static const double gst = 70;
+  static const double status = 140;
+  static const double menu = 40;
+
+  static double get total =>
+      thumb +
+      AppSpacing.md +
+      product +
+      barcode +
+      sku +
+      category +
+      brand +
+      supplier +
+      purchase +
+      selling +
+      stock +
+      gst +
+      status +
+      menu +
+      (AppSpacing.xl * 2);
+}
+
 class InventoryDataTable extends StatefulWidget {
   final ValueChanged<ProductEntity> onDelete;
 
@@ -16,8 +57,6 @@ class InventoryDataTable extends StatefulWidget {
 
   static const double _headerHeight = 44.0;
   static const double _minBodyHeight = 140.0;
-
-  static const double _minTableWidth = 1100.0;
 
   @override
   State<InventoryDataTable> createState() => _InventoryDataTableState();
@@ -36,17 +75,26 @@ class _InventoryDataTableState extends State<InventoryDataTable> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final tableWidth =
-            constraints.maxWidth < InventoryDataTable._minTableWidth
-            ? InventoryDataTable._minTableWidth
-            : constraints.maxWidth;
+        final availableWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : MediaQuery.sizeOf(context).width;
+
+        if (availableWidth < _cardBreakpoint) {
+          return _CardListFallback(onDelete: widget.onDelete);
+        }
+
+        final minTableWidth = _ColW.total;
+
+        final tableWidth = availableWidth < minTableWidth
+            ? minTableWidth
+            : availableWidth;
 
         final availableHeight = constraints.maxHeight.isFinite
             ? constraints.maxHeight
             : MediaQuery.sizeOf(context).height * 0.6;
 
         final maxBodyHeight =
-            (availableHeight - InventoryDataTable._headerHeight -3).clamp(
+            (availableHeight - InventoryDataTable._headerHeight - 3).clamp(
               InventoryDataTable._minBodyHeight,
               double.infinity,
             );
@@ -72,7 +120,6 @@ class _InventoryDataTableState extends State<InventoryDataTable> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(AppRadius.lg),
-           
             child: ScrollConfiguration(
               behavior: ScrollConfiguration.of(context).copyWith(
                 dragDevices: {
@@ -89,7 +136,6 @@ class _InventoryDataTableState extends State<InventoryDataTable> {
                 child: SingleChildScrollView(
                   controller: _horizontalController,
                   scrollDirection: Axis.horizontal,
-                 
                   child: SizedBox(
                     width: tableWidth,
                     child: Column(
@@ -112,6 +158,198 @@ class _InventoryDataTableState extends State<InventoryDataTable> {
       },
     );
   }
+}
+
+/// Stacked card list used below [_cardBreakpoint] (phones). Shows the same
+/// data as the table columns, laid out for narrow-width scanning instead of
+/// horizontal scroll.
+class _CardListFallback extends StatelessWidget {
+  final ValueChanged<ProductEntity> onDelete;
+
+  const _CardListFallback({required this.onDelete});
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.find<InventoryController>();
+
+    return Obx(() {
+      final products = controller.filteredProducts;
+
+      if (products.isEmpty) {
+        return const Padding(
+          padding: EdgeInsets.symmetric(vertical: 40),
+          child: Center(
+            child: Text(
+              'No products found',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+        );
+      }
+
+      return ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: products.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 10),
+        itemBuilder: (_, i) => _ProductListCard(
+          product: products[i],
+          onDelete: onDelete,
+        ),
+      );
+    });
+  }
+}
+
+class _ProductListCard extends StatelessWidget {
+  final ProductEntity product;
+  final ValueChanged<ProductEntity> onDelete;
+
+  const _ProductListCard({required this.product, required this.onDelete});
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.find<InventoryController>();
+    final status = controller.stockStatusFor(product);
+    final stockQty = controller.stockQuantityFor(product.id);
+    final unit = controller.unitShortCode(product.unitId);
+
+    return InkWell(
+      onTap: () => controller.selectProduct(product),
+      borderRadius: BorderRadius.circular(AppRadius.md),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.sm),
+              child: SizedBox(
+                width: 48,
+                height: 48,
+                child: product.primaryImageUrl != null
+                    ? Image.network(
+                        product.primaryImageUrl!,
+                        fit: BoxFit.cover,
+                        gaplessPlayback: true,
+                        cacheWidth: 96,
+                        cacheHeight: 96,
+                        errorBuilder: (_, __, ___) => _thumbPlaceholder(),
+                      )
+                    : _thumbPlaceholder(),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          product.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 28,
+                        height: 28,
+                        child: PopupMenuButton<String>(
+                          padding: EdgeInsets.zero,
+                          splashRadius: 15,
+                          icon: Icon(
+                            Icons.more_vert_rounded,
+                            size: 18,
+                            color: Colors.grey.shade600,
+                          ),
+                          onSelected: (action) {
+                            switch (action) {
+                              case 'view':
+                                controller.selectProduct(product);
+                                break;
+                              case 'edit':
+                                Get.snackbar(
+                                  'Edit Product',
+                                  'The edit form for "${product.name}" will be available soon.',
+                                  snackPosition: SnackPosition.BOTTOM,
+                                );
+                                break;
+                              case 'delete':
+                                onDelete(product);
+                                break;
+                            }
+                          },
+                          itemBuilder: (context) => const [
+                            PopupMenuItem(value: 'view', child: Text('View')),
+                            PopupMenuItem(value: 'edit', child: Text('Edit')),
+                            PopupMenuItem(
+                              value: 'delete',
+                              child: Text('Delete'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    '${controller.categoryName(product.categoryId)} · SKU ${product.sku}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 11.5, color: Colors.grey.shade600),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Text(
+                        '₹${product.price.sellingPrice.toStringAsFixed(0)}',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.blue.shade700,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${stockQty.toStringAsFixed(0)} $unit',
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                      const Spacer(),
+                      StatusChip(status: status),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _thumbPlaceholder() => Container(
+    color: Colors.grey.shade200,
+    alignment: Alignment.center,
+    child: Icon(
+      Icons.inventory_2_outlined,
+      size: 18,
+      color: Colors.grey.shade600,
+    ),
+  );
 }
 
 class _TableBody extends StatelessWidget {
@@ -170,20 +408,25 @@ class _TableHeader extends StatelessWidget {
       ),
       child: const Row(
         children: [
-          SizedBox(width: 42),
+          SizedBox(width: _ColW.thumb),
           SizedBox(width: AppSpacing.md),
-          _HeaderCell('Product', flex: 3, column: 'name'),
-          _HeaderCell('Barcode', flex: 2, column: ''),
-          _HeaderCell('SKU', flex: 2, column: 'sku'),
-          _HeaderCell('Category', flex: 2, column: 'category'),
-          _HeaderCell('Brand', flex: 2, column: ''),
-          _HeaderCell('Supplier', flex: 2, column: 'supplier'),
-          _HeaderCell('Purchase', flex: 1, column: ''),
-          _HeaderCell('Selling', flex: 1, column: 'price'),
-          _HeaderCell('Stock', flex: 1, column: 'stock'),
-          _HeaderCell('GST', flex: 1, column: ''),
-          _HeaderCell('Status', flex: 2, column: '', sortable: false),
-          SizedBox(width: 40),
+          _HeaderCell('Product', width: _ColW.product, column: 'name'),
+          _HeaderCell('Barcode', width: _ColW.barcode, column: ''),
+          _HeaderCell('SKU', width: _ColW.sku, column: 'sku'),
+          _HeaderCell('Category', width: _ColW.category, column: 'category'),
+          _HeaderCell('Brand', width: _ColW.brand, column: ''),
+          _HeaderCell('Supplier', width: _ColW.supplier, column: 'supplier'),
+          _HeaderCell('Purchase', width: _ColW.purchase, column: ''),
+          _HeaderCell('Selling', width: _ColW.selling, column: 'price'),
+          _HeaderCell('Stock', width: _ColW.stock, column: 'stock'),
+          _HeaderCell('GST', width: _ColW.gst, column: ''),
+          _HeaderCell(
+            'Status',
+            width: _ColW.status,
+            column: '',
+            sortable: false,
+          ),
+          SizedBox(width: _ColW.menu),
         ],
       ),
     );
@@ -192,13 +435,13 @@ class _TableHeader extends StatelessWidget {
 
 class _HeaderCell extends StatelessWidget {
   final String label;
-  final int flex;
+  final double width;
   final String column;
   final bool sortable;
 
   const _HeaderCell(
     this.label, {
-    required this.flex,
+    required this.width,
     required this.column,
     this.sortable = true,
   });
@@ -213,16 +456,16 @@ class _HeaderCell extends StatelessWidget {
     );
 
     if (!sortable || column.isEmpty) {
-      return Expanded(
-        flex: flex,
+      return SizedBox(
+        width: width,
         child: Text(label, style: labelStyle, overflow: TextOverflow.ellipsis),
       );
     }
 
     final controller = Get.find<InventoryController>();
 
-    return Expanded(
-      flex: flex,
+    return SizedBox(
+      width: width,
       child: Obx(() {
         final isActive = controller.sortColumn.value == column;
         return InkWell(
@@ -295,8 +538,8 @@ class _ProductRow extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(AppRadius.sm),
               child: SizedBox(
-                width: 42,
-                height: 42,
+                width: _ColW.thumb,
+                height: _ColW.thumb,
                 child: product.primaryImageUrl != null
                     ? Image.network(
                         product.primaryImageUrl!,
@@ -310,8 +553,8 @@ class _ProductRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.md),
-            Expanded(
-              flex: 3,
+            SizedBox(
+              width: _ColW.product,
               child: Text(
                 product.name,
                 maxLines: 1,
@@ -323,8 +566,8 @@ class _ProductRow extends StatelessWidget {
                 ),
               ),
             ),
-            Expanded(
-              flex: 2,
+            SizedBox(
+              width: _ColW.barcode,
               child: Text(
                 product.barcode,
                 overflow: TextOverflow.ellipsis,
@@ -335,16 +578,16 @@ class _ProductRow extends StatelessWidget {
                 ),
               ),
             ),
-            Expanded(
-              flex: 2,
+            SizedBox(
+              width: _ColW.sku,
               child: Text(
                 product.sku,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontSize: 12.5, color: Colors.grey.shade700),
               ),
             ),
-            Expanded(
-              flex: 2,
+            SizedBox(
+              width: _ColW.category,
               child: Text(
                 controller.categoryName(product.categoryId),
                 maxLines: 1,
@@ -352,8 +595,8 @@ class _ProductRow extends StatelessWidget {
                 style: const TextStyle(fontSize: 13, color: Colors.black87),
               ),
             ),
-            Expanded(
-              flex: 2,
+            SizedBox(
+              width: _ColW.brand,
               child: Text(
                 controller.brandName(product.brandId) ?? '—',
                 maxLines: 1,
@@ -361,8 +604,8 @@ class _ProductRow extends StatelessWidget {
                 style: const TextStyle(fontSize: 13, color: Colors.black87),
               ),
             ),
-            Expanded(
-              flex: 2,
+            SizedBox(
+              width: _ColW.supplier,
               child: Text(
                 controller.supplierName(product.primarySupplierId) ?? '—',
                 maxLines: 1,
@@ -370,16 +613,16 @@ class _ProductRow extends StatelessWidget {
                 style: const TextStyle(fontSize: 13, color: Colors.black87),
               ),
             ),
-            Expanded(
-              flex: 1,
+            SizedBox(
+              width: _ColW.purchase,
               child: Text(
                 '₹${product.price.purchasePrice.toStringAsFixed(0)}',
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
               ),
             ),
-            Expanded(
-              flex: 1,
+            SizedBox(
+              width: _ColW.selling,
               child: Text(
                 '₹${product.price.sellingPrice.toStringAsFixed(0)}',
                 overflow: TextOverflow.ellipsis,
@@ -390,8 +633,8 @@ class _ProductRow extends StatelessWidget {
                 ),
               ),
             ),
-            Expanded(
-              flex: 1,
+            SizedBox(
+              width: _ColW.stock,
               child: Text(
                 '${stockQty.toStringAsFixed(0)} $unit',
                 overflow: TextOverflow.ellipsis,
@@ -406,17 +649,20 @@ class _ProductRow extends StatelessWidget {
                 ),
               ),
             ),
-            Expanded(
-              flex: 1,
+            SizedBox(
+              width: _ColW.gst,
               child: Text(
                 '${product.tax.gstPercent.toStringAsFixed(0)}%',
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
               ),
             ),
-            Expanded(flex: 2, child: StatusChip(status: status)),
             SizedBox(
-              width: 40,
+              width: _ColW.status,
+              child: StatusChip(status: status),
+            ),
+            SizedBox(
+              width: _ColW.menu,
               child: PopupMenuButton<String>(
                 icon: Icon(
                   Icons.more_vert_rounded,

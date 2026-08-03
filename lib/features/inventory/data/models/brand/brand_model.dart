@@ -17,7 +17,12 @@ class BrandModel extends HiveObject {
   @HiveField(3)
   final String searchName;
 
-  BrandModel({required this.id, required this.name, required this.createdAt,required this.searchName});
+  BrandModel({
+    required this.id,
+    required this.name,
+    required this.createdAt,
+    required this.searchName,
+  });
 
   factory BrandModel.fromEntity(BrandEntity entity) {
     return BrandModel(
@@ -29,7 +34,12 @@ class BrandModel extends HiveObject {
   }
 
   BrandEntity toEntity() {
-    return BrandEntity(id: id, name: name, createdAt: createdAt,searchName:searchName);
+    return BrandEntity(
+      id: id,
+      name: name,
+      createdAt: createdAt,
+      searchName: searchName,
+    );
   }
 
   factory BrandModel.fromJson(Map<String, dynamic> json) {
@@ -44,14 +54,24 @@ class BrandModel extends HiveObject {
   }
 
   Map<String, dynamic> toJson() {
-    return {'id': id, 'name': name, 'createdAt': createdAt.toIso8601String(),searchName:"searchName"};
+    return {
+      'id': id,
+      'name': name,
+      'createdAt': createdAt.toIso8601String(),
+      'searchName': searchName,
+    };
   }
 
-  BrandModel copyWith({String? id, String? name, DateTime? createdAt,String?searchName}) {
+  BrandModel copyWith({
+    String? id,
+    String? name,
+    DateTime? createdAt,
+    String? searchName,
+  }) {
     return BrandModel(
       id: id ?? this.id,
       name: name ?? this.name,
-      searchName:searchName ?? this.searchName,
+      searchName: searchName ?? this.searchName,
       createdAt: createdAt ?? this.createdAt,
     );
   }

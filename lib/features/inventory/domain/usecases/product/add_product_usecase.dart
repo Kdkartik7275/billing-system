@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:billing_system/core/config/constants/typedefs.dart';
 import 'package:billing_system/core/errors/failure.dart';
 import 'package:billing_system/core/usecases/usecases.dart';
@@ -6,6 +8,8 @@ import 'package:billing_system/features/inventory/domain/entities/stock_entity.d
 import 'package:billing_system/features/inventory/domain/repositories/product_repository.dart';
 import 'package:billing_system/features/inventory/domain/repositories/stock_repository.dart';
 import 'package:billing_system/features/inventory/domain/usecases/brand/get_brand_or_create_usecase.dart';
+import 'package:billing_system/features/inventory/domain/usecases/product/upload_product_images.dart';
+import 'package:billing_system/features/inventory/domain/value_objects/product_image.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:uuid/uuid.dart';
 
@@ -22,11 +26,13 @@ class AddProductUseCase
   final ProductRepository productRepository;
   final StockRepository stockRepository;
   final GetOrCreateBrandUseCase getOrCreateBrandUseCase;
+  final UploadProductImages uploadProductImages;
 
   const AddProductUseCase({
     required this.productRepository,
     required this.stockRepository,
     required this.getOrCreateBrandUseCase,
+    required this.uploadProductImages,
   });
 
   @override
@@ -91,9 +97,38 @@ class AddProductUseCase
 
     final brand = brandResult.getRight().toNullable()!;
 
+    // ---------------- Upload Product Images ----------------
+
+    List<String> imageUrls = [];
+
+    if (params.product.images.isNotEmpty) {
+      final files = params.product.images
+          .map((image) => File(image.url))
+          .toList();
+
+      final uploadResult = await uploadProductImages.call(files);
+
+      final uploadFailure = uploadResult.fold(
+        (failure) => failure,
+        (_) => null,
+      );
+
+      if (uploadFailure != null) {
+        return left(uploadFailure);
+      }
+
+      imageUrls = uploadResult.getRight().toNullable()!;
+    }
+
     // ---------------- Update Product ----------------
 
-    final productToCreate = params.product.copyWith(brandId: brand.id);
+    final productToCreate = params.product.copyWith(
+      brandId: brand.id,
+      images: List.generate(
+        imageUrls.length,
+        (index) => ProductImage(url: imageUrls[index], isPrimary: index == 0),
+      ),
+    );
 
     // ---------------- Create Product ----------------
 

@@ -1,7 +1,9 @@
 import 'package:billing_system/core/config/theme/app_colors.dart';
+import 'package:billing_system/core/helper/functions.dart';
 import 'package:billing_system/features/inventory/presentation/controller/add_product_controller.dart';
 import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/add_product/add_product_textfield.dart';
+import 'package:billing_system/features/inventory/presentation/widgets/add_product/bottom_bar.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/add_product/field_label.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/add_product/image_upload_grid.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/add_product/product_dropdown.dart';
@@ -14,14 +16,25 @@ import 'package:get/get.dart';
 class AddProductTabletLayout extends StatelessWidget {
   const AddProductTabletLayout({super.key});
 
+  Future<void> _pickAndAddImage(AddProductController controller) async {
+    final file = await pickImage();
+    if (file == null) return;
+    controller.addImage(
+      file.path,
+      isPrimary: controller.draftProduct.value.images.isEmpty,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<AddProductController>();
-    List<String> categories = Get.find<InventoryController>().categories.map((c)=>c.name).toList();
+    List<String> categories = Get.find<InventoryController>().categories
+        .map((c) => c.name)
+        .toList();
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: _buildAppBar(context),
+      appBar: _buildAppBar(context, controller),
       body: SafeArea(
         top: false,
         child: Padding(
@@ -226,48 +239,24 @@ class AddProductTabletLayout extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 18),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const FieldLabel('Wholesale Price (₹)'),
-                                  AddProductTextfield(
-                                    controller: controller.wholesalePriceCtrl,
-                                    hint: '0.00',
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(
-                                          decimal: true,
-                                        ),
-                                    prefixText: '₹ ',
-                                  ),
-                                ],
+                        SizedBox(
+                          width: double.infinity,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const FieldLabel('Wholesale Price (₹)'),
+                              AddProductTextfield(
+                                controller: controller.wholesalePriceCtrl,
+                                hint: '0.00',
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
+                                prefixText: '₹ ',
                               ),
-                            ),
-                            const SizedBox(width: 20),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const FieldLabel(
-                                    'Min. Selling Price (₹)',
-                                    info: 'Lowest price a cashier can bill at',
-                                  ),
-                                  AddProductTextfield(
-                                    controller: controller.minSellingPriceCtrl,
-                                    hint: '0.00',
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(
-                                          decimal: true,
-                                        ),
-                                    prefixText: '₹ ',
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -319,59 +308,17 @@ class AddProductTabletLayout extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            const SizedBox(width: 20),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const FieldLabel('Maximum Stock'),
-                                  AddProductTextfield(
-                                    controller: controller.maxStockCtrl,
-                                    hint: '100',
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
                           ],
                         ),
                         const SizedBox(height: 18),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const FieldLabel('Rack / Location'),
-                                  AddProductTextfield(
-                                    controller: controller.rackLocationCtrl,
-                                    hint: 'e.g. A-12, Shelf 3',
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 20),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const FieldLabel('Warehouse'),
-                                  Obx(
-                                    () => AddProductDropdown(
-                                      hint: 'Select warehouse',
-                                      value: controller.selectedWarehouse.value,
-                                      items: controller.warehouses,
-                                      onChanged: controller.selectWarehouse,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                        const FieldLabel('Warehouse'),
+                        Obx(
+                          () => AddProductDropdown(
+                            hint: 'Select warehouse',
+                            value: controller.selectedWarehouse.value,
+                            items: controller.warehouses,
+                            onChanged: controller.selectWarehouse,
+                          ),
                         ),
                       ],
                     ),
@@ -560,7 +507,12 @@ class AddProductTabletLayout extends StatelessWidget {
                             title: 'Product Images',
                             subtitle: 'Add up to 5 images for this product',
                             icon: Icons.image_outlined,
-                            children: [ImageUploadGrid(onUpload: () {})],
+                            children: [
+                              ImageUploadGrid(
+                                onUpload: () => _pickAndAddImage(controller),
+                                controller: controller,
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 20),
                           SectionCard(
@@ -573,13 +525,38 @@ class AddProductTabletLayout extends StatelessWidget {
                                 controller: controller.barcodeCtrl,
                                 hint: 'Scan or enter barcode',
                                 suffixIcon: Icons.qr_code_scanner_outlined,
-                                onSuffixTap: () {},
+                                onSuffixTap: controller.scanBarcode,
+                              ),
+                              const SizedBox(height: 12),
+                              SizedBox(
+                                width: double.infinity,
+                                child: OutlinedButton.icon(
+                                  onPressed: controller.printBarcode,
+                                  icon: const Icon(
+                                    Icons.print_outlined,
+                                    size: 18,
+                                  ),
+                                  label: const Text('Print Barcode'),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: AppColors.primary,
+                                    side: const BorderSide(
+                                      color: AppColors.primary,
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 12,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
                               ),
                               const SizedBox(height: 18),
                               const FieldLabel('SKU'),
                               AddProductTextfield(
+                                readOnly: true,
                                 controller: controller.skuCtrl,
-                                hint: 'e.g. SAM-TV-55Q',
+                                hint: 'Auto-generated from name and category',
                               ),
                               const SizedBox(height: 18),
                               const FieldLabel('Barcode Type'),
@@ -597,7 +574,22 @@ class AddProductTabletLayout extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    _buildActionCard(context, controller),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppColors.border),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.03),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: ProductActionButtons(controller: controller),
+                    ),
                   ],
                 ),
               ),
@@ -608,7 +600,10 @@ class AddProductTabletLayout extends StatelessWidget {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
+  PreferredSizeWidget _buildAppBar(
+    BuildContext context,
+    AddProductController controller,
+  ) {
     return AppBar(
       backgroundColor: AppColors.surface,
       elevation: 0,
@@ -624,108 +619,12 @@ class AddProductTabletLayout extends StatelessWidget {
       ),
       titleSpacing: 0,
       title: Text(
-        'New Product',
+        controller.isEditMode ? 'Edit Product' : 'New Product',
         style: Theme.of(context).textTheme.titleMedium,
       ),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
         child: Container(height: 1, color: AppColors.border),
-      ),
-    );
-  }
-
-  Widget _buildActionCard(
-    BuildContext context,
-    AddProductController controller,
-  ) {
-    return Obx(
-      () => Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            ElevatedButton(
-              onPressed: controller.isSaving.value
-                  ? null
-                  : controller.addProduct,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: controller.isSaving.value
-                  ? const SizedBox(
-                      height: 18,
-                      width: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : Text(
-                      'Add Product',
-                      style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
-            ),
-            const SizedBox(height: 10),
-            OutlinedButton(
-              onPressed: controller.isSaving.value
-                  ? null
-                  : controller.saveDraft,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.textPrimary,
-                side: const BorderSide(color: AppColors.border),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: Text(
-                'Save Draft',
-                style: Theme.of(
-                  context,
-                ).textTheme.labelLarge!.copyWith(fontWeight: FontWeight.w600),
-              ),
-            ),
-            const SizedBox(height: 10),
-            OutlinedButton(
-              onPressed: controller.isSaving.value ? null : controller.cancel,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.textSecondary,
-                side: const BorderSide(color: AppColors.border),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: Text(
-                'Cancel',
-                style: Theme.of(
-                  context,
-                ).textTheme.labelLarge!.copyWith(fontWeight: FontWeight.w600),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

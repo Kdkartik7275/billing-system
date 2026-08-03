@@ -1,3 +1,4 @@
+import 'package:billing_system/features/inventory/presentation/views/add_product/edit_product_page.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -9,14 +10,8 @@ import '../../domain/entities/stock_entity.dart';
 import '../controller/inventory_controller.dart';
 import 'status_chip.dart';
 
-/// Below this width a table (even scrollable) is a poor fit — switch to a
-/// stacked card list instead of forcing horizontal scroll on a phone.
 const double _cardBreakpoint = 640.0;
 
-/// Fixed pixel width for each column. Using fixed widths instead of flex
-/// ratios means header/cell text always gets the room it needs — no more
-/// ellipsis-truncated headers on narrower screens. Anything narrower than
-/// the resulting total table width just scrolls horizontally.
 class _ColW {
   static const double thumb = 42;
   static const double product = 220;
@@ -160,9 +155,6 @@ class _InventoryDataTableState extends State<InventoryDataTable> {
   }
 }
 
-/// Stacked card list used below [_cardBreakpoint] (phones). Shows the same
-/// data as the table columns, laid out for narrow-width scanning instead of
-/// horizontal scroll.
 class _CardListFallback extends StatelessWidget {
   final ValueChanged<ProductEntity> onDelete;
 
@@ -192,10 +184,8 @@ class _CardListFallback extends StatelessWidget {
         physics: const NeverScrollableScrollPhysics(),
         itemCount: products.length,
         separatorBuilder: (_, __) => const SizedBox(height: 10),
-        itemBuilder: (_, i) => _ProductListCard(
-          product: products[i],
-          onDelete: onDelete,
-        ),
+        itemBuilder: (_, i) =>
+            _ProductListCard(product: products[i], onDelete: onDelete),
       );
     });
   }
@@ -273,17 +263,19 @@ class _ProductListCard extends StatelessWidget {
                             size: 18,
                             color: Colors.grey.shade600,
                           ),
-                          onSelected: (action) {
+                          onSelected: (action) async {
                             switch (action) {
                               case 'view':
                                 controller.selectProduct(product);
                                 break;
                               case 'edit':
-                                Get.snackbar(
-                                  'Edit Product',
-                                  'The edit form for "${product.name}" will be available soon.',
-                                  snackPosition: SnackPosition.BOTTOM,
+                                final result = await Get.to<ProductEntity>(
+                                  () => EditProductPage(product: product),
                                 );
+
+                                if (result != null) {
+                                  controller.updateProduct(result);
+                                }
                                 break;
                               case 'delete':
                                 onDelete(product);
@@ -307,7 +299,10 @@ class _ProductListCard extends StatelessWidget {
                     '${controller.categoryName(product.categoryId)} · SKU ${product.sku}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 11.5, color: Colors.grey.shade600),
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      color: Colors.grey.shade600,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -374,19 +369,15 @@ class _TableBody extends StatelessWidget {
           itemCount: products.length,
           itemBuilder: (context, i) {
             final product = products[i];
-            return Obx(() {
-              final isSelected =
-                  controller.selectedProduct.value?.id == product.id;
-              return RepaintBoundary(
-                key: ValueKey(product.id),
-                child: _ProductRow(
-                  product: product,
-                  isSelected: isSelected,
-                  isLast: i == products.length - 1,
-                  onDelete: onDelete,
-                ),
-              );
-            });
+            return RepaintBoundary(
+              key: ValueKey(product.id),
+              child: _ProductRow(
+                product: product,
+
+                isLast: i == products.length - 1,
+                onDelete: onDelete,
+              ),
+            );
           },
         ),
       );
@@ -502,13 +493,11 @@ class _HeaderCell extends StatelessWidget {
 
 class _ProductRow extends StatelessWidget {
   final ProductEntity product;
-  final bool isSelected;
   final bool isLast;
   final ValueChanged<ProductEntity> onDelete;
 
   const _ProductRow({
     required this.product,
-    required this.isSelected,
     required this.isLast,
     required this.onDelete,
   });
@@ -524,7 +513,7 @@ class _ProductRow extends StatelessWidget {
       onTap: () => controller.selectProduct(product),
       child: Container(
         decoration: BoxDecoration(
-          color: isSelected ? Colors.blue.shade50 : null,
+          color: Colors.white,
           border: isLast
               ? null
               : Border(bottom: BorderSide(color: Colors.grey.shade200)),
@@ -547,7 +536,7 @@ class _ProductRow extends StatelessWidget {
                         gaplessPlayback: true,
                         cacheWidth: 84,
                         cacheHeight: 84,
-                        errorBuilder: (_, __, ___) => _thumbPlaceholder(),
+                        errorBuilder: (_, _, _) => _thumbPlaceholder(),
                       )
                     : _thumbPlaceholder(),
               ),
@@ -669,17 +658,19 @@ class _ProductRow extends StatelessWidget {
                   size: 18,
                   color: Colors.grey.shade700,
                 ),
-                onSelected: (action) {
+                onSelected: (action) async{
                   switch (action) {
                     case 'view':
                       controller.selectProduct(product);
                       break;
                     case 'edit':
-                      Get.snackbar(
-                        'Edit Product',
-                        'The edit form for "${product.name}" will be available soon.',
-                        snackPosition: SnackPosition.BOTTOM,
-                      );
+                        final result = await Get.to<ProductEntity>(
+                                  () => EditProductPage(product: product),
+                                );
+
+                                if (result != null) {
+                                  controller.updateProduct(result);
+                                }
                       break;
                     case 'delete':
                       onDelete(product);

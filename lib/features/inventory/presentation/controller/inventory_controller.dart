@@ -3,6 +3,7 @@ import 'package:billing_system/features/inventory/domain/usecases/brand/get_bran
 import 'package:billing_system/features/inventory/domain/usecases/category/get_categories_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/product/get_products_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/get_stocks_usecase.dart';
+import 'package:billing_system/features/inventory/presentation/views/product_details/product_detail_page.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 
@@ -42,7 +43,6 @@ class InventoryController extends GetxController {
   final RxString sortColumn = 'name'.obs;
   final RxBool sortAscending = true.obs;
 
-  final Rxn<ProductEntity> selectedProduct = Rxn<ProductEntity>();
   final RxBool isLoading = false.obs;
   final RxnString errorMessage = RxnString();
 
@@ -67,7 +67,6 @@ class InventoryController extends GetxController {
       result.fold((err) => AppSnackbar.error(message: err.message), (prods) {
         products.assignAll(prods);
       });
-      selectedProduct.value = products.isNotEmpty ? products.first : null;
     } catch (e) {
       errorMessage.value = 'Failed to load products: ${e.toString()}';
     } finally {
@@ -277,7 +276,9 @@ class InventoryController extends GetxController {
     }
   }
 
-  void selectProduct(ProductEntity product) {}
+  void selectProduct(ProductEntity product) {
+    Get.to(() => ProductDetailPage(product: product,stock: stockRecords.firstWhereOrNull((s) => s.productId == product.id),));
+  }
 
   Future<void> refreshProducts() async {
     await loadProducts();
@@ -288,8 +289,13 @@ class InventoryController extends GetxController {
     stockRecords.removeWhere((s) => s.productId == productId);
     stockBatches.removeWhere((b) => b.productId == productId);
 
-    if (selectedProduct.value?.id == productId) {
-      selectedProduct.value = products.isNotEmpty ? products.first : null;
+    
+  }
+
+  void updateProduct(ProductEntity updatedProduct) {
+    final index = products.indexWhere((p) => p.id == updatedProduct.id);
+    if (index != -1) {
+      products[index] = updatedProduct;
     }
   }
 

@@ -4,7 +4,7 @@ import '../../domain/value_objects/product_variant.dart';
 
 part 'product_variant_model.g.dart';
 
-@HiveType(typeId: 5)
+@HiveType(typeId: 15)
 class VariantAttributeModel extends HiveObject {
   @HiveField(0)
   final String name;

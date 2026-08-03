@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:billing_system/core/config/constants/typedefs.dart';
 import 'package:billing_system/core/errors/failure.dart';
 import 'package:billing_system/core/network/connection_checker.dart';
@@ -188,6 +190,16 @@ class ProductRepositoryImpl implements ProductRepository {
       return await localCall();
     } catch (_) {
       return await localCall();
+    }
+  }
+
+  @override
+  ResultFuture<List<String>> uploadProductImages(List<File> images) async {
+    try {
+      final imageUrls = await remoteDataSource.uploadProductImages(images);
+      return right(imageUrls);
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
     }
   }
 }

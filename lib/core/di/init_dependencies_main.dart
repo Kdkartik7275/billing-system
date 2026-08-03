@@ -130,6 +130,7 @@ void _initProducts() {
       productRepository: sl(),
       stockRepository: sl(),
       getOrCreateBrandUseCase: sl(),
+      uploadProductImages: sl(),
     ),
   );
   sl.registerLazySingleton(() => DeleteProductUseCase(sl()));
@@ -138,7 +139,14 @@ void _initProducts() {
   sl.registerLazySingleton(() => GetProductUsecase(repository: sl()));
   sl.registerLazySingleton(() => GetProductsUseCase(sl()));
   sl.registerLazySingleton(() => SearchProductsUseCase(sl()));
-  sl.registerLazySingleton(() => UpdateProductUseCase(sl()));
+  sl.registerLazySingleton(
+    () => UpdateProductUseCase(
+      getOrCreateBrandUseCase: sl(),
+      uploadProductImages: sl(),
+      productRepository: sl(),
+    ),
+  );
+  sl.registerLazySingleton(() => UploadProductImages(repository: sl()));
 }
 
 void _initCategory() {

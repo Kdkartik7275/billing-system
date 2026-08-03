@@ -244,55 +244,22 @@ class AddProductWebLayout extends StatelessWidget {
                               ],
                             ),
                             const SizedBox(height: 20),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const FieldLabel('Wholesale Price (₹)'),
-                                      AddProductTextfield(
-                                        controller:
-                                            controller.wholesalePriceCtrl,
-                                        hint: '0.00',
-                                        keyboardType:
-                                            const TextInputType.numberWithOptions(
-                                              decimal: true,
-                                            ),
-                                        prefixText: '₹ ',
-                                      ),
-                                    ],
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const FieldLabel('Wholesale Price (₹)'),
+                                  AddProductTextfield(
+                                    controller: controller.wholesalePriceCtrl,
+                                    hint: '0.00',
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                          decimal: true,
+                                        ),
+                                    prefixText: '₹ ',
                                   ),
-                                ),
-                                const SizedBox(width: 24),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const FieldLabel(
-                                        'Min. Selling Price (₹)',
-                                        info:
-                                            'Lowest price a cashier can bill at',
-                                      ),
-                                      AddProductTextfield(
-                                        controller:
-                                            controller.minSellingPriceCtrl,
-                                        hint: '0.00',
-                                        keyboardType:
-                                            const TextInputType.numberWithOptions(
-                                              decimal: true,
-                                            ),
-                                        prefixText: '₹ ',
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 24),
-                                const Expanded(child: SizedBox()),
-                              ],
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -350,67 +317,17 @@ class AddProductWebLayout extends StatelessWidget {
                                     ],
                                   ),
                                 ),
-                                const SizedBox(width: 24),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const FieldLabel('Maximum Stock'),
-                                      AddProductTextfield(
-                                        controller: controller.maxStockCtrl,
-                                        hint: '100',
-                                        keyboardType: TextInputType.number,
-                                        inputFormatters: [
-                                          FilteringTextInputFormatter
-                                              .digitsOnly,
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
                               ],
                             ),
                             const SizedBox(height: 20),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const FieldLabel('Rack / Location'),
-                                      AddProductTextfield(
-                                        controller: controller.rackLocationCtrl,
-                                        hint: 'e.g. A-12, Shelf 3',
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 24),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const FieldLabel('Warehouse'),
-                                      Obx(
-                                        () => AddProductDropdown(
-                                          hint: 'Select warehouse',
-                                          value: controller
-                                              .selectedWarehouse
-                                              .value,
-                                          items: controller.warehouses,
-                                          onChanged: controller.selectWarehouse,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 24),
-                                const Expanded(child: SizedBox()),
-                              ],
+                            const FieldLabel('Warehouse'),
+                            Obx(
+                              () => AddProductDropdown(
+                                hint: 'Select warehouse',
+                                value: controller.selectedWarehouse.value,
+                                items: controller.warehouses,
+                                onChanged: controller.selectWarehouse,
+                              ),
                             ),
                           ],
                         ),
@@ -625,7 +542,12 @@ class AddProductWebLayout extends StatelessWidget {
                                 title: 'Product Images',
                                 subtitle: 'Add up to 5 images for this product',
                                 icon: Icons.image_outlined,
-                                children: [ImageUploadGrid(onUpload: () {})],
+                                children: [
+                                  ImageUploadGrid(
+                                    onUpload: () {},
+                                    controller: controller,
+                                  ),
+                                ],
                               ),
                               const SizedBox(height: 20),
                               SectionCard(

@@ -40,6 +40,7 @@ class Bootstrap {
       ..registerAdapter(ProductTaxModelAdapter())
       ..registerAdapter(ProductSettingsModelAdapter())
       ..registerAdapter(ProductVariantModelAdapter())
+      ..registerAdapter(VariantAttributeModelAdapter())
       ..registerAdapter(ProductImageModelAdapter())
       ..registerAdapter(TaxTypeModelAdapter())
       ..registerAdapter(CategoryModelAdapter())
@@ -48,6 +49,7 @@ class Bootstrap {
     await Hive.openBox<ProductModel>('products');
     await Hive.openBox<CategoryModel>('categories');
     await Hive.openBox<BrandModel>('brands');
+    await Hive.openBox<StockModel>('stocks');
 
     await Hive.openBox<UserModel>('current_user');
     await Hive.openBox<ShopModel>('current_shop');

@@ -11,12 +11,14 @@ class AddProductTextfield extends StatelessWidget {
   final String? prefixText;
   final IconData? suffixIcon;
   final VoidCallback? onSuffixTap;
+  final bool readOnly;
 
   const AddProductTextfield({
     super.key,
     required this.controller,
     required this.hint,
     this.maxLines = 1,
+    this.readOnly = false,
     this.keyboardType,
     this.inputFormatters,
     this.prefixText,
@@ -29,8 +31,10 @@ class AddProductTextfield extends StatelessWidget {
     return TextField(
       controller: controller,
       maxLines: maxLines,
+      readOnly:readOnly,
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
+      
       style: const TextStyle(fontSize: 14.5, color: AppColors.textPrimary),
       decoration: InputDecoration(
         hintText: hint,

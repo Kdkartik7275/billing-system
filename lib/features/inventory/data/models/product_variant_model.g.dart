@@ -8,7 +8,7 @@ part of 'product_variant_model.dart';
 
 class VariantAttributeModelAdapter extends TypeAdapter<VariantAttributeModel> {
   @override
-  final int typeId = 5;
+  final int typeId = 15;
 
   @override
   VariantAttributeModel read(BinaryReader reader) {

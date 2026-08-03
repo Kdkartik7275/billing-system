@@ -45,6 +45,7 @@ import 'package:billing_system/features/inventory/domain/usecases/product/get_pr
 import 'package:billing_system/features/inventory/domain/usecases/product/get_products_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/product/search_products_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/product/update_product_usecase.dart';
+import 'package:billing_system/features/inventory/domain/usecases/product/upload_product_images.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/create_stock_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/get_product_stocks_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/get_stocks_usecase.dart';

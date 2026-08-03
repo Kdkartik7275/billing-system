@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:billing_system/core/config/constants/typedefs.dart';
 
 import '../entities/product_entity.dart';
@@ -18,4 +20,5 @@ abstract class ProductRepository {
   ResultFuture<ProductEntity> updateProduct(ProductEntity product);
 
   ResultVoid deleteProduct(String id);
+  ResultFuture<List<String>> uploadProductImages(List<File> images);
 }

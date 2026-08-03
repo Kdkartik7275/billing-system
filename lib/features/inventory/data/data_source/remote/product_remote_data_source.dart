@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:billing_system/core/services/storage/storage_service.dart';
 import 'package:billing_system/features/inventory/data/models/product_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -17,6 +20,8 @@ abstract interface class ProductRemoteDataSource {
   Future<ProductModel> updateProduct(ProductModel product);
 
   Future<void> deleteProduct(String id);
+
+  Future<List<String>> uploadProductImages(List<File> images);
 }
 
 class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
@@ -161,6 +166,27 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
       throw Exception('Failed to update product: ${e.message}');
     } catch (e) {
       throw Exception('Failed to update product: $e');
+    }
+  }
+
+  @override
+  Future<List<String>> uploadProductImages(List<File> images) async {
+    try {
+      final storageService = StorageService();
+      List<String> uploadedImageUrls = [];
+
+      for (File image in images) {
+        final imageUrl = await storageService.uploadFileData(image);
+        if (imageUrl != null) {
+          uploadedImageUrls.add(imageUrl);
+        } else {
+          throw Exception('Failed to upload image: ${image.path}');
+        }
+      }
+
+      return uploadedImageUrls;
+    } catch (e) {
+      throw Exception('Failed to upload product images: $e');
     }
   }
 }

@@ -1,3 +1,4 @@
+import 'package:billing_system/core/config/constants/dropdown_values.dart';
 import 'package:billing_system/core/config/theme/app_colors.dart';
 import 'package:billing_system/core/helper/functions.dart';
 import 'package:billing_system/features/inventory/presentation/controller/add_product_controller.dart';
@@ -69,7 +70,7 @@ class AddProductMobileLayout extends StatelessWidget {
                   () => AddProductDropdown(
                     hint: 'Select supplier',
                     value: controller.draftProduct.value.primarySupplierId,
-                    items: controller.suppliers,
+                    items: suppliers,
                     onChanged: controller.updateSupplier,
                   ),
                 ),
@@ -79,7 +80,7 @@ class AddProductMobileLayout extends StatelessWidget {
                   () => AddProductDropdown(
                     hint: 'Select unit',
                     value: controller.draftProduct.value.unitId,
-                    items: controller.units,
+                    items: units,
                     onChanged: controller.updateUnit,
                   ),
                 ),
@@ -207,7 +208,7 @@ class AddProductMobileLayout extends StatelessWidget {
                   () => AddProductDropdown(
                     hint: 'Select warehouse',
                     value: controller.selectedWarehouse.value,
-                    items: controller.warehouses,
+                    items: warehouses,
                     onChanged: controller.selectWarehouse,
                   ),
                 ),
@@ -224,7 +225,7 @@ class AddProductMobileLayout extends StatelessWidget {
                   () => AddProductDropdown(
                     hint: 'Select GST rate',
                     value: controller.gstLabel,
-                    items: controller.gstRates,
+                    items: gstRates,
                     onChanged: controller.updateGST,
                   ),
                 ),
@@ -278,7 +279,7 @@ class AddProductMobileLayout extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
-                    onPressed: controller.printBarcode,
+                    onPressed: () => printBarcode(controller.barcodeCtrl.text),
                     icon: const Icon(Icons.print_outlined, size: 18),
                     label: const Text('Print Barcode'),
                     style: OutlinedButton.styleFrom(
@@ -304,7 +305,7 @@ class AddProductMobileLayout extends StatelessWidget {
                   () => AddProductDropdown(
                     hint: 'Select barcode type',
                     value: controller.selectedBarcodeType.value,
-                    items: controller.barcodeTypes,
+                    items: barcodeTypes,
                     onChanged: controller.selectBarcodeType,
                   ),
                 ),

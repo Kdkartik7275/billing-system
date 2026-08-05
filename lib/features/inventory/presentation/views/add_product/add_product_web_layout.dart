@@ -1,4 +1,5 @@
 // import 'package:billing_system/core/config/theme/app_colors.dart';
+import 'package:billing_system/core/config/constants/dropdown_values.dart';
 import 'package:billing_system/core/config/theme/app_colors.dart';
 import 'package:billing_system/features/inventory/presentation/controller/add_product_controller.dart';
 import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
@@ -116,7 +117,7 @@ class AddProductWebLayout extends StatelessWidget {
                                               .draftProduct
                                               .value
                                               .primarySupplierId,
-                                          items: controller.suppliers,
+                                          items: suppliers,
                                           onChanged: controller.updateSupplier,
                                         ),
                                       ),
@@ -137,7 +138,7 @@ class AddProductWebLayout extends StatelessWidget {
                                               .draftProduct
                                               .value
                                               .unitId,
-                                          items: controller.units,
+                                          items: units,
                                           onChanged: controller.updateUnit,
                                         ),
                                       ),
@@ -325,7 +326,7 @@ class AddProductWebLayout extends StatelessWidget {
                               () => AddProductDropdown(
                                 hint: 'Select warehouse',
                                 value: controller.selectedWarehouse.value,
-                                items: controller.warehouses,
+                                items: warehouses,
                                 onChanged: controller.selectWarehouse,
                               ),
                             ),
@@ -353,7 +354,7 @@ class AddProductWebLayout extends StatelessWidget {
                                         () => AddProductDropdown(
                                           hint: 'Select GST rate',
                                           value: controller.gstLabel,
-                                          items: controller.gstRates,
+                                          items: gstRates,
                                           onChanged: controller.updateGST,
                                         ),
                                       ),
@@ -576,7 +577,7 @@ class AddProductWebLayout extends StatelessWidget {
                                       hint: 'Select barcode type',
                                       value:
                                           controller.selectedBarcodeType.value,
-                                      items: controller.barcodeTypes,
+                                      items: barcodeTypes,
                                       onChanged: controller.selectBarcodeType,
                                     ),
                                   ),

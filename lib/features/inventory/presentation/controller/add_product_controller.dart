@@ -1,3 +1,4 @@
+import 'package:billing_system/core/config/constants/dropdown_values.dart';
 import 'package:billing_system/core/helper/functions.dart' as scanner;
 import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/features/inventory/domain/entities/category_entity.dart';
@@ -14,10 +15,7 @@ import 'package:billing_system/features/inventory/domain/value_objects/product_t
 import 'package:billing_system/features/inventory/domain/value_objects/product_variant.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:pdf/pdf.dart';
 import 'package:uuid/uuid.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
 
 class AddProductController extends GetxController {
   AddProductController({
@@ -82,38 +80,6 @@ class AddProductController extends GetxController {
   List<String> get categories =>
       _inventoryController.categories.map((c) => c.name).toList();
 
-  // ---------------- STATIC OPTIONS ----------------
-
-  final List<String> suppliers = const [
-    'Samsung India Pvt Ltd',
-    'Reliance Digital',
-    'Local Distributor Co.',
-    'Global Traders Inc.',
-  ];
-
-  final List<String> units = const [
-    'Piece',
-    'Box',
-    'Kg',
-    'Litre',
-    'Pack',
-    'Dozen',
-  ];
-
-  final List<String> warehouses = const [
-    'Main Store',
-    'Warehouse A',
-    'Warehouse B',
-  ];
-
-  final List<String> gstRates = const ['0%', '5%', '12%', '18%', '28%'];
-
-  final List<String> barcodeTypes = const [
-    'EAN-13',
-    'UPC-A',
-    'CODE-128',
-    'QR Code',
-  ];
 
   // ---------------- LIFECYCLE ----------------
 
@@ -308,63 +274,6 @@ class AddProductController extends GetxController {
     barcodeCtrl.text = result;
   }
 
-  Future<void> printBarcode() async {
-    final barcode = barcodeCtrl.text.trim();
-
-    if (barcode.isEmpty) {
-      AppSnackbar.error(message: 'Enter or scan a barcode before printing');
-      return;
-    }
-
-    final pdf = pw.Document();
-
-    pdf.addPage(
-      pw.Page(
-        pageFormat: PdfPageFormat.a6,
-        margin: const pw.EdgeInsets.all(16),
-        build: (context) {
-          return pw.Center(
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.center,
-              mainAxisSize: pw.MainAxisSize.min,
-              children: [
-                pw.Text(
-                  'Product Barcode',
-                  style: pw.TextStyle(
-                    fontSize: 18,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-                pw.SizedBox(height: 24),
-
-                // Barcode
-                pw.BarcodeWidget(
-                  barcode: pw.Barcode.code128(),
-                  data: barcode,
-                  width: 220,
-                  height: 80,
-                  drawText: false,
-                ),
-
-                pw.SizedBox(height: 12),
-
-                // Human readable text
-                pw.Text(
-                  barcode,
-                  style: const pw.TextStyle(fontSize: 16, letterSpacing: 2),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdf.save(),
-      name: 'barcode_$barcode.pdf',
-    );
-  }
   // ---------------- SELECTORS ----------------
 
   void setTaxInclusive(String label) {

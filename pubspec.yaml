@@ -34,6 +34,9 @@ dependencies:
   printing: ^5.14.3
   internet_connection_checker_plus: ^3.0.1
   flutter_native_splash: ^2.4.7
+  cached_network_image: ^3.4.1
+  intl: ^0.20.3
+  barcode_widget: ^2.0.4
 
 dev_dependencies:
   flutter_test:

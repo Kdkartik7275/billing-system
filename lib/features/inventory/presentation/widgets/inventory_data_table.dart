@@ -1,4 +1,5 @@
 import 'package:billing_system/features/inventory/presentation/views/add_product/edit_product_page.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -223,13 +224,12 @@ class _ProductListCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 child: product.primaryImageUrl != null
-                    ? Image.network(
-                        product.primaryImageUrl!,
+                    ? CachedNetworkImage(
+                        imageUrl: product.primaryImageUrl!,
                         fit: BoxFit.cover,
-                        gaplessPlayback: true,
-                        cacheWidth: 96,
-                        cacheHeight: 96,
-                        errorBuilder: (_, __, ___) => _thumbPlaceholder(),
+                        placeholder: (_, __) => _thumbPlaceholder(),
+                        errorWidget: (_, __, ___) => _thumbPlaceholder(),
+
                       )
                     : _thumbPlaceholder(),
               ),
@@ -530,13 +530,12 @@ class _ProductRow extends StatelessWidget {
                 width: _ColW.thumb,
                 height: _ColW.thumb,
                 child: product.primaryImageUrl != null
-                    ? Image.network(
-                        product.primaryImageUrl!,
+                    ? CachedNetworkImage(
+                        imageUrl: product.primaryImageUrl!,
                         fit: BoxFit.cover,
-                        gaplessPlayback: true,
-                        cacheWidth: 84,
-                        cacheHeight: 84,
-                        errorBuilder: (_, _, _) => _thumbPlaceholder(),
+                        placeholder: (_, __) => _thumbPlaceholder(),
+                        errorWidget: (_, __, ___) => _thumbPlaceholder(),
+                        
                       )
                     : _thumbPlaceholder(),
               ),

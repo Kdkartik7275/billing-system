@@ -17,7 +17,9 @@ import 'package:billing_system/features/inventory/data/data_source/remote/stock_
 import 'package:billing_system/features/inventory/data/models/brand/brand_model.dart';
 import 'package:billing_system/features/inventory/data/models/category/category_model.dart';
 import 'package:billing_system/features/inventory/data/models/product_model.dart';
+import 'package:billing_system/features/inventory/data/models/stock/stock_batch_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_model.dart';
+import 'package:billing_system/features/inventory/data/models/stock/stock_movement_model.dart';
 import 'package:billing_system/features/inventory/data/repository_impl/brand_repository_impl.dart';
 import 'package:billing_system/features/inventory/data/repository_impl/category_repository_impl.dart';
 import 'package:billing_system/features/inventory/data/repository_impl/product_repository_impl.dart';
@@ -46,9 +48,16 @@ import 'package:billing_system/features/inventory/domain/usecases/product/get_pr
 import 'package:billing_system/features/inventory/domain/usecases/product/search_products_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/product/update_product_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/product/upload_product_images.dart';
+import 'package:billing_system/features/inventory/domain/usecases/stock/create_stock_batch_usecase.dart';
+import 'package:billing_system/features/inventory/domain/usecases/stock/create_stock_movement_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/create_stock_usecase.dart';
+import 'package:billing_system/features/inventory/domain/usecases/stock/get_product_stock_batches_usecase.dart';
+import 'package:billing_system/features/inventory/domain/usecases/stock/get_product_stock_movements_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/get_product_stocks_usecase.dart';
+import 'package:billing_system/features/inventory/domain/usecases/stock/get_stock_batches_usecase.dart';
+import 'package:billing_system/features/inventory/domain/usecases/stock/get_stocks_movement_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/get_stocks_usecase.dart';
+import 'package:billing_system/features/inventory/domain/usecases/stock/purchase_stock_usecase.dart';
 
 import 'package:billing_system/features/user/data/data_source/user_local_data_source.dart';
 import 'package:billing_system/features/user/data/data_source/user_remote_data_source.dart';

@@ -49,6 +49,14 @@ Future<void> _initHiveBoxes() async {
   final stocksBox = await Hive.openBox<StockModel>('stocks');
   sl.registerLazySingleton<Box<StockModel>>(() => stocksBox);
 
+  final stockBatches = await Hive.openBox<StockBatchModel>('stock_batch');
+  sl.registerLazySingleton<Box<StockBatchModel>>(() => stockBatches);
+
+  final stockMovements = await Hive.openBox<StockMovementModel>(
+    'stock_movement',
+  );
+  sl.registerLazySingleton<Box<StockMovementModel>>(() => stockMovements);
+
   // ==========================================================
   // User Module
   // ==========================================================
@@ -131,6 +139,8 @@ void _initProducts() {
       stockRepository: sl(),
       getOrCreateBrandUseCase: sl(),
       uploadProductImages: sl(),
+      createStockBatchUseCase: sl(),
+      createStockMovementUseCase: sl(),
     ),
   );
   sl.registerLazySingleton(() => DeleteProductUseCase(sl()));
@@ -221,10 +231,26 @@ void _initStocks() {
     ),
   );
   sl.registerLazySingleton<StockLocalDataSource>(
-    () => StockLocalDataSourceImpl(box: sl()),
+    () => StockLocalDataSourceImpl(
+      batchBox: sl(),
+      movementBox: sl(),
+      stockBox: sl(),
+    ),
   );
   // USECASES
   sl.registerLazySingleton(() => CreateStockUsecase(repository: sl()));
   sl.registerLazySingleton(() => GetProductStocksUsecase(repository: sl()));
   sl.registerLazySingleton(() => GetStocksUsecase(repository: sl()));
+  sl.registerLazySingleton(() => CreateStockBatchUsecase(repository: sl()));
+
+  sl.registerLazySingleton(() => CreateStockMovementUsecase(repository: sl()));
+  sl.registerLazySingleton(
+    () => GetProductStockBatchesUsecase(repository: sl()),
+  );
+  sl.registerLazySingleton(
+    () => GetProductStockMovementsUsecase(repository: sl()),
+  );
+  sl.registerLazySingleton(() => GetStockBatchesUsecase(repository: sl()));
+  sl.registerLazySingleton(() => GetStocksMovementUsecase(repository: sl()));
+  sl.registerLazySingleton(() => PurchaseStockUseCase(repository: sl()));
 }

@@ -1,4 +1,5 @@
 import 'package:billing_system/core/config/theme/app_colors.dart';
+import 'package:billing_system/features/billing/presentation/views/billing_page.dart';
 import 'package:billing_system/features/dashboard/presentation/controller/dashboard_shell_controller.dart';
 import 'package:billing_system/features/dashboard/presentation/layout/dashboard_tablet_body.dart';
 import 'package:billing_system/features/dashboard/presentation/models/dashboard_menu.dart';
@@ -12,7 +13,7 @@ class DashboardTabletLayout extends StatefulWidget {
 
   static const Map<DashboardMenu, Widget> _pages = {
     DashboardMenu.dashboard: TabletDashboardBody(),
-    DashboardMenu.pos: Center(child: Text('Sales')),
+    DashboardMenu.pos: BillingPage(),
     DashboardMenu.inventory: InventoryPage(),
     DashboardMenu.sales: Center(child: Text('Sales')),
     DashboardMenu.customers: Center(child: Text('Customers')),
@@ -70,21 +71,18 @@ class _DashboardTabletLayoutState extends State<DashboardTabletLayout> {
             color: Color(0xFFE5E7EB),
           ),
           // Main content
-           Expanded(
-                  child: Obx(
-                    () =>
-                        DashboardTabletLayout._pages[controller
-                            .selectedMenu
-                            .value] ??
-                        const Center(child: Text('Dashboard')),
-                  ),
-                ),
+          Expanded(
+            child: Obx(
+              () =>
+                  DashboardTabletLayout._pages[controller.selectedMenu.value] ??
+                  const Center(child: Text('Dashboard')),
+            ),
+          ),
         ],
       ),
     );
   }
 }
-
 
 class _TabletSidebar extends StatelessWidget {
   final bool expanded;

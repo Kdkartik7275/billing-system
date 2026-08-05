@@ -7,7 +7,9 @@ import 'package:billing_system/features/inventory/data/models/product_price_mode
 import 'package:billing_system/features/inventory/data/models/product_settings_model.dart';
 import 'package:billing_system/features/inventory/data/models/product_tax_model.dart';
 import 'package:billing_system/features/inventory/data/models/product_variant_model.dart';
+import 'package:billing_system/features/inventory/data/models/stock/stock_batch_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_model.dart';
+import 'package:billing_system/features/inventory/data/models/stock/stock_movement_model.dart';
 import 'package:billing_system/features/inventory/data/models/tax_type.dart';
 
 import 'package:billing_system/features/user/data/models/firebase_config_model.dart';
@@ -45,11 +47,16 @@ class Bootstrap {
       ..registerAdapter(TaxTypeModelAdapter())
       ..registerAdapter(CategoryModelAdapter())
       ..registerAdapter(BrandModelAdapter())
-      ..registerAdapter(StockModelAdapter());
+      ..registerAdapter(StockModelAdapter())
+      ..registerAdapter(StockBatchModelAdapter())
+      ..registerAdapter(StockMovementModelAdapter())
+      ..registerAdapter(StockMovementTypeModelAdapter());
     await Hive.openBox<ProductModel>('products');
     await Hive.openBox<CategoryModel>('categories');
     await Hive.openBox<BrandModel>('brands');
     await Hive.openBox<StockModel>('stocks');
+    await Hive.openBox<StockMovementModel>('stock_movement');
+    await Hive.openBox<StockBatchModel>('stock_batch');
 
     await Hive.openBox<UserModel>('current_user');
     await Hive.openBox<ShopModel>('current_shop');

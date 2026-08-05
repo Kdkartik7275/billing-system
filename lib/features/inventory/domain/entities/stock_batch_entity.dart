@@ -55,15 +55,4 @@ class StockBatchEntity {
       receivedAt: receivedAt ?? this.receivedAt,
     );
   }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) || (other is StockBatchEntity && other.id == id);
-
-  @override
-  int get hashCode => id.hashCode;
-
-  @override
-  String toString() =>
-      'StockBatchEntity(id: $id, batch: $batchNumber, qty: $quantity)';
 }

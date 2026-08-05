@@ -1,8 +1,12 @@
 import 'dart:io';
 
 import 'package:billing_system/core/scanner/barcode_scanner_page.dart';
+import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 Future<File?> pickImage({bool camera = false}) async {
   ImagePicker picker = ImagePicker();
@@ -23,4 +27,60 @@ Future<String?> scanBarcode({
 
   if (result == null || result.trim().isEmpty) return null;
   return result.trim();
+}
+
+Future<void> printBarcode(String barcode) async {
+  if (barcode.isEmpty) {
+    AppSnackbar.error(message: 'Enter or scan a barcode before printing');
+    return;
+  }
+
+  final pdf = pw.Document();
+
+  pdf.addPage(
+    pw.Page(
+      pageFormat: PdfPageFormat.a6,
+      margin: const pw.EdgeInsets.all(16),
+      build: (context) {
+        return pw.Center(
+          child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
+            mainAxisSize: pw.MainAxisSize.min,
+            children: [
+              pw.Text(
+                'Product Barcode',
+                style: pw.TextStyle(
+                  fontSize: 18,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+              pw.SizedBox(height: 24),
+
+              // Barcode
+              pw.BarcodeWidget(
+                barcode: pw.Barcode.code128(),
+                data: barcode,
+                width: 220,
+                height: 80,
+                drawText: false,
+              ),
+
+              pw.SizedBox(height: 12),
+
+              // Human readable text
+              pw.Text(
+                barcode,
+                style: const pw.TextStyle(fontSize: 16, letterSpacing: 2),
+              ),
+            ],
+          ),
+        );
+      },
+    ),
+  );
+
+  await Printing.layoutPdf(
+    onLayout: (PdfPageFormat format) async => pdf.save(),
+    name: 'barcode_$barcode.pdf',
+  );
 }

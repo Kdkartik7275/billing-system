@@ -299,32 +299,42 @@ class ReceivePaymentView extends StatelessWidget {
         // ---------------- PINNED NUMPAD ----------------
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-          child: GridView.count(
+          child: // ---------------- NUMPAD ----------------
+          GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 3,
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-            childAspectRatio: 2.1,
-            children: [
-              for (final digit in ['1', '2', '3', '4', '5', '6', '7', '8', '9'])
-                NumpadButton(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              mainAxisExtent: 48,
+            ),
+            itemCount: 12,
+            itemBuilder: (_, index) {
+              if (index < 9) {
+                final digit = '${index + 1}';
+                return NumpadButton(
                   label: digit,
                   onTap: () => checkoutController.appendDigit(digit),
-                ),
-              NumpadButton(
-                label: '.',
-                onTap: () => checkoutController.appendDigit('.'),
-              ),
-              NumpadButton(
-                label: '0',
-                onTap: () => checkoutController.appendDigit('0'),
-              ),
-              NumpadButton(
+                );
+              }
+              if (index == 9) {
+                return NumpadButton(
+                  label: '.',
+                  onTap: () => checkoutController.appendDigit('.'),
+                );
+              }
+              if (index == 10) {
+                return NumpadButton(
+                  label: '0',
+                  onTap: () => checkoutController.appendDigit('0'),
+                );
+              }
+              return NumpadButton(
                 icon: Icons.backspace_outlined,
                 onTap: checkoutController.backspace,
-              ),
-            ],
+              );
+            },
           ),
         ),
 
@@ -371,7 +381,7 @@ class ReceivePaymentView extends StatelessWidget {
                       ],
                     ),
                   ),
-                 TextButton.icon(
+                  TextButton.icon(
                     onPressed: () {
                       final bill = checkoutController.completedBill.value;
                       if (bill != null) {
@@ -382,8 +392,15 @@ class ReceivePaymentView extends StatelessWidget {
                       }
                       onClose();
                     },
-                    icon: const Icon(Icons.print_outlined, color: Colors.white, size: 18),
-                    label: const Text("Print Receipt", style: TextStyle(color: Colors.white)),
+                    icon: const Icon(
+                      Icons.print_outlined,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                    label: const Text(
+                      "Print Receipt",
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ],
               ),

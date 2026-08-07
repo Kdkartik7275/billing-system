@@ -43,10 +43,7 @@ class BillRemoteDataSourceImpl implements BillRemoteDataSource {
   @override
   Future<List<BillModel>> getBillsForOutlet(String outletId) async {
     try {
-      final snapshot = await firestore
-          .collection(_collection)
-          .where('outletId', isEqualTo: outletId)
-          .get();
+      final snapshot = await firestore.collection(_collection).get();
 
       return snapshot.docs
           .map((doc) => BillModel.fromJson(doc.data()))

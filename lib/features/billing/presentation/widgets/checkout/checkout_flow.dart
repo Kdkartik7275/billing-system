@@ -1,4 +1,7 @@
 import 'package:billing_system/core/di/init_dependencies.dart';
+import 'package:billing_system/features/billing/domain/usecases/clear_cart_usecase.dart';
+import 'package:billing_system/features/billing/domain/usecases/create_bill_usecase.dart';
+import 'package:billing_system/features/billing/domain/usecases/get_next_bill_number_usecase.dart';
 import 'package:billing_system/features/billing/presentation/controllers/cart_controller.dart';
 import 'package:billing_system/features/billing/presentation/controllers/checkout_controller.dart';
 import 'package:billing_system/features/billing/presentation/widgets/checkout/proceed_to_payment_view.dart';
@@ -48,22 +51,29 @@ Future<void> showCheckoutFlow(
   final checkoutController = Get.put(
     CheckoutController(
       cartController: cartController,
-      clearCartUsecase: sl(),
-      createBillUsecase: sl(),
-      getNextBillNumberUsecase: sl(),
+      createBillUsecase: sl<CreateBillUsecase>(),
+      getNextBillNumberUsecase: sl<GetNextBillNumberUsecase>(),
+      clearCartUsecase: sl<ClearCartUsecase>(),
     ),
     tag: 'checkout',
   );
 
-  final isWide = MediaQuery.of(context).size.width >= 700;
+  final screenSize = MediaQuery.of(context).size;
+  final isWide = screenSize.width >= 700;
 
   void closeAndReset() {
     Navigator.of(context).maybePop();
-    cartController.clearCart();
     Get.delete<CheckoutController>(tag: 'checkout');
   }
 
   if (isWide) {
+    // Hard caps regardless of monitor size — never let the dialog grow
+    // past a sensible fixed footprint just because the viewport is huge.
+    final dialogWidth = screenSize.width < 480 ? screenSize.width : 460.0;
+    final dialogHeight = screenSize.height < 700
+        ? screenSize.height * .9
+        : 680.0;
+
     await showDialog(
       context: context,
       barrierDismissible: false,
@@ -72,21 +82,19 @@ Future<void> showCheckoutFlow(
           insetPadding: const EdgeInsets.symmetric(vertical: 24),
           backgroundColor: Colors.transparent,
           child: Center(
-            child: Container(
-              width: MediaQuery.of(context).size.width * .8,
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * .9,
-              ),
-              decoration: BoxDecoration(
+            child: SizedBox(
+              width: dialogWidth,
+              height: dialogHeight,
+              child: Material(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: CheckoutFlow(
-                checkoutController: checkoutController,
-                cartController: cartController,
-                onEditCart: () => Navigator.of(context).maybePop(),
-                onClose: closeAndReset,
+                clipBehavior: Clip.antiAlias,
+                child: CheckoutFlow(
+                  checkoutController: checkoutController,
+                  cartController: cartController,
+                  onEditCart: () => Navigator.of(context).maybePop(),
+                  onClose: closeAndReset,
+                ),
               ),
             ),
           ),
@@ -100,9 +108,7 @@ Future<void> showCheckoutFlow(
       backgroundColor: Colors.transparent,
       builder: (_) {
         return Padding(
-          padding: EdgeInsets.only(
-            top: MediaQuery.of(context).size.height * .06,
-          ),
+          padding: EdgeInsets.only(top: screenSize.height * .06),
           child: ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             child: Container(

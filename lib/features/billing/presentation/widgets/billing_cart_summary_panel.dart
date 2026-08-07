@@ -115,58 +115,23 @@ class BillingCartSummaryPanel extends StatelessWidget {
             child: Obx(
               () => Column(
                 children: [
-                  Row(
-                    children: [
-                      Text(
-                        "Subtotal",
-                        style: theme.bodyMedium?.copyWith(
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        "₹${cartController.subtotal.toStringAsFixed(2)}",
-                        style: theme.bodyMedium?.copyWith(
-                          color: Colors.grey.shade700,
-                        ),
-                      ),
-                    ],
+                  _buildSummaryRow(
+                    context,
+                    title: "Subtotal",
+                    value: "₹${cartController.subtotal.toStringAsFixed(2)}",
                   ),
                   const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Text(
-                        "GST",
-                        style: theme.bodyMedium?.copyWith(
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        "₹${cartController.totalTax.toStringAsFixed(2)}",
-                        style: theme.bodyMedium?.copyWith(
-                          color: Colors.grey.shade700,
-                        ),
-                      ),
-                    ],
+                  _buildSummaryRow(
+                    context,
+                    title: "GST",
+                    value: "₹${cartController.totalTax.toStringAsFixed(2)}",
                   ),
                   const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Text(
-                        "Grand Total",
-                        style: theme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        "₹${cartController.totalAmount.toStringAsFixed(2)}",
-                        style: theme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
+                  _buildSummaryRow(
+                    context,
+                    title: "Grand Total",
+                    value: "₹${cartController.totalAmount.toStringAsFixed(2)}",
+                    isGrandTotal: true,
                   ),
                   const SizedBox(height: 14),
                   SizedBox(
@@ -197,9 +162,46 @@ class BillingCartSummaryPanel extends StatelessWidget {
       ),
     );
   }
-}
 
-// ---------------- CART ITEM ROW (EXTRACTED FOR REPAINT ISOLATION) ----------------
+  Widget _buildSummaryRow(
+    BuildContext context, {
+    required String title,
+    required String value,
+    bool isGrandTotal = false,
+  }) {
+    final theme = Theme.of(context).textTheme;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: isGrandTotal
+                ? theme.titleSmall?.copyWith(fontWeight: FontWeight.w700)
+                : theme.bodyMedium?.copyWith(color: Colors.grey.shade600),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Flexible(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerRight,
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: isGrandTotal
+                  ? theme.titleMedium?.copyWith(fontWeight: FontWeight.w700)
+                  : theme.bodyMedium?.copyWith(color: Colors.grey.shade700),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
 
 class _CartItemRow extends StatelessWidget {
   final CartItem item;

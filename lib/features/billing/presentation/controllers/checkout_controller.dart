@@ -218,7 +218,6 @@ class CheckoutController extends GetxController {
 
     final userController = Get.find<UserController>();
     final cashierId = userController.user.value?.uid ?? '';
-    final shopId = userController.shop.value?.id ?? '';
 
     const uuid = Uuid();
 
@@ -295,7 +294,7 @@ class CheckoutController extends GetxController {
       return;
     }
 
-    final createResult = await createBillUsecase(result);
+    final createResult = await createBillUsecase.call(result);
 
     createResult.fold(
       (failure) {

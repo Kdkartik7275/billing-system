@@ -1,4 +1,5 @@
 import 'package:billing_system/core/config/responsive/adaptive_layout.dart';
+import 'package:billing_system/core/di/init_dependencies.dart';
 import 'package:billing_system/features/billing/presentation/controllers/billing_controller.dart';
 import 'package:billing_system/features/billing/presentation/layout/billing_mobile_layout.dart';
 import 'package:billing_system/features/billing/presentation/layout/billing_tablet_layout.dart';
@@ -11,7 +12,7 @@ class BillingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(BillingController());
+    Get.put(BillingController(getAllBillsUsecase: sl()));
     return AdaptiveLayout(
       desktop: BillingWebLayout(),
       tablet: BillingTabletLayout(),

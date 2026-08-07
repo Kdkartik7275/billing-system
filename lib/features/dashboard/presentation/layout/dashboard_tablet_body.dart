@@ -10,89 +10,89 @@ class TabletDashboardBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Obx(() {
-            final cards = [
-              DashboardCardModel(
-                title: "Today's Sales",
-                value: "₹${0}",
-                growth: "${0} orders today",
-                icon: Icons.attach_money,
-                iconColor: Colors.green,
-              ),
-              DashboardCardModel(
-                title: "Total Orders",
-                value: "${0}",
-                growth: "bills today",
-                icon: Icons.shopping_cart_outlined,
-                iconColor: Colors.blue,
-              ),
-              DashboardCardModel(
-                title: "Revenue",
-                value: "₹${0}",
-                growth: "excl. tax",
-                icon: Icons.show_chart,
-                iconColor: Colors.deepPurple,
-              ),
-              DashboardCardModel(
-                title: "Pending Sync",
-                value: "${0}",
-                growth:  "No pending bills"
-                    ,
-                icon: Icons.pending_actions_outlined,
-                iconColor: Colors.orange,
-              ),
-            ];
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                final cardWidth = (constraints.maxWidth - 10) / 2;
-                final cardHeight = cardWidth * 0.38;
-                return GridView.count(
-                  crossAxisCount: 2,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  childAspectRatio: cardWidth / cardHeight,
-                  children: cards
-                      .map((c) => _TabletSummaryCard(data: c))
-                      .toList(),
-                );
-              },
-            );
-          }),
-          const SizedBox(height: 12),
-          // const SalesLineChart(height: 260),
-          // const SizedBox(height: 12),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              if (constraints.maxWidth >= 480) {
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                  //  const Expanded(child: CategoryPieChart(height: 300)),
-                    const SizedBox(width: 10),
-                    Expanded(child: _TabletTransactions()),
-                  ],
-                );
-              }
-              return Column(
-                children: [
-                 // const CategoryPieChart(height: 280),
-                  const SizedBox(height: 12),
-                  _TabletTransactions(),
-                ],
-              );
-            },
-          ),
-          const SizedBox(height: 24),
-          // const LowStockAlerts(),
-          // const SizedBox(height: 12),
-        ],
-      ),
+      // padding: const EdgeInsets.symmetric(horizontal: 12),
+      // child: Column(
+      //   crossAxisAlignment: CrossAxisAlignment.start,
+      //   children: [
+      //     Obx(() {
+      //       final cards = [
+      //         DashboardCardModel(
+      //           title: "Today's Sales",
+      //           value: "₹${0}",
+      //           growth: "${0} orders today",
+      //           icon: Icons.attach_money,
+      //           iconColor: Colors.green,
+      //         ),
+      //         DashboardCardModel(
+      //           title: "Total Orders",
+      //           value: "${0}",
+      //           growth: "bills today",
+      //           icon: Icons.shopping_cart_outlined,
+      //           iconColor: Colors.blue,
+      //         ),
+      //         DashboardCardModel(
+      //           title: "Revenue",
+      //           value: "₹${0}",
+      //           growth: "excl. tax",
+      //           icon: Icons.show_chart,
+      //           iconColor: Colors.deepPurple,
+      //         ),
+      //         DashboardCardModel(
+      //           title: "Pending Sync",
+      //           value: "${0}",
+      //           growth:  "No pending bills"
+      //               ,
+      //           icon: Icons.pending_actions_outlined,
+      //           iconColor: Colors.orange,
+      //         ),
+      //       ];
+      //       return LayoutBuilder(
+      //         builder: (context, constraints) {
+      //           final cardWidth = (constraints.maxWidth - 10) / 2;
+      //           final cardHeight = cardWidth * 0.38;
+      //           return GridView.count(
+      //             crossAxisCount: 2,
+      //             shrinkWrap: true,
+      //             physics: const NeverScrollableScrollPhysics(),
+      //             crossAxisSpacing: 10,
+      //             mainAxisSpacing: 10,
+      //             childAspectRatio: cardWidth / cardHeight,
+      //             children: cards
+      //                 .map((c) => _TabletSummaryCard(data: c))
+      //                 .toList(),
+      //           );
+      //         },
+      //       );
+      //     }),
+      //     const SizedBox(height: 12),
+      //     // const SalesLineChart(height: 260),
+      //     // const SizedBox(height: 12),
+      //     LayoutBuilder(
+      //       builder: (context, constraints) {
+      //         if (constraints.maxWidth >= 480) {
+      //           return Row(
+      //             crossAxisAlignment: CrossAxisAlignment.start,
+      //             children: [
+      //             //  const Expanded(child: CategoryPieChart(height: 300)),
+      //               const SizedBox(width: 10),
+      //               Expanded(child: _TabletTransactions()),
+      //             ],
+      //           );
+      //         }
+      //         return Column(
+      //           children: [
+      //            // const CategoryPieChart(height: 280),
+      //             const SizedBox(height: 12),
+      //             _TabletTransactions(),
+      //           ],
+      //         );
+      //       },
+      //     ),
+      //     const SizedBox(height: 24),
+      //     // const LowStockAlerts(),
+      //     // const SizedBox(height: 12),
+      //   ],
+      // ),
     );
   }
 }

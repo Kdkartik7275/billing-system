@@ -90,162 +90,17 @@ class BillingCartSummaryPanel extends StatelessWidget {
 
               return ListView.separated(
                 padding: const EdgeInsets.all(12),
+                physics: const ClampingScrollPhysics(),
+                cacheExtent: 300,
                 itemCount: items.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 14),
                 itemBuilder: (_, index) {
                   final item = items[index];
-                  final tax = item.product.tax;
-                  final basePrice = item.product.price.sellingPrice;
-                  final unitFinalPrice = item.product.finalSellingPrice;
-                  final lineTotal = unitFinalPrice * item.quantity;
 
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // ---------- TOP ROW: THUMBNAIL / NAME / DELETE ----------
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: CachedNetworkImage(
-                              imageUrl: item.product.images.first.url,
-                              height: 44,
-                              width: 44,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-
-                          const SizedBox(width: 10),
-
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item.product.name,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text.rich(
-                                  TextSpan(
-                                    children: [
-                                      TextSpan(
-                                        text:
-                                            "₹${basePrice.toStringAsFixed(2)}",
-                                      ),
-                                      if (!tax.isExempt && tax.gstPercent > 0)
-                                        TextSpan(
-                                          text:
-                                              " + GST ${tax.gstPercent.toStringAsFixed(0)}%",
-                                        ),
-                                      TextSpan(
-                                        text:
-                                            " = ₹${unitFinalPrice.toStringAsFixed(2)} each",
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.bodySmall?.copyWith(
-                                    color: Colors.grey.shade500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          InkWell(
-                            onTap: () =>
-                                cartController.removeFromCart(item.product.id),
-                            borderRadius: BorderRadius.circular(8),
-                            child: Padding(
-                              padding: const EdgeInsets.all(4),
-                              child: Icon(
-                                Icons.delete_outline,
-                                size: 18,
-                                color: Colors.grey.shade400,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      // ---------- BOTTOM ROW: STEPPER / LINE TOTAL ----------
-                      Row(
-                        children: [
-                          Container(
-                            height: 30,
-                            decoration: BoxDecoration(
-                              color: const Color(0xff2962FF),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                InkWell(
-                                  onTap: () => cartController.decrementQuantity(
-                                    item.product.id,
-                                  ),
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: const SizedBox(
-                                    width: 30,
-                                    child: Icon(
-                                      Icons.remove,
-                                      color: Colors.white,
-                                      size: 16,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 24,
-                                  child: Text(
-                                    "${item.quantity}",
-                                    textAlign: TextAlign.center,
-                                    style: theme.bodyMedium?.copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                                InkWell(
-                                  onTap: () => cartController.incrementQuantity(
-                                    item.product.id,
-                                  ),
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: const SizedBox(
-                                    width: 30,
-                                    child: Icon(
-                                      Icons.add,
-                                      color: Colors.white,
-                                      size: 16,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          const Spacer(),
-
-                          Text(
-                            "₹${lineTotal.toStringAsFixed(2)}",
-                            style: theme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                  return _CartItemRow(
+                    key: ValueKey(item.product.id),
+                    item: item,
+                    cartController: cartController,
                   );
                 },
               );
@@ -337,6 +192,188 @@ class BillingCartSummaryPanel extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------- CART ITEM ROW (EXTRACTED FOR REPAINT ISOLATION) ----------------
+
+class _CartItemRow extends StatelessWidget {
+  final CartItem item;
+  final CartController cartController;
+
+  const _CartItemRow({
+    super.key,
+    required this.item,
+    required this.cartController,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    final tax = item.product.tax;
+    final basePrice = item.product.price.sellingPrice;
+    final unitFinalPrice = item.product.finalSellingPrice;
+    final lineTotal = unitFinalPrice * item.quantity;
+
+    return RepaintBoundary(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ---------- TOP ROW: THUMBNAIL / NAME / DELETE ----------
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: item.product.primaryImageUrl == null
+                    ? Container(
+                        height: 44,
+                        width: 44,
+                        color: Colors.grey.shade100,
+                        child: Icon(
+                          Icons.inventory_2_outlined,
+                          size: 18,
+                          color: Colors.grey.shade400,
+                        ),
+                      )
+                    : CachedNetworkImage(
+                        imageUrl: item.product.primaryImageUrl!,
+                        height: 44,
+                        width: 44,
+                        fit: BoxFit.cover,
+                        memCacheWidth: 88,
+                        memCacheHeight: 88,
+                        fadeInDuration: Duration.zero,
+                        placeholder: (_, _) =>
+                            Container(color: Colors.grey.shade100),
+                        errorWidget: (_, _, _) => Container(
+                          color: Colors.grey.shade100,
+                          child: const Icon(
+                            Icons.image_not_supported_outlined,
+                            size: 16,
+                          ),
+                        ),
+                      ),
+              ),
+
+              const SizedBox(width: 10),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.product.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(text: "₹${basePrice.toStringAsFixed(2)}"),
+                          if (!tax.isExempt && tax.gstPercent > 0)
+                            TextSpan(
+                              text:
+                                  " + GST ${tax.gstPercent.toStringAsFixed(0)}%",
+                            ),
+                          TextSpan(
+                            text:
+                                " = ₹${unitFinalPrice.toStringAsFixed(2)} each",
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.bodySmall?.copyWith(
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              InkWell(
+                onTap: () => cartController.removeFromCart(item.product.id),
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: Icon(
+                    Icons.delete_outline,
+                    size: 18,
+                    color: Colors.grey.shade400,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          // ---------- BOTTOM ROW: STEPPER / LINE TOTAL ----------
+          Row(
+            children: [
+              Container(
+                height: 30,
+                decoration: BoxDecoration(
+                  color: const Color(0xff2962FF),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    InkWell(
+                      onTap: () =>
+                          cartController.decrementQuantity(item.product.id),
+                      borderRadius: BorderRadius.circular(10),
+                      child: const SizedBox(
+                        width: 30,
+                        child: Icon(
+                          Icons.remove,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 24,
+                      child: Text(
+                        "${item.quantity}",
+                        textAlign: TextAlign.center,
+                        style: theme.bodyMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () =>
+                          cartController.incrementQuantity(item.product.id),
+                      borderRadius: BorderRadius.circular(10),
+                      child: const SizedBox(
+                        width: 30,
+                        child: Icon(Icons.add, color: Colors.white, size: 16),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const Spacer(),
+
+              Text(
+                "₹${lineTotal.toStringAsFixed(2)}",
+                style: theme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ],
           ),
         ],
       ),

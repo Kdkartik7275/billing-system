@@ -1,3 +1,4 @@
+import 'package:billing_system/core/di/init_dependencies.dart';
 import 'package:billing_system/features/billing/presentation/controllers/cart_controller.dart';
 import 'package:billing_system/features/billing/presentation/controllers/checkout_controller.dart';
 import 'package:billing_system/features/billing/presentation/widgets/checkout/proceed_to_payment_view.dart';
@@ -45,7 +46,12 @@ Future<void> showCheckoutFlow(
   required CartController cartController,
 }) async {
   final checkoutController = Get.put(
-    CheckoutController(cartController: cartController),
+    CheckoutController(
+      cartController: cartController,
+      clearCartUsecase: sl(),
+      createBillUsecase: sl(),
+      getNextBillNumberUsecase: sl(),
+    ),
     tag: 'checkout',
   );
 
@@ -67,7 +73,7 @@ Future<void> showCheckoutFlow(
           backgroundColor: Colors.transparent,
           child: Center(
             child: Container(
-              width: 460,
+              width: MediaQuery.of(context).size.width * .8,
               constraints: BoxConstraints(
                 maxHeight: MediaQuery.of(context).size.height * .9,
               ),

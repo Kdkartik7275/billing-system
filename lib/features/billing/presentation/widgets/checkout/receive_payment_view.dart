@@ -1,6 +1,8 @@
+import 'package:billing_system/core/helper/print_bill.dart';
 import 'package:billing_system/features/billing/presentation/controllers/checkout_controller.dart';
 import 'package:billing_system/features/billing/presentation/widgets/checkout/numpad_button.dart';
 import 'package:billing_system/features/billing/presentation/widgets/checkout/payment_method_tile.dart';
+import 'package:billing_system/features/user/presentation/controller/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -27,7 +29,10 @@ class ReceivePaymentView extends StatelessWidget {
             children: [
               IconButton(
                 onPressed: checkoutController.backToPaymentMethod,
-                icon: const Icon(Icons.arrow_back_rounded),
+                icon: const Icon(
+                  Icons.arrow_back_ios_rounded,
+                  color: Colors.black,
+                ),
               ),
               Text(
                 "Receive Payment",
@@ -38,21 +43,25 @@ class ReceivePaymentView extends StatelessWidget {
         ),
         const Divider(height: 1),
 
+        // ---------------- SCROLLABLE CONTENT ----------------
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ---------------- GRAND TOTAL ----------------
+                // ---------------- GRAND TOTAL (compact) ----------------
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xffEAF8ED),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Column(
+                  child: Row(
                     children: [
                       Text(
                         "Grand Total",
@@ -60,11 +69,11 @@ class ReceivePaymentView extends StatelessWidget {
                           color: const Color(0xff2E7D32),
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const Spacer(),
                       Obx(
                         () => Text(
                           "₹${checkoutController.grandTotal.toStringAsFixed(2)}",
-                          style: theme.headlineSmall?.copyWith(
+                          style: theme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w800,
                             color: const Color(0xff2E7D32),
                           ),
@@ -74,7 +83,7 @@ class ReceivePaymentView extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 14),
 
                 // ---------------- PAYMENT METHOD ----------------
                 Text(
@@ -93,7 +102,7 @@ class ReceivePaymentView extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 14),
 
                 // ---------------- AMOUNT RECEIVED ----------------
                 Text(
@@ -108,7 +117,7 @@ class ReceivePaymentView extends StatelessWidget {
                   () => Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
-                      vertical: 14,
+                      vertical: 12,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -122,7 +131,7 @@ class ReceivePaymentView extends StatelessWidget {
                       children: [
                         Text(
                           "₹",
-                          style: theme.headlineSmall?.copyWith(
+                          style: theme.titleLarge?.copyWith(
                             color: Colors.grey.shade500,
                             fontWeight: FontWeight.w600,
                           ),
@@ -133,7 +142,7 @@ class ReceivePaymentView extends StatelessWidget {
                             checkoutController.amountReceived.value.isEmpty
                                 ? "0"
                                 : checkoutController.amountReceived.value,
-                            style: theme.headlineSmall?.copyWith(
+                            style: theme.titleLarge?.copyWith(
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -143,11 +152,11 @@ class ReceivePaymentView extends StatelessWidget {
                             onTap: checkoutController.clearAmount,
                             borderRadius: BorderRadius.circular(20),
                             child: CircleAvatar(
-                              radius: 12,
+                              radius: 11,
                               backgroundColor: Colors.grey.shade200,
                               child: Icon(
                                 Icons.close,
-                                size: 14,
+                                size: 13,
                                 color: Colors.grey.shade700,
                               ),
                             ),
@@ -157,13 +166,13 @@ class ReceivePaymentView extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
 
                 // ---------------- QUICK AMOUNTS ----------------
                 Obx(
                   () => Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
+                    spacing: 8,
+                    runSpacing: 8,
                     children: checkoutController.quickAmounts.map((amount) {
                       final isSelected =
                           checkoutController.amountReceivedValue == amount &&
@@ -175,8 +184,8 @@ class ReceivePaymentView extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 10,
+                            horizontal: 14,
+                            vertical: 8,
                           ),
                           decoration: BoxDecoration(
                             color: isSelected
@@ -191,7 +200,7 @@ class ReceivePaymentView extends StatelessWidget {
                           ),
                           child: Text(
                             "₹${amount.toStringAsFixed(0)}",
-                            style: theme.bodyMedium?.copyWith(
+                            style: theme.bodySmall?.copyWith(
                               color: isSelected ? Colors.white : Colors.black87,
                               fontWeight: FontWeight.w600,
                             ),
@@ -202,81 +211,64 @@ class ReceivePaymentView extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
 
-                // ---------------- CHANGE TO RETURN ----------------
+                // ---------------- CHANGE TO RETURN (compact) ----------------
                 Obx(() {
                   if (checkoutController.amountReceived.value.isEmpty) {
                     return const SizedBox.shrink();
                   }
                   return Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xffEAF8ED),
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Change to Return",
-                                style: theme.bodySmall?.copyWith(
-                                  color: const Color(0xff2E7D32),
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                "₹${checkoutController.changeToReturn.toStringAsFixed(2)}",
-                                style: theme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                  color: const Color(0xff2E7D32),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
                         const Icon(
                           Icons.currency_exchange_rounded,
                           color: Color(0xff2E7D32),
-                          size: 34,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          "Change to Return",
+                          style: theme.bodySmall?.copyWith(
+                            color: const Color(0xff2E7D32),
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          "₹${checkoutController.changeToReturn.toStringAsFixed(2)}",
+                          style: theme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xff2E7D32),
+                          ),
                         ),
                       ],
                     ),
                   );
                 }),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
 
-                // ---------------- PAYMENT SUMMARY ----------------
+                // ---------------- PAYMENT SUMMARY (compact) ----------------
                 Container(
-                  padding: const EdgeInsets.all(14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade50,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        "Payment Summary",
-                        style: theme.bodySmall?.copyWith(
-                          color: Colors.grey.shade500,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Obx(
-                        () => _SummaryRow(
-                          label: "Grand Total",
-                          value:
-                              "₹${checkoutController.grandTotal.toStringAsFixed(2)}",
-                        ),
-                      ),
-                      const SizedBox(height: 8),
                       Obx(
                         () => _SummaryRow(
                           label: "Amount Received",
@@ -284,10 +276,7 @@ class ReceivePaymentView extends StatelessWidget {
                               "₹${checkoutController.amountReceivedValue.toStringAsFixed(2)}",
                         ),
                       ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 10),
-                        child: Divider(height: 1),
-                      ),
+                      const SizedBox(height: 6),
                       Obx(
                         () => _SummaryRow(
                           label: "Change to Return",
@@ -300,47 +289,6 @@ class ReceivePaymentView extends StatelessWidget {
                     ],
                   ),
                 ),
-
-                const SizedBox(height: 20),
-
-                // ---------------- NUMPAD ----------------
-                GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 3,
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                  childAspectRatio: 1.6,
-                  children: [
-                    for (final digit in [
-                      '1',
-                      '2',
-                      '3',
-                      '4',
-                      '5',
-                      '6',
-                      '7',
-                      '8',
-                      '9',
-                    ])
-                      NumpadButton(
-                        label: digit,
-                        onTap: () => checkoutController.appendDigit(digit),
-                      ),
-                    NumpadButton(
-                      label: '.',
-                      onTap: () => checkoutController.appendDigit('.'),
-                    ),
-                    NumpadButton(
-                      label: '0',
-                      onTap: () => checkoutController.appendDigit('0'),
-                    ),
-                    NumpadButton(
-                      icon: Icons.backspace_outlined,
-                      onTap: checkoutController.backspace,
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
@@ -348,7 +296,39 @@ class ReceivePaymentView extends StatelessWidget {
 
         const Divider(height: 1),
 
-        // ---------------- FOOTER ----------------
+        // ---------------- PINNED NUMPAD ----------------
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 3,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            childAspectRatio: 2.1,
+            children: [
+              for (final digit in ['1', '2', '3', '4', '5', '6', '7', '8', '9'])
+                NumpadButton(
+                  label: digit,
+                  onTap: () => checkoutController.appendDigit(digit),
+                ),
+              NumpadButton(
+                label: '.',
+                onTap: () => checkoutController.appendDigit('.'),
+              ),
+              NumpadButton(
+                label: '0',
+                onTap: () => checkoutController.appendDigit('0'),
+              ),
+              NumpadButton(
+                icon: Icons.backspace_outlined,
+                onTap: checkoutController.backspace,
+              ),
+            ],
+          ),
+        ),
+
+        // ---------------- PINNED FOOTER ----------------
         Obx(() {
           if (checkoutController.paymentSuccessful.value) {
             return Container(
@@ -370,11 +350,11 @@ class ReceivePaymentView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           "Payment Successful",
                           style: TextStyle(
                             color: Colors.white,
@@ -382,23 +362,28 @@ class ReceivePaymentView extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          "Successful",
-                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                          "Bill #${checkoutController.completedBill.value?.billNumber ?? ''}",
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  TextButton.icon(
-                    onPressed: onClose,
-                    icon: const Icon(
-                      Icons.print_outlined,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                    label: const Text(
-                      "Print Receipt",
-                      style: TextStyle(color: Colors.white),
-                    ),
+                 TextButton.icon(
+                    onPressed: () {
+                      final bill = checkoutController.completedBill.value;
+                      if (bill != null) {
+                        final shop = Get.find<UserController>().shop.value;
+                        if (shop != null) {
+                          printBill(bill: bill, shop: shop);
+                        }
+                      }
+                      onClose();
+                    },
+                    icon: const Icon(Icons.print_outlined, color: Colors.white, size: 18),
+                    label: const Text("Print Receipt", style: TextStyle(color: Colors.white)),
                   ),
                 ],
               ),
@@ -406,31 +391,67 @@ class ReceivePaymentView extends StatelessWidget {
           }
 
           return Padding(
-            padding: const EdgeInsets.all(16),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed:
-                    checkoutController.amountReceivedValue >=
-                        checkoutController.grandTotal
-                    ? checkoutController.confirmPayment
-                    : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xff2962FF),
-                  disabledBackgroundColor: Colors.grey.shade300,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+            child: Column(
+              children: [
+                if (checkoutController.errorMessage.value.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.error_outline_rounded,
+                          color: Color(0xffD32F2F),
+                          size: 16,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            checkoutController.errorMessage.value,
+                            style: theme.bodySmall?.copyWith(
+                              color: const Color(0xffD32F2F),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed:
+                        (checkoutController.amountReceivedValue >=
+                                checkoutController.grandTotal &&
+                            !checkoutController.isProcessing.value)
+                        ? checkoutController.confirmPayment
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xff2962FF),
+                      disabledBackgroundColor: Colors.grey.shade300,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: checkoutController.isProcessing.value
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.4,
+                              valueColor: AlwaysStoppedAnimation(Colors.white),
+                            ),
+                          )
+                        : const Text(
+                            "Confirm Payment",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                   ),
                 ),
-                child: const Text(
-                  "Confirm Payment",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
+              ],
             ),
           );
         }),
@@ -460,12 +481,12 @@ class _SummaryRow extends StatelessWidget {
       children: [
         Text(
           label,
-          style: theme.bodyMedium?.copyWith(color: Colors.grey.shade600),
+          style: theme.bodySmall?.copyWith(color: Colors.grey.shade600),
         ),
         const Spacer(),
         Text(
           value,
-          style: theme.bodyMedium?.copyWith(
+          style: theme.bodySmall?.copyWith(
             fontWeight: bold ? FontWeight.w700 : FontWeight.w600,
             color: valueColor ?? Colors.black87,
           ),

@@ -6,6 +6,7 @@ import 'package:billing_system/features/billing/presentation/widgets/billing_emp
 import 'package:billing_system/features/billing/presentation/widgets/billing_product_card.dart';
 import 'package:billing_system/features/billing/presentation/widgets/billing_search_bar.dart';
 import 'package:billing_system/features/billing/presentation/widgets/checkout/checkout_flow.dart';
+import 'package:billing_system/features/billing/presentation/widgets/scan/billing_scan_handler.dart';
 import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -48,7 +49,11 @@ class _BillingTabletLayoutState extends State<BillingTabletLayout> {
                   BillingSearchBar(
                     controller: _textController,
                     onChanged: (val) {},
-                    onScanTap: () {},
+                    onScanTap: () => BillingScanHandler.scanAndAddToCart(
+                      context: context,
+                      inventoryController: inventoryController,
+                      cartController: cartController,
+                    ),
                   ),
 
                   const SizedBox(height: 14),
@@ -117,8 +122,8 @@ class _BillingTabletLayoutState extends State<BillingTabletLayout> {
               flex: 1,
               child: BillingCartSummaryPanel(
                 cartController: cartController,
-               onCheckout: () =>
-                  showCheckoutFlow(context, cartController: cartController),
+                onCheckout: () =>
+                    showCheckoutFlow(context, cartController: cartController),
               ),
             ),
           ],

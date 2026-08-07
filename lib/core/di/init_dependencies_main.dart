@@ -13,6 +13,7 @@ class DependencyInjection {
     _initStocks();
     _initBrands();
     _initProducts();
+    _initBilling();
     // _initPOSBilling();
   }
 }
@@ -66,6 +67,27 @@ Future<void> _initHiveBoxes() async {
 
   final shopBox = await Hive.openBox<ShopModel>('current_shop');
   sl.registerLazySingleton<Box<ShopModel>>(() => shopBox);
+
+  final billingMetaBox = await Hive.openBox('billing_meta');
+  sl.registerLazySingleton<Box>(() => billingMetaBox);
+
+  // ==========================================================
+  // Billing Module
+  // ==========================================================
+
+  final billsBox = await Hive.openBox<BillModel>('bills');
+  sl.registerLazySingleton<Box<BillModel>>(() => billsBox);
+
+  final billingCartBox = await Hive.openBox<BillingCartModel>('billing_cart');
+  sl.registerLazySingleton<Box<BillingCartModel>>(() => billingCartBox);
+
+  // Customer and coupon features are deactivated for MVP.
+  // Uncomment and register when those features are implemented:
+  // final customersBox = await Hive.openBox<CustomerModel>('customers');
+  // sl.registerLazySingleton<Box<CustomerModel>>(() => customersBox);
+  //
+  // final couponsBox = await Hive.openBox<CouponModel>('coupons');
+  // sl.registerLazySingleton<Box<CouponModel>>(() => couponsBox);
 }
 
 // ----------------------- AUTH -----------------------
@@ -253,4 +275,44 @@ void _initStocks() {
   sl.registerLazySingleton(() => GetStockBatchesUsecase(repository: sl()));
   sl.registerLazySingleton(() => GetStocksMovementUsecase(repository: sl()));
   sl.registerLazySingleton(() => PurchaseStockUseCase(repository: sl()));
+}
+
+void _initBilling() {
+  // ---------------- DATA SOURCES ----------------
+  sl.registerLazySingleton<BillLocalDataSource>(
+    () => BillLocalDataSourceImpl(box: sl<Box<BillModel>>(),metaBox: sl()),
+  );
+  sl.registerLazySingleton<BillRemoteDataSource>(
+    () => BillRemoteDataSourceImpl(
+      firestore: sl<ShopFirebaseService>().firestore,
+    ),
+  );
+  sl.registerLazySingleton<BillingCartLocalDataSource>(
+    () => BillingCartLocalDataSourceImpl(box: sl<Box<BillingCartModel>>()),
+  );
+
+  // ---------------- REPOSITORIES ----------------
+  sl.registerLazySingleton<BillRepository>(
+    () => BillRepositoryImpl(
+      remoteDataSource: sl(),
+      localDataSource: sl(),
+      connectionChecker: sl(),
+    ),
+  );
+  sl.registerLazySingleton<BillingCartRepository>(
+    () => BillingCartRepositoryImpl(localDataSource: sl()),
+  );
+
+  // ---------------- USE CASES ----------------
+  sl.registerLazySingleton(() => CreateBillUsecase(repository: sl()));
+  sl.registerLazySingleton(() => GetBillByIdUsecase(repository: sl()));
+  sl.registerLazySingleton(() => GetAllBillsUsecase(repository: sl()));
+  sl.registerLazySingleton(() => GetBillsByDateRangeUsecase(repository: sl()));
+  sl.registerLazySingleton(() => UpdateBillStatusUsecase(repository: sl()));
+  sl.registerLazySingleton(() => DeleteBillUsecase(repository: sl()));
+  sl.registerLazySingleton(() => GetNextBillNumberUsecase(repository: sl()));
+
+  sl.registerLazySingleton(() => GetCartUsecase(repository: sl()));
+  sl.registerLazySingleton(() => SaveCartUsecase(repository: sl()));
+  sl.registerLazySingleton(() => ClearCartUsecase(repository: sl()));
 }

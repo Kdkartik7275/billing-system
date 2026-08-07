@@ -40,12 +40,8 @@ class CartController extends GetxController {
     );
   }
 
-  double get totalAmount {
-    return cartItems.values.fold(
-      0.0,
-      (sum, item) => sum + (item.product.finalSellingPrice * item.quantity),
-    );
-  }
+  // Explicit: always subtotal + tax, never derived any other way.
+  double get totalAmount => subtotal + totalTax;
 
   // ---------------- CART ACTIONS ----------------
 

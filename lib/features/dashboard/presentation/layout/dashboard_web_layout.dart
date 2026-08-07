@@ -1,4 +1,5 @@
 import 'package:billing_system/core/config/theme/app_colors.dart';
+import 'package:billing_system/features/billing/presentation/views/billing_page.dart';
 import 'package:billing_system/features/dashboard/presentation/controller/dashboard_shell_controller.dart';
 import 'package:billing_system/features/dashboard/presentation/models/dashboard_menu.dart';
 import 'package:billing_system/features/dashboard/presentation/layout/dashboard_web_body.dart';
@@ -13,7 +14,7 @@ class DashboardWebLayout extends StatefulWidget {
 
   static const Map<DashboardMenu, Widget> _pages = {
     DashboardMenu.dashboard: DashboardBody(),
-    DashboardMenu.pos: Center(child: Text('Sales')),
+    DashboardMenu.pos: BillingPage(),
     DashboardMenu.inventory: InventoryPage(),
     DashboardMenu.sales: Center(child: Text('Sales')),
     DashboardMenu.customers: Center(child: Text('Customers')),
@@ -21,7 +22,7 @@ class DashboardWebLayout extends StatefulWidget {
     DashboardMenu.suppliers: Center(child: Text('Suppliers')),
     DashboardMenu.reports: Center(child: Text('Reports')),
     DashboardMenu.settings: Center(child: Text('Settings')),
-  };  
+  };
 
   @override
   State<DashboardWebLayout> createState() => _DashboardWebLayoutState();

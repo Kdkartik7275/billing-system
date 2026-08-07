@@ -1,4 +1,12 @@
 import 'package:billing_system/core/di/init_dependencies.dart';
+import 'package:billing_system/core/enums/billing.dart';
+import 'package:billing_system/features/billing/data/models/bill_item_model.dart';
+import 'package:billing_system/features/billing/data/models/bill_model.dart';
+import 'package:billing_system/features/billing/data/models/billing_cart_model.dart';
+import 'package:billing_system/features/billing/data/models/coupon_model.dart';
+import 'package:billing_system/features/billing/data/models/customer_model.dart';
+import 'package:billing_system/features/billing/data/models/payment_model.dart';
+import 'package:billing_system/features/billing/data/models/payment_summary_model.dart';
 import 'package:billing_system/features/inventory/data/models/brand/brand_model.dart';
 import 'package:billing_system/features/inventory/data/models/category/category_model.dart';
 import 'package:billing_system/features/inventory/data/models/product_image_model.dart';
@@ -50,7 +58,18 @@ class Bootstrap {
       ..registerAdapter(StockModelAdapter())
       ..registerAdapter(StockBatchModelAdapter())
       ..registerAdapter(StockMovementModelAdapter())
-      ..registerAdapter(StockMovementTypeModelAdapter());
+      ..registerAdapter(StockMovementTypeModelAdapter())
+      // ---------------- BILLING MODULE ----------------
+      ..registerAdapter(BillStatusAdapter())
+      ..registerAdapter(PaymentMethodAdapter())
+      ..registerAdapter(CustomerModelAdapter())
+      ..registerAdapter(CouponModelAdapter())
+      ..registerAdapter(PaymentModelAdapter())
+      ..registerAdapter(PaymentSummaryModelAdapter())
+      ..registerAdapter(BillItemModelAdapter())
+      ..registerAdapter(BillModelAdapter())
+      ..registerAdapter(BillingCartModelAdapter());
+
     await Hive.openBox<ProductModel>('products');
     await Hive.openBox<CategoryModel>('categories');
     await Hive.openBox<BrandModel>('brands');
@@ -61,6 +80,16 @@ class Bootstrap {
     await Hive.openBox<UserModel>('current_user');
     await Hive.openBox<ShopModel>('current_shop');
     await Hive.openBox<FirebaseConfigModel>('firebase_config');
+
+    // ---------------- BILLING MODULE ----------------
+    await Hive.openBox<BillModel>('bills');
+    await Hive.openBox<BillingCartModel>('billing_cart');
+    await Hive.openBox('billing_meta');
+    // Customer and coupon features are deactivated for MVP.
+    // Uncomment when those features are implemented:
+    // await Hive.openBox<CustomerModel>('customers');
+    // await Hive.openBox<CouponModel>('coupons');
+
     await DependencyInjection.init();
     Get.put(
       UserController(

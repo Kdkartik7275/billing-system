@@ -47,165 +47,188 @@ class ProceedToPaymentView extends StatelessWidget {
         const Divider(height: 1),
 
         Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ---------------- CUSTOMER ----------------
-                Text(
-                  "Customer",
-                  style: theme.bodySmall?.copyWith(
-                    color: Colors.grey.shade500,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade200),
-                  ),
-                  child: Row(
+          child: CustomScrollView(
+            physics: const ClampingScrollPhysics(),
+            cacheExtent: 400,
+            slivers: [
+              // ---------------- CUSTOMER ----------------
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.person_outline,
-                        color: Colors.grey.shade600,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 10),
-                      Obx(
-                        () => Expanded(
-                          child: Text(
-                            checkoutController.customerName.value,
-                            style: theme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                      Text(
+                        "Customer",
+                        style: theme.bodySmall?.copyWith(
+                          color: Colors.grey.shade500,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      Icon(
-                        Icons.chevron_right_rounded,
-                        color: Colors.grey.shade400,
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // ---------------- ORDER SUMMARY ----------------
-                Text(
-                  "Order Summary",
-                  style: theme.bodySmall?.copyWith(
-                    color: Colors.grey.shade500,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Obx(() {
-                  final items = cartController.cartItems.values.toList();
-                  return Column(
-                    children: [
-                      for (int i = 0; i < items.length; i++) ...[
-                        OrderSummaryTile(item: items[i]),
-                        if (i != items.length - 1) const Divider(height: 1),
-                      ],
-                    ],
-                  );
-                }),
-
-                const SizedBox(height: 16),
-
-                // ---------------- BILL BREAKDOWN ----------------
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Obx(
-                    () => Column(
-                      children: [
-                        _BillRow(
-                          label: "Subtotal",
-                          value: checkoutController.subtotal,
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 12,
                         ),
-                        const SizedBox(height: 8),
-                        _BillRow(
-                          label: "Discount",
-                          value: -checkoutController.discount.value,
-                          valueColor: const Color(0xff2E7D32),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade200),
                         ),
-                        const SizedBox(height: 8),
-                        _BillRow(
-                          label: "Tax (GST)",
-                          value: checkoutController.tax,
-                        ),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 10),
-                          child: Divider(height: 1),
-                        ),
-                        Row(
+                        child: Row(
                           children: [
-                            Text(
-                              "Grand Total",
-                              style: theme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w700,
+                            Icon(
+                              Icons.person_outline,
+                              color: Colors.grey.shade600,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 10),
+                            Obx(
+                              () => Expanded(
+                                child: Text(
+                                  checkoutController.customerName.value,
+                                  style: theme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ),
                             ),
-                            const Spacer(),
-                            Text(
-                              "₹${checkoutController.grandTotal.toStringAsFixed(2)}",
-                              style: theme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xff2962FF),
-                              ),
+                            Icon(
+                              Icons.chevron_right_rounded,
+                              color: Colors.grey.shade400,
                             ),
                           ],
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        "Order Summary",
+                        style: theme.bodySmall?.copyWith(
+                          color: Colors.grey.shade500,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+              ),
 
-                const SizedBox(height: 20),
+              // ---------------- ORDER SUMMARY (LAZY LIST) ----------------
+              // This Obx works because its builder eagerly reads
+              // cartController.cartItems.values right here — not deferred
+              // into itemBuilder — so GetX registers the listener correctly.
+              Obx(() {
+                final items = cartController.cartItems.values.toList();
 
-                // ---------------- PAYMENT METHOD ----------------
-                Text(
-                  "Select Payment Method",
-                  style: theme.bodySmall?.copyWith(
-                    color: Colors.grey.shade500,
-                    fontWeight: FontWeight.w600,
+                return SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  sliver: SliverList.separated(
+                    itemCount: items.length,
+                    separatorBuilder: (_, _) => const Divider(height: 1),
+                    itemBuilder: (_, index) =>
+                        OrderSummaryTile(item: items[index]),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Obx(
-                  () => Column(
-                    children: PaymentMethodType.values
-                        .map(
-                          (type) => Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: PaymentMethodTile(
-                              type: type,
-                              isSelected:
-                                  checkoutController.selectedMethod.value ==
-                                  type,
-                              onTap: () =>
-                                  checkoutController.selectPaymentMethod(type),
-                            ),
+                );
+              }),
+
+              // ---------------- BILL BREAKDOWN + PAYMENT METHOD HEADER ----------------
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Obx(
+                          () => Column(
+                            children: [
+                              _BillRow(
+                                label: "Subtotal",
+                                value: checkoutController.subtotal,
+                              ),
+                              const SizedBox(height: 8),
+                              _BillRow(
+                                label: "Discount",
+                                value: -checkoutController.discount.value,
+                                valueColor: const Color(0xff2E7D32),
+                              ),
+                              const SizedBox(height: 8),
+                              _BillRow(
+                                label: "Tax (GST)",
+                                value: checkoutController.tax,
+                              ),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 10),
+                                child: Divider(height: 1),
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    "Grand Total",
+                                    style: theme.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  Text(
+                                    "₹${checkoutController.grandTotal.toStringAsFixed(2)}",
+                                    style: theme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xff2962FF),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                        )
-                        .toList(),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        "Select Payment Method",
+                        style: theme.bodySmall?.copyWith(
+                          color: Colors.grey.shade500,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+
+              // ---------------- PAYMENT METHODS (LAZY LIST) ----------------
+              // No Obx wrapping the sliver itself — SliverList's itemBuilder
+              // is lazy, so an Obx placed here never reads an observable
+              // during its own build and GetX can't register it. Instead,
+              // each tile wraps itself in its own Obx inside itemBuilder.
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                sliver: SliverList.separated(
+                  itemCount: PaymentMethodType.values.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 10),
+                  itemBuilder: (_, index) {
+                    final type = PaymentMethodType.values[index];
+
+                    return Obx(
+                      () => PaymentMethodTile(
+                        type: type,
+                        isSelected:
+                            checkoutController.selectedMethod.value == type,
+                        onTap: () =>
+                            checkoutController.selectPaymentMethod(type),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         ),
 

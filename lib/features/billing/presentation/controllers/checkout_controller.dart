@@ -6,6 +6,7 @@ import 'package:billing_system/features/billing/domain/entities/payment_summary_
 import 'package:billing_system/features/billing/domain/usecases/clear_cart_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/create_bill_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/get_next_bill_number_usecase.dart';
+import 'package:billing_system/features/billing/presentation/controllers/billing_controller.dart';
 import 'package:billing_system/features/billing/presentation/controllers/cart_controller.dart';
 import 'package:billing_system/features/user/presentation/controller/user_controller.dart';
 import 'package:flutter/material.dart';
@@ -305,6 +306,7 @@ class CheckoutController extends GetxController {
         paymentSuccessful.value = true;
         cartController.clearCart();
         clearCartUsecase();
+        Get.find<BillingController>().addBillLocally(createdBill);
       },
     );
 

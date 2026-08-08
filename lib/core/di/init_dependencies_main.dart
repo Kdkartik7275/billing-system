@@ -280,7 +280,7 @@ void _initStocks() {
 void _initBilling() {
   // ---------------- DATA SOURCES ----------------
   sl.registerLazySingleton<BillLocalDataSource>(
-    () => BillLocalDataSourceImpl(box: sl<Box<BillModel>>(),metaBox: sl()),
+    () => BillLocalDataSourceImpl(box: sl<Box<BillModel>>(), metaBox: sl()),
   );
   sl.registerLazySingleton<BillRemoteDataSource>(
     () => BillRemoteDataSourceImpl(
@@ -315,4 +315,12 @@ void _initBilling() {
   sl.registerLazySingleton(() => GetCartUsecase(repository: sl()));
   sl.registerLazySingleton(() => SaveCartUsecase(repository: sl()));
   sl.registerLazySingleton(() => ClearCartUsecase(repository: sl()));
+  sl.registerLazySingleton(() => GetUnsyncedBillsUsecase(repository: sl()));
+  sl.registerLazySingleton(() => SyncPendingBillsUsecase(repository: sl()));
+  sl.registerLazySingleton(
+    () => AggregateSoldQuantitiesUsecase(productRepository: sl()),
+  );
+  sl.registerLazySingleton(
+    () => ReduceStockForSoldProductsUsecase(stockRepository: sl()),
+  );
 }

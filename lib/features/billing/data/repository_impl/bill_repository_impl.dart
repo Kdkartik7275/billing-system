@@ -70,6 +70,16 @@ class BillRepositoryImpl implements BillRepository {
     }
   }
 
+  @override
+  ResultFuture<List<BillEntity>> getUnsyncedBills() async {
+    try {
+      final unsynced = await localDataSource.getUnsyncedBills();
+      return right(unsynced.map((e) => e.toEntity()).toList());
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
   // ---------------- STATUS UPDATE — LOCAL ONLY, RE-QUEUES FOR SYNC ----------------
 
   @override
@@ -125,27 +135,26 @@ class BillRepositoryImpl implements BillRepository {
   // ---------------- PUSH SYNC — CALLED ONCE DAILY BY THE SCHEDULER ----------------
 
   @override
-  ResultFuture<int> syncPendingBills() async {
+  ResultFuture<List<BillEntity>> syncPendingBills() async {
     try {
       if (!await connectionChecker.isConnected) {
         return left(FirebaseFailure(message: 'No Internet Connection'));
       }
 
       final unsynced = await localDataSource.getUnsyncedBills();
-
-      int successCount = 0;
+      final syncedBills = <BillEntity>[];
 
       for (final bill in unsynced) {
         try {
           await remoteDataSource.addBill(bill);
           await localDataSource.markBillSynced(bill.id);
-          successCount++;
+          syncedBills.add(bill.copyWith(synced: true).toEntity());
         } catch (_) {
           // Leave unsynced — retried on the next sync run.
         }
       }
 
-      return right(successCount);
+      return right(syncedBills);
     } catch (e) {
       return left(FirebaseFailure(message: e.toString()));
     }
@@ -154,7 +163,7 @@ class BillRepositoryImpl implements BillRepository {
   // ---------------- HYDRATE — ONE-TIME PULL-BACK AFTER REINSTALL ----------------
 
   @override
-  ResultFuture<void> hydrateFromRemote(String outletId) async {
+  ResultFuture<void> hydrateFromRemote() async {
     try {
       final alreadyHydrated = await localDataSource.isHydrated();
       if (alreadyHydrated) return const Right(null);
@@ -168,7 +177,7 @@ class BillRepositoryImpl implements BillRepository {
         );
       }
 
-      final remoteBills = await remoteDataSource.getBillsForOutlet(outletId);
+      final remoteBills = await remoteDataSource.getBillsForOutlet();
 
       final syncedModels = remoteBills
           .map((bill) => bill.copyWith(synced: true))

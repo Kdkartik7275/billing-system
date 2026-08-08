@@ -74,13 +74,11 @@ class StockRepositoryImpl implements StockRepository {
   @override
   ResultFuture<StockEntity?> getStockForProduct(
     String productId,
-    String warehouseId,
   ) async {
     try {
       if (await connectionChecker.isConnected) {
         final remote = await remoteDataSource.getStockForProduct(
           productId,
-          warehouseId,
         );
 
         if (remote != null) {
@@ -92,7 +90,6 @@ class StockRepositoryImpl implements StockRepository {
 
       final local = await localDataSource.getStockForProduct(
         productId,
-        warehouseId,
       );
 
       return right(local?.toEntity());
@@ -100,7 +97,6 @@ class StockRepositoryImpl implements StockRepository {
       try {
         final local = await localDataSource.getStockForProduct(
           productId,
-          warehouseId,
         );
 
         return right(local?.toEntity());
@@ -324,6 +320,25 @@ class StockRepositoryImpl implements StockRepository {
       await localDataSource.createStockMovement(result.movement);
 
       return right(null);
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultFuture<StockEntity> updateStock(StockEntity stock) async {
+    try {
+      if (!await connectionChecker.isConnected) {
+        return left(FirebaseFailure(message: 'No Internet Connection'));
+      }
+
+      final model = StockModel.fromEntity(stock);
+
+      final result = await remoteDataSource.updateStock(model);
+
+      await localDataSource.updateStock(result);
+
+      return right(result.toEntity());
     } catch (e) {
       return left(FirebaseFailure(message: e.toString()));
     }

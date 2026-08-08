@@ -36,19 +36,13 @@ class _DashboardTabletLayoutState extends State<DashboardTabletLayout> {
 
   bool _isSidebarExpanded = false;
 
-  // final inventoryController = Get.find<InventoryController>();
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   inventoryController.getProducts();
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
 
       body: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Icon-only / expandable sidebar
           AnimatedContainer(

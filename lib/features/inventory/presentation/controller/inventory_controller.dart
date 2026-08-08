@@ -56,7 +56,13 @@ class InventoryController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    Future.wait([loadProducts(), loadCategories(), loadStocks(),loadBrands()]);
+    Future.wait([loadProducts(), loadCategories(), loadStocks(), loadBrands()]);
+  }
+
+  List<ProductEntity> get lowStockProducts {
+    return products
+        .where((p) => stockStatusFor(p) == StockStatus.lowStock)
+        .toList();
   }
 
   Future<void> loadProducts() async {
@@ -277,7 +283,12 @@ class InventoryController extends GetxController {
   }
 
   void selectProduct(ProductEntity product) {
-    Get.to(() => ProductDetailPage(product: product,stock: stockRecords.firstWhereOrNull((s) => s.productId == product.id),));
+    Get.to(
+      () => ProductDetailPage(
+        product: product,
+        stock: stockRecords.firstWhereOrNull((s) => s.productId == product.id),
+      ),
+    );
   }
 
   Future<void> refreshProducts() async {
@@ -288,8 +299,6 @@ class InventoryController extends GetxController {
     products.removeWhere((p) => p.id == productId);
     stockRecords.removeWhere((s) => s.productId == productId);
     stockBatches.removeWhere((b) => b.productId == productId);
-
-    
   }
 
   void updateProduct(ProductEntity updatedProduct) {

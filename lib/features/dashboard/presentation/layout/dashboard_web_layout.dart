@@ -13,7 +13,7 @@ class DashboardWebLayout extends StatefulWidget {
   const DashboardWebLayout({super.key});
 
   static const Map<DashboardMenu, Widget> _pages = {
-    DashboardMenu.dashboard: DashboardBody(),
+    DashboardMenu.dashboard: DashboardWebBody(),
     DashboardMenu.pos: BillingPage(),
     DashboardMenu.inventory: InventoryPage(),
     DashboardMenu.sales: Center(child: Text('Sales')),
@@ -30,13 +30,6 @@ class DashboardWebLayout extends StatefulWidget {
 
 class _DashboardWebLayoutState extends State<DashboardWebLayout> {
   final controller = Get.find<DashboardShellController>();
-
-  // final inventoryController = Get.find<InventoryController>();
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   inventoryController.getProducts();
-  // }
 
   @override
   Widget build(BuildContext context) {

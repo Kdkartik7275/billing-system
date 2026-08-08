@@ -10,9 +10,10 @@ abstract class BillRepository {
     DateTime start,
     DateTime end,
   );
+  ResultFuture<List<BillEntity>> getUnsyncedBills();
   ResultFuture<BillEntity> updateBillStatus(String id, BillStatus status);
   ResultFuture<void> deleteBill(String id);
   ResultFuture<String> getNextBillNumber();
-  ResultFuture<int> syncPendingBills();
-  ResultFuture<void> hydrateFromRemote(String outletId);
+  ResultFuture<List<BillEntity>> syncPendingBills();
+  ResultFuture<void> hydrateFromRemote();
 }

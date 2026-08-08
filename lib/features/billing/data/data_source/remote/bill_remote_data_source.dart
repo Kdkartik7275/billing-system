@@ -10,7 +10,7 @@ abstract interface class BillRemoteDataSource {
 
   Future<BillModel> addBill(BillModel bill);
 
-  Future<List<BillModel>> getBillsForOutlet(String outletId);
+  Future<List<BillModel>> getBillsForOutlet();
 
   Future<BillModel> updateBill(BillModel bill);
 
@@ -41,7 +41,7 @@ class BillRemoteDataSourceImpl implements BillRemoteDataSource {
   }
 
   @override
-  Future<List<BillModel>> getBillsForOutlet(String outletId) async {
+  Future<List<BillModel>> getBillsForOutlet() async {
     try {
       final snapshot = await firestore.collection(_collection).get();
 

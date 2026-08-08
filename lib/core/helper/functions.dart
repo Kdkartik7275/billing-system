@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:billing_system/core/scanner/barcode_scanner_page.dart';
 import 'package:billing_system/core/snackbars/snackbars.dart';
@@ -83,4 +84,20 @@ Future<void> printBarcode(String barcode) async {
     onLayout: (PdfPageFormat format) async => pdf.save(),
     name: 'barcode_$barcode.pdf',
   );
+}
+
+const List<Color> _categoryPalette = [
+  Color(0xff2962FF),
+  Color(0xff2E7D32),
+  Color(0xffEF6C00),
+  Color(0xff6A1B9A),
+  Color(0xffD32F2F),
+  Color(0xff00838F),
+  Color(0xffAD1457),
+  Color(0xff5D4037),
+];
+
+Color categoryColor(String category) {
+  final hash = category.codeUnits.fold(0, (sum, unit) => sum + unit);
+  return _categoryPalette[hash % _categoryPalette.length];
 }

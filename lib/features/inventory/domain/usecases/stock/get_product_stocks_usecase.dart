@@ -10,10 +10,7 @@ class GetProductStocksUsecase
   GetProductStocksUsecase({required this.repository});
   @override
   ResultFuture<StockEntity?> call(GetProductStocksParams params) async {
-    return await repository.getStockForProduct(
-      params.productId,
-      params.warehouseId,
-    );
+    return await repository.getStockForProduct(params.productId);
   }
 }
 

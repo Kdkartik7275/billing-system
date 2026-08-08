@@ -1,20 +1,13 @@
-import 'package:billing_system/core/helper/print_bill.dart';
 import 'package:billing_system/features/billing/presentation/controllers/checkout_controller.dart';
 import 'package:billing_system/features/billing/presentation/widgets/checkout/numpad_button.dart';
 import 'package:billing_system/features/billing/presentation/widgets/checkout/payment_method_tile.dart';
-import 'package:billing_system/features/user/presentation/controller/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ReceivePaymentView extends StatelessWidget {
   final CheckoutController checkoutController;
-  final VoidCallback onClose;
 
-  const ReceivePaymentView({
-    super.key,
-    required this.checkoutController,
-    required this.onClose,
-  });
+  const ReceivePaymentView({super.key, required this.checkoutController});
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +22,7 @@ class ReceivePaymentView extends StatelessWidget {
             children: [
               IconButton(
                 onPressed: checkoutController.backToPaymentMethod,
-                icon: const Icon(
-                  Icons.arrow_back_ios_rounded,
-                  color: Colors.black,
-                ),
+                icon: const Icon(Icons.arrow_back_rounded),
               ),
               Text(
                 "Receive Payment",
@@ -43,14 +33,12 @@ class ReceivePaymentView extends StatelessWidget {
         ),
         const Divider(height: 1),
 
-        // ---------------- SCROLLABLE CONTENT ----------------
         Expanded(
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ---------------- GRAND TOTAL (compact) ----------------
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(
@@ -85,7 +73,6 @@ class ReceivePaymentView extends StatelessWidget {
 
                 const SizedBox(height: 14),
 
-                // ---------------- PAYMENT METHOD ----------------
                 Text(
                   "Payment Method",
                   style: theme.bodySmall?.copyWith(
@@ -104,7 +91,6 @@ class ReceivePaymentView extends StatelessWidget {
 
                 const SizedBox(height: 14),
 
-                // ---------------- AMOUNT RECEIVED ----------------
                 Text(
                   "Amount Received",
                   style: theme.bodySmall?.copyWith(
@@ -168,7 +154,6 @@ class ReceivePaymentView extends StatelessWidget {
 
                 const SizedBox(height: 10),
 
-                // ---------------- QUICK AMOUNTS ----------------
                 Obx(
                   () => Wrap(
                     spacing: 8,
@@ -213,7 +198,6 @@ class ReceivePaymentView extends StatelessWidget {
 
                 const SizedBox(height: 12),
 
-                // ---------------- CHANGE TO RETURN (compact) ----------------
                 Obx(() {
                   if (checkoutController.amountReceived.value.isEmpty) {
                     return const SizedBox.shrink();
@@ -257,7 +241,6 @@ class ReceivePaymentView extends StatelessWidget {
 
                 const SizedBox(height: 12),
 
-                // ---------------- PAYMENT SUMMARY (compact) ----------------
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,
@@ -299,143 +282,70 @@ class ReceivePaymentView extends StatelessWidget {
         // ---------------- PINNED NUMPAD ----------------
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-          child: // ---------------- NUMPAD ----------------
-          GridView.builder(
+          child: GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
-              mainAxisExtent: 48,
-            ),
-            itemCount: 12,
-            itemBuilder: (_, index) {
-              if (index < 9) {
-                final digit = '${index + 1}';
-                return NumpadButton(
+            crossAxisCount: 3,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            childAspectRatio: 2.1,
+            children: [
+              for (final digit in ['1', '2', '3', '4', '5', '6', '7', '8', '9'])
+                NumpadButton(
                   label: digit,
                   onTap: () => checkoutController.appendDigit(digit),
-                );
-              }
-              if (index == 9) {
-                return NumpadButton(
-                  label: '.',
-                  onTap: () => checkoutController.appendDigit('.'),
-                );
-              }
-              if (index == 10) {
-                return NumpadButton(
-                  label: '0',
-                  onTap: () => checkoutController.appendDigit('0'),
-                );
-              }
-              return NumpadButton(
+                ),
+              NumpadButton(
+                label: '.',
+                onTap: () => checkoutController.appendDigit('.'),
+              ),
+              NumpadButton(
+                label: '0',
+                onTap: () => checkoutController.appendDigit('0'),
+              ),
+              NumpadButton(
                 icon: Icons.backspace_outlined,
                 onTap: checkoutController.backspace,
-              );
-            },
+              ),
+            ],
           ),
         ),
 
         // ---------------- PINNED FOOTER ----------------
-        Obx(() {
-          if (checkoutController.paymentSuccessful.value) {
-            return Container(
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              decoration: BoxDecoration(
-                color: const Color(0xff2E7D32),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Row(
-                children: [
-                  const CircleAvatar(
-                    radius: 16,
-                    backgroundColor: Colors.white,
-                    child: Icon(
-                      Icons.check,
-                      color: Color(0xff2E7D32),
-                      size: 18,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Payment Successful",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+          child: Column(
+            children: [
+              Obx(() {
+                if (checkoutController.errorMessage.value.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.error_outline_rounded,
+                        color: Color(0xffD32F2F),
+                        size: 16,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          checkoutController.errorMessage.value,
+                          style: theme.bodySmall?.copyWith(
+                            color: const Color(0xffD32F2F),
                           ),
                         ),
-                        Text(
-                          "Bill #${checkoutController.completedBill.value?.billNumber ?? ''}",
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  TextButton.icon(
-                    onPressed: () {
-                      final bill = checkoutController.completedBill.value;
-                      if (bill != null) {
-                        final shop = Get.find<UserController>().shop.value;
-                        if (shop != null) {
-                          printBill(bill: bill, shop: shop);
-                        }
-                      }
-                      onClose();
-                    },
-                    icon: const Icon(
-                      Icons.print_outlined,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                    label: const Text(
-                      "Print Receipt",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-            child: Column(
-              children: [
-                if (checkoutController.errorMessage.value.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.error_outline_rounded,
-                          color: Color(0xffD32F2F),
-                          size: 16,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            checkoutController.errorMessage.value,
-                            style: theme.bodySmall?.copyWith(
-                              color: const Color(0xffD32F2F),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
+                );
+              }),
+              SizedBox(
+                width: double.infinity,
+                child: Obx(
+                  () => ElevatedButton(
                     onPressed:
                         (checkoutController.amountReceivedValue >=
                                 checkoutController.grandTotal &&
@@ -468,10 +378,10 @@ class ReceivePaymentView extends StatelessWidget {
                           ),
                   ),
                 ),
-              ],
-            ),
-          );
-        }),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }

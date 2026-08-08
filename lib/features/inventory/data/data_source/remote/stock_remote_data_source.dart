@@ -11,7 +11,7 @@ abstract interface class StockRemoteDataSource {
 
   Future<List<StockModel>> getAllStock();
 
-  Future<StockModel?> getStockForProduct(String productId, String warehouseId);
+  Future<StockModel?> getStockForProduct(String productId);
 
   Future<StockModel> createInitialStock(StockModel stock);
 
@@ -57,6 +57,8 @@ abstract interface class StockRemoteDataSource {
     required DateTime dueDate,
     String? notes,
   });
+
+  Future<StockModel> updateStock(StockModel stock);
 }
 
 class StockRemoteDataSourceImpl implements StockRemoteDataSource {
@@ -102,15 +104,11 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
   }
 
   @override
-  Future<StockModel?> getStockForProduct(
-    String productId,
-    String warehouseId,
-  ) async {
+  Future<StockModel?> getStockForProduct(String productId) async {
     try {
       final snapshot = await firestore
           .collection(_stockCollection)
           .where('productId', isEqualTo: productId)
-          .where('warehouseId', isEqualTo: warehouseId)
           .limit(1)
           .get();
 
@@ -347,6 +345,22 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
       throw Exception('Failed to purchase stock: ${e.message}');
     } catch (e) {
       throw Exception('Failed to purchase stock: $e');
+    }
+  }
+
+  @override
+  Future<StockModel> updateStock(StockModel stock) async {
+    try {
+      await firestore
+          .collection(_stockCollection)
+          .doc(stock.id)
+          .update(stock.toJson());
+
+      return stock;
+    } on FirebaseException catch (e) {
+      throw Exception('Failed to update stock: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to update stock: $e');
     }
   }
 }

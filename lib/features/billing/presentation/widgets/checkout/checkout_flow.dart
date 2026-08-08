@@ -5,6 +5,7 @@ import 'package:billing_system/features/billing/domain/usecases/get_next_bill_nu
 import 'package:billing_system/features/billing/presentation/controllers/cart_controller.dart';
 import 'package:billing_system/features/billing/presentation/controllers/checkout_controller.dart';
 import 'package:billing_system/features/billing/presentation/widgets/checkout/proceed_to_payment_view.dart';
+import 'package:billing_system/features/billing/presentation/widgets/checkout/receipt_dialog.dart';
 import 'package:billing_system/features/billing/presentation/widgets/checkout/receive_payment_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,14 +14,12 @@ class CheckoutFlow extends StatelessWidget {
   final CheckoutController checkoutController;
   final CartController cartController;
   final VoidCallback onEditCart;
-  final VoidCallback onClose;
 
   const CheckoutFlow({
     super.key,
     required this.checkoutController,
     required this.cartController,
     required this.onEditCart,
-    required this.onClose,
   });
 
   @override
@@ -34,10 +33,7 @@ class CheckoutFlow extends StatelessWidget {
         );
       }
 
-      return ReceivePaymentView(
-        checkoutController: checkoutController,
-        onClose: onClose,
-      );
+      return ReceivePaymentView(checkoutController: checkoutController);
     });
   }
 }
@@ -61,14 +57,28 @@ Future<void> showCheckoutFlow(
   final screenSize = MediaQuery.of(context).size;
   final isWide = screenSize.width >= 700;
 
-  void closeAndReset() {
-    Navigator.of(context).maybePop();
+  // Fires exactly once, the moment payment succeeds. Closes every open
+  // sheet/dialog stacked on this route (checkout flow, plus the cart
+  // bottom sheet beneath it on mobile) back to the billing page in one
+  // shot, then opens the receipt.
+  once<bool>(checkoutController.paymentSuccessful, (success) async {
+    if (!success) return;
+
+    final bill = checkoutController.completedBill.value;
+
+    Navigator.of(
+      context,
+      rootNavigator: true,
+    ).popUntil((route) => route.isFirst);
+
     Get.delete<CheckoutController>(tag: 'checkout');
-  }
+
+    if (bill != null) {
+      await showReceiptDialog(context, bill: bill);
+    }
+  });
 
   if (isWide) {
-    // Hard caps regardless of monitor size — never let the dialog grow
-    // past a sensible fixed footprint just because the viewport is huge.
     final dialogWidth = screenSize.width < 480 ? screenSize.width : 460.0;
     final dialogHeight = screenSize.height < 700
         ? screenSize.height * .9
@@ -93,7 +103,6 @@ Future<void> showCheckoutFlow(
                   checkoutController: checkoutController,
                   cartController: cartController,
                   onEditCart: () => Navigator.of(context).maybePop(),
-                  onClose: closeAndReset,
                 ),
               ),
             ),
@@ -117,7 +126,6 @@ Future<void> showCheckoutFlow(
                 checkoutController: checkoutController,
                 cartController: cartController,
                 onEditCart: () => Navigator.of(context).maybePop(),
-                onClose: closeAndReset,
               ),
             ),
           ),

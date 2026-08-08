@@ -8,7 +8,7 @@ abstract interface class StockLocalDataSource {
 
   Future<List<StockModel>> getAllStock();
 
-  Future<StockModel?> getStockForProduct(String productId, String warehouseId);
+  Future<StockModel?> getStockForProduct(String productId);
 
   Future<StockModel> createInitialStock(StockModel stock);
 
@@ -29,6 +29,7 @@ abstract interface class StockLocalDataSource {
   Future<List<StockBatchModel>> getStockBatchesForProduct(String productId);
 
   Future<StockBatchModel> createStockBatch(StockBatchModel batch);
+  Future<StockModel> updateStock(StockModel stock);
 
   Future<void> clear();
 
@@ -74,14 +75,10 @@ class StockLocalDataSourceImpl implements StockLocalDataSource {
   }
 
   @override
-  Future<StockModel?> getStockForProduct(
-    String productId,
-    String warehouseId,
-  ) async {
+  Future<StockModel?> getStockForProduct(String productId) async {
     try {
       return stockBox.values.firstWhere(
-        (stock) =>
-            stock.productId == productId && stock.warehouseId == warehouseId,
+        (stock) => stock.productId == productId,
       );
     } catch (_) {
       return null;
@@ -182,6 +179,11 @@ class StockLocalDataSourceImpl implements StockLocalDataSource {
     }
   }
 
+  @override
+  Future<StockModel> updateStock(StockModel stock) async {
+    await stockBox.put(stock.id, stock);
+    return stock;
+  }
   // ======================================================
   // Utilities
   // ======================================================

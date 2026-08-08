@@ -9,7 +9,6 @@ abstract class StockRepository {
 
   ResultFuture<StockEntity?> getStockForProduct(
     String productId,
-    String warehouseId,
   );
 
   ResultFuture<StockEntity> createInitialStock(StockEntity stock);
@@ -29,6 +28,7 @@ abstract class StockRepository {
     String productId,
   );
   ResultFuture<StockBatchEntity> createStockBatch(StockBatchEntity batch);
+  ResultFuture<StockEntity> updateStock(StockEntity stock);
 
   // -------------- Purchase Stock --------------
   ResultFuture<void> purchaseStock({

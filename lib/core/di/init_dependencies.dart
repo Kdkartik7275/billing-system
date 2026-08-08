@@ -15,6 +15,7 @@ import 'package:billing_system/features/billing/data/repository_impl/bill_reposi
 import 'package:billing_system/features/billing/data/repository_impl/billing_cart_repository_impl.dart';
 import 'package:billing_system/features/billing/domain/repositories/bill_repository.dart';
 import 'package:billing_system/features/billing/domain/repositories/billing_cart_repository.dart';
+import 'package:billing_system/features/billing/domain/usecases/aggregate_sold_quantities_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/clear_cart_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/create_bill_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/delete_bill_usecase.dart';
@@ -23,7 +24,10 @@ import 'package:billing_system/features/billing/domain/usecases/get_bill_by_id_u
 import 'package:billing_system/features/billing/domain/usecases/get_bills_by_date_range_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/get_cart_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/get_next_bill_number_usecase.dart';
+import 'package:billing_system/features/billing/domain/usecases/get_unsynced_bills_usecase.dart';
+import 'package:billing_system/features/billing/domain/usecases/reduce_stock_for_sold_products_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/save_cart_usecase.dart';
+import 'package:billing_system/features/billing/domain/usecases/sync_pending_bills_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/update_bill_status_usecase.dart';
 import 'package:billing_system/features/inventory/data/data_source/local/brand_local_data_source.dart';
 import 'package:billing_system/features/inventory/data/data_source/local/category_local_data_source.dart';

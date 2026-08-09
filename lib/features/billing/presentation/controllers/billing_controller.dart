@@ -1,4 +1,5 @@
 import 'package:billing_system/core/snackbars/snackbars.dart';
+import 'package:billing_system/core/sync/bill_sync_scheduler.dart';
 import 'package:billing_system/features/billing/domain/entities/bill_entity.dart';
 import 'package:billing_system/features/billing/domain/usecases/aggregate_sold_quantities_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/get_bills_by_date_range_usecase.dart';
@@ -24,7 +25,7 @@ class BillingController extends GetxController {
   final SyncPendingBillsUsecase syncPendingBillsUsecase;
   final AggregateSoldQuantitiesUsecase aggregateSoldQuantitiesUsecase;
   final ReduceStockForSoldProductsUsecase reduceStockForSoldProductsUsecase;
-
+  final BillSyncScheduler billSyncScheduler;
   final RxString selectedCategory = 'All'.obs;
   final InventoryController inventoryController = Get.find();
 
@@ -42,13 +43,24 @@ class BillingController extends GetxController {
     required this.syncPendingBillsUsecase,
     required this.aggregateSoldQuantitiesUsecase,
     required this.reduceStockForSoldProductsUsecase,
+    required this.billSyncScheduler,
   });
 
   @override
   void onInit() {
     super.onInit();
-    getBills();
-    getPendingBills();
+    _initializeBilling();
+  }
+
+  Future<void> _initializeBilling() async {
+    await billSyncScheduler.hydrateIfNeeded();
+
+    await getBills();
+    await getPendingBills();
+
+    await billSyncScheduler.runIfDue();
+
+    await getPendingBills();
   }
 
   void selectCategory(String category) {
@@ -197,8 +209,6 @@ class BillingController extends GetxController {
     }
   }
 
-  // Inserts a freshly created bill directly into local state instead of
-  // re-querying Hive after every sale.
   void addBillLocally(BillEntity bill) {
     bills.insert(0, bill);
 
@@ -221,14 +231,26 @@ class BillingController extends GetxController {
 
         await getPendingBills();
 
-        final aggregateResult = await aggregateSoldQuantitiesUsecase.call(
+        final aggregateResult = await aggregateSoldQuantitiesUsecase(
           syncedBills,
         );
 
         await aggregateResult.fold((_) async {}, (aggregates) async {
-          if (aggregates.isNotEmpty) {
-            await reduceStockForSoldProductsUsecase.call(aggregates);
-          }
+          if (aggregates.isEmpty) return;
+
+          final reductionResult = await reduceStockForSoldProductsUsecase(
+            aggregates,
+          );
+
+          reductionResult.fold((_) {}, (reductions) {
+            final inventoryController = Get.find<InventoryController>();
+            for (final r in reductions) {
+              inventoryController.updateStockQuantityLocally(
+                r.productId,
+                r.newQuantity,
+              );
+            }
+          });
         });
 
         AppSnackbar.success(

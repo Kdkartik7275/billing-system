@@ -14,7 +14,9 @@ class AppPages {
     GetPage(
       name: AppRoutes.dashboard,
       binding: DashboardShellBinding(),
-      page: () =>kIsWeb ? AppInitializerPage(child: const DashboardPage()) : const DashboardPage(),
+      page: () => kIsWeb
+          ? AppInitializerPage(child: const DashboardPage())
+          : const DashboardPage(),
     ),
     GetPage(name: AppRoutes.login, page: () => const LoginPage()),
     GetPage(name: AppRoutes.splash, page: () => const SplashPage()),

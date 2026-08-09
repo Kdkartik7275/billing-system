@@ -2,6 +2,7 @@ import 'package:billing_system/core/config/theme/app_radius.dart';
 import 'package:billing_system/features/billing/presentation/controllers/billing_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 class TabletSmartPosCard extends StatelessWidget {
   const TabletSmartPosCard({super.key, this.branchName = 'Main Branch'});
   final String branchName;
@@ -42,8 +43,11 @@ class TabletSmartPosCard extends StatelessWidget {
                     color: Colors.white.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.storefront_rounded,
-                      color: Colors.white, size: 24),
+                  child: const Icon(
+                    Icons.storefront_rounded,
+                    color: Colors.white,
+                    size: 24,
+                  ),
                 ),
                 const SizedBox(width: 14),
                 Column(
@@ -60,8 +64,11 @@ class TabletSmartPosCard extends StatelessWidget {
                     const SizedBox(height: 3),
                     Row(
                       children: [
-                        const Icon(Icons.location_on_rounded,
-                            color: Color(0xFFFFC857), size: 14),
+                        const Icon(
+                          Icons.location_on_rounded,
+                          color: Color(0xFFFFC857),
+                          size: 14,
+                        ),
                         const SizedBox(width: 3),
                         Text(
                           branchName,
@@ -116,10 +123,21 @@ class TabletSmartPosCard extends StatelessWidget {
   }
 
   String _month(int m) => const [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-      ][m - 1];
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ][m - 1];
 }
+
 class _SyncButton extends StatelessWidget {
   const _SyncButton({required this.billsController});
   final BillingController billsController;
@@ -144,10 +162,7 @@ class _SyncButton extends StatelessWidget {
           child: Container(
             height: 40,
             padding: const EdgeInsets.symmetric(horizontal: 6),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-             
-            ),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(24)),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -194,8 +209,13 @@ class _SyncButton extends StatelessWidget {
     });
   }
 }
+
 class _InfoTile extends StatelessWidget {
-  const _InfoTile({required this.icon, required this.label, required this.value});
+  const _InfoTile({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
   final IconData icon;
   final String label;
   final String value;

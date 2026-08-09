@@ -20,10 +20,7 @@ class QuickAction {
 class QuickActionGrid extends StatelessWidget {
   final List<QuickAction> actions;
 
-  const QuickActionGrid({
-    super.key,
-    required this.actions,
-  });
+  const QuickActionGrid({super.key, required this.actions});
 
   @override
   Widget build(BuildContext context) {
@@ -55,9 +52,7 @@ class QuickActionGrid extends StatelessWidget {
 class _ActionCard extends StatelessWidget {
   final QuickAction action;
 
-  const _ActionCard({
-    required this.action,
-  });
+  const _ActionCard({required this.action});
 
   @override
   Widget build(BuildContext context) {
@@ -68,10 +63,7 @@ class _ActionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         onTap: action.onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 10,
-            vertical: 14,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -82,11 +74,7 @@ class _ActionCard extends StatelessWidget {
                   color: action.color.withOpacity(.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  action.icon,
-                  color: action.color,
-                  size: 22,
-                ),
+                child: Icon(action.icon, color: action.color, size: 22),
               ),
               const SizedBox(height: 10),
               Text(
@@ -105,10 +93,7 @@ class _ActionCard extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: Colors.grey.shade600,
-                ),
+                style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
               ),
             ],
           ),

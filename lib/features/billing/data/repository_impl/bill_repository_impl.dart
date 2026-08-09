@@ -177,7 +177,17 @@ class BillRepositoryImpl implements BillRepository {
         );
       }
 
-      final remoteBills = await remoteDataSource.getBillsForOutlet();
+      final now = DateTime.now();
+      final start = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).subtract(const Duration(days: 30));
+
+      final remoteBills = await remoteDataSource.getBillsByDateRange(
+        start,
+        now,
+      );
 
       final syncedModels = remoteBills
           .map((bill) => bill.copyWith(synced: true))
@@ -187,6 +197,26 @@ class BillRepositoryImpl implements BillRepository {
       await localDataSource.setHydrated();
 
       return const Right(null);
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultFuture<int> pruneOldLocalBills() async {
+    try {
+      final now = DateTime.now();
+      final cutoff = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).subtract(const Duration(days: 30));
+
+      final prunedCount = await localDataSource.pruneSyncedBillsOlderThan(
+        cutoff,
+      );
+
+      return right(prunedCount);
     } catch (e) {
       return left(FirebaseFailure(message: e.toString()));
     }

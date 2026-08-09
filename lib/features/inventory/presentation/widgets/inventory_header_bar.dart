@@ -40,18 +40,15 @@ class InventoryHeaderBar extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   subtitle!,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                 ),
               ],
             ],
           ),
         ),
-    
+
         const SizedBox(width: 16),
-    
+
         _HeaderActions(
           compact: false,
           onRefresh: onRefresh,

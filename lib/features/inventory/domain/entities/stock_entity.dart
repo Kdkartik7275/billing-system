@@ -1,4 +1,3 @@
-
 enum StockStatus { inStock, lowStock, outOfStock }
 
 class StockEntity {
@@ -8,7 +7,6 @@ class StockEntity {
   final String? variantId;
 
   final double quantity;
-
 
   final double reservedQuantity;
 

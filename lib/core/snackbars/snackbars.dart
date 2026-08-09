@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class AppSnackbar {
-  static void success({
-    required String message,
-    String title = 'Success',
-  }) {
+  static void success({required String message, String title = 'Success'}) {
     Get.snackbar(
       title,
       message,
@@ -15,17 +12,11 @@ class AppSnackbar {
       margin: const EdgeInsets.all(12),
       borderRadius: 12,
       duration: const Duration(seconds: 3),
-      icon: const Icon(
-        Icons.check_circle,
-        color: Colors.white,
-      ),
+      icon: const Icon(Icons.check_circle, color: Colors.white),
     );
   }
 
-  static void error({
-    required String message,
-    String title = 'Error',
-  }) {
+  static void error({required String message, String title = 'Error'}) {
     Get.snackbar(
       title,
       message,
@@ -35,17 +26,11 @@ class AppSnackbar {
       margin: const EdgeInsets.all(12),
       borderRadius: 12,
       duration: const Duration(seconds: 3),
-      icon: const Icon(
-        Icons.error,
-        color: Colors.white,
-      ),
+      icon: const Icon(Icons.error, color: Colors.white),
     );
   }
 
-  static void warning({
-    required String message,
-    String title = 'Warning',
-  }) {
+  static void warning({required String message, String title = 'Warning'}) {
     Get.snackbar(
       title,
       message,
@@ -55,17 +40,11 @@ class AppSnackbar {
       margin: const EdgeInsets.all(12),
       borderRadius: 12,
       duration: const Duration(seconds: 3),
-      icon: const Icon(
-        Icons.warning,
-        color: Colors.white,
-      ),
+      icon: const Icon(Icons.warning, color: Colors.white),
     );
   }
 
-  static void info({
-    required String message,
-    String title = 'Info',
-  }) {
+  static void info({required String message, String title = 'Info'}) {
     Get.snackbar(
       title,
       message,
@@ -75,10 +54,7 @@ class AppSnackbar {
       margin: const EdgeInsets.all(12),
       borderRadius: 12,
       duration: const Duration(seconds: 3),
-      icon: const Icon(
-        Icons.info,
-        color: Colors.white,
-      ),
+      icon: const Icon(Icons.info, color: Colors.white),
     );
   }
 }

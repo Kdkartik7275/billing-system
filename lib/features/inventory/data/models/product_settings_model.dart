@@ -24,7 +24,7 @@ class ProductSettingsModel extends HiveObject {
   @HiveField(5)
   final bool isLoyaltyEligible;
 
-   ProductSettingsModel({
+  ProductSettingsModel({
     this.lowStockThreshold = 10,
     this.allowNegativeStock = false,
     this.isActive = true,
@@ -91,8 +91,7 @@ class ProductSettingsModel extends HiveObject {
       isActive: isActive ?? this.isActive,
       trackBatches: trackBatches ?? this.trackBatches,
       trackExpiry: trackExpiry ?? this.trackExpiry,
-      isLoyaltyEligible:
-          isLoyaltyEligible ?? this.isLoyaltyEligible,
+      isLoyaltyEligible: isLoyaltyEligible ?? this.isLoyaltyEligible,
     );
   }
 }

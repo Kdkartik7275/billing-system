@@ -31,10 +31,10 @@ class AddProductTextfield extends StatelessWidget {
     return TextField(
       controller: controller,
       maxLines: maxLines,
-      readOnly:readOnly,
+      readOnly: readOnly,
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
-      
+
       style: const TextStyle(fontSize: 14.5, color: AppColors.textPrimary),
       decoration: InputDecoration(
         hintText: hint,

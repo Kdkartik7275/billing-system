@@ -104,7 +104,9 @@ class _BrandPanel extends StatelessWidget {
           ),
           // Faint grid texture
           Positioned.fill(
-            child: CustomPaint(painter: _GridPainter(Colors.white.withValues(alpha: .04))),
+            child: CustomPaint(
+              painter: _GridPainter(Colors.white.withValues(alpha: .04)),
+            ),
           ),
 
           Padding(
@@ -207,7 +209,11 @@ class _BrandPanel extends StatelessWidget {
                 // Bottom stat strip
                 Row(
                   children: [
-                    _StatChip(value: '12k+', label: 'Shops onboarded', amber: amber),
+                    _StatChip(
+                      value: '12k+',
+                      label: 'Shops onboarded',
+                      amber: amber,
+                    ),
                     const SizedBox(width: 28),
                     _StatChip(value: '99.9%', label: 'Uptime', amber: amber),
                   ],
@@ -303,9 +309,7 @@ class _GlowBlob extends StatelessWidget {
       width: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: RadialGradient(
-          colors: [color, color.withValues(alpha: 0)],
-        ),
+        gradient: RadialGradient(colors: [color, color.withValues(alpha: 0)]),
       ),
     );
   }

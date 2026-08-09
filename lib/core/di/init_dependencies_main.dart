@@ -80,14 +80,6 @@ Future<void> _initHiveBoxes() async {
 
   final billingCartBox = await Hive.openBox<BillingCartModel>('billing_cart');
   sl.registerLazySingleton<Box<BillingCartModel>>(() => billingCartBox);
-
-  // Customer and coupon features are deactivated for MVP.
-  // Uncomment and register when those features are implemented:
-  // final customersBox = await Hive.openBox<CustomerModel>('customers');
-  // sl.registerLazySingleton<Box<CustomerModel>>(() => customersBox);
-  //
-  // final couponsBox = await Hive.openBox<CouponModel>('coupons');
-  // sl.registerLazySingleton<Box<CouponModel>>(() => couponsBox);
 }
 
 // ----------------------- AUTH -----------------------
@@ -110,6 +102,7 @@ void _initAuthentication() {
     () => RequestShopRegistrationUseCase(repository: sl()),
   );
   sl.registerLazySingleton(() => LoginUser(repository: sl()));
+  sl.registerLazySingleton(() => LogoutUsecase(repository: sl()));
 }
 
 void _initUser() {
@@ -301,6 +294,14 @@ void _initBilling() {
   );
   sl.registerLazySingleton<BillingCartRepository>(
     () => BillingCartRepositoryImpl(localDataSource: sl()),
+  );
+  sl.registerLazySingleton<BillSyncScheduler>(
+    () => BillSyncScheduler(
+      aggregateSoldQuantitiesUsecase: sl(),
+      billRepository: sl(),
+      metaBox: sl(),
+      reduceStockForSoldProductsUsecase: sl(),
+    ),
   );
 
   // ---------------- USE CASES ----------------

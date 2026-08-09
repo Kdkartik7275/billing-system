@@ -1,10 +1,4 @@
-enum TaxType {
-  exclusive,
-
-  inclusive,
-
-  exempt,
-}
+enum TaxType { exclusive, inclusive, exempt }
 
 class ProductTax {
   final double gstPercent;
@@ -19,8 +13,8 @@ class ProductTax {
   });
 
   const ProductTax.exempt({this.hsnCode})
-      : gstPercent = 0,
-        type = TaxType.exempt;
+    : gstPercent = 0,
+      type = TaxType.exempt;
 
   bool get isExempt => type == TaxType.exempt;
 
@@ -41,17 +35,11 @@ class ProductTax {
     return sellingPrice + taxAmountFor(sellingPrice);
   }
 
-  ProductTax copyWith({
-    double? gstPercent,
-    TaxType? type,
-    String? hsnCode,
-  }) {
+  ProductTax copyWith({double? gstPercent, TaxType? type, String? hsnCode}) {
     return ProductTax(
       gstPercent: gstPercent ?? this.gstPercent,
       type: type ?? this.type,
       hsnCode: hsnCode ?? this.hsnCode,
     );
   }
-
- 
 }

@@ -7,9 +7,7 @@ abstract class StockRepository {
   // ------------- Stock Entity --------------
   ResultFuture<List<StockEntity>> getAllStock();
 
-  ResultFuture<StockEntity?> getStockForProduct(
-    String productId,
-  );
+  ResultFuture<StockEntity?> getStockForProduct(String productId);
 
   ResultFuture<StockEntity> createInitialStock(StockEntity stock);
 

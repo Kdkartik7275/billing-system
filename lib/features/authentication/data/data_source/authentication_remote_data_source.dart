@@ -1,3 +1,4 @@
+import 'package:billing_system/core/config/constants/typedefs.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
@@ -15,6 +16,7 @@ abstract interface class AuthenticationRemoteDataSource {
     required String email,
     required String password,
   });
+  Future logout();
 }
 
 class AuthenticationRemoteDataSourceImpl
@@ -60,6 +62,15 @@ class AuthenticationRemoteDataSourceImpl
       return userCredential.user;
     } catch (e) {
       throw Exception('Login failed: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<void> logout() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+    } catch (e) {
+      throw Exception('Logout failed: ${e.toString()}');
     }
   }
 }

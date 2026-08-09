@@ -7,6 +7,7 @@ import 'package:billing_system/features/dashboard/presentation/models/dashboard_
 import 'package:billing_system/features/dashboard/presentation/widgets/dashboard_drawer_navigation.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/logout_button.dart';
 import 'package:billing_system/features/inventory/presentation/views/inventory_page.dart';
+import 'package:billing_system/features/user/presentation/controller/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -33,6 +34,7 @@ class _DashboardMobileLayoutState extends State<DashboardMobileLayout> {
   final controller = Get.find<DashboardShellController>();
 
   final billsController = Get.find<BillingController>();
+  final user = Get.find<UserController>().user;
   @override
   void initState() {
     super.initState();
@@ -66,26 +68,24 @@ class _DashboardMobileLayoutState extends State<DashboardMobileLayout> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Text(
-                          'Hello, Admin ',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 19,
-                            fontWeight: FontWeight.w700,
-                          ),
+                    Obx(
+                      () => Text(
+                        'Hello, ${user.value?.name ?? ''} ',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: tt.titleMedium!.copyWith(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
                         ),
-                        Text('👋', style: TextStyle(fontSize: 16)),
-                      ],
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       "Here's what's happening today",
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: tt.titleSmall!.copyWith(
                         color: Colors.white.withValues(alpha: 0.55),
                         fontSize: 12,
                       ),

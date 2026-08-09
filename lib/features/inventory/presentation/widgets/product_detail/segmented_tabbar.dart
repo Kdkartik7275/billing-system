@@ -39,7 +39,9 @@ class SegmentedTabBar extends StatelessWidget {
                     Icon(
                       icons![index],
                       size: 16,
-                      color: isActive ? Colors.blue.shade600 : Colors.grey.shade500,
+                      color: isActive
+                          ? Colors.blue.shade600
+                          : Colors.grey.shade500,
                     ),
                   if (icons != null) const SizedBox(height: 4),
                   Text(
@@ -47,7 +49,9 @@ class SegmentedTabBar extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodySmall!.copyWith(
                       fontSize: 12.5,
                       fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                      color: isActive ? Colors.blue.shade600 : Colors.grey.shade600,
+                      color: isActive
+                          ? Colors.blue.shade600
+                          : Colors.grey.shade600,
                     ),
                   ),
                 ],

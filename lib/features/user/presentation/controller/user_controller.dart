@@ -1,6 +1,7 @@
 import 'package:billing_system/core/config/routes/app_routes.dart';
 import 'package:billing_system/core/di/init_dependencies.dart';
 import 'package:billing_system/core/firebase/shop_firebase_service.dart';
+import 'package:billing_system/features/authentication/domain/usecases/logout_usecase.dart';
 import 'package:billing_system/features/user/data/models/shop_model.dart';
 import 'package:billing_system/features/user/data/models/user_model.dart';
 import 'package:billing_system/features/user/domain/entity/shop_entity.dart';
@@ -16,13 +17,16 @@ class UserController extends GetxController {
   final GetUserByIdUseCase _getUserByIdUseCase;
   final GetShopByIdUseCase _getShopByIdUseCase;
   final ShopFirebaseService _shopFirebaseService;
+  final LogoutUsecase _logoutUsecase;
 
   UserController({
     required GetUserByIdUseCase getUserByIdUseCase,
     required GetShopByIdUseCase getShopByIdUseCase,
     required ShopFirebaseService shopFirebaseService,
+    required LogoutUsecase logoutUsecase,
   }) : _getUserByIdUseCase = getUserByIdUseCase,
        _getShopByIdUseCase = getShopByIdUseCase,
+       _logoutUsecase = logoutUsecase,
        _shopFirebaseService = shopFirebaseService;
 
   final Rx<UserEntity?> user = Rx<UserEntity?>(null);
@@ -118,19 +122,6 @@ class UserController extends GetxController {
       debugPrint(stackTrace.toString());
     }
 
-    // final productsResult = await sl<GetProductsUsecase>().call();
-    // productsResult.fold(
-    //   (failure) {
-    //     debugPrint('Error fetching products: $failure');
-    //     errorMessage.value =
-    //         'We couldn\'t load your products. Please try again.';
-    //     isLoading.value = false;
-    //     return false;
-    //   },
-    //   (fetchedProducts) {
-    //     debugPrint('Fetched products: ${fetchedProducts.length}');
-    //   },
-    // );
     statusMessage.value = 'All set!';
     isLoading.value = false;
 
@@ -199,5 +190,24 @@ class UserController extends GetxController {
 
     await FirebaseAuth.instance.signOut();
     return AppRoutes.login;
+  }
+
+  Future<bool> logout() async {
+    final result = await _logoutUsecase.call();
+
+    return result.fold(
+      (failure) {
+        debugPrint('Error logging out: ${failure.message}');
+        errorMessage.value = failure.message;
+        return false;
+      },
+      (_) {
+        user.value = null;
+        shop.value = null;
+        errorMessage.value = null;
+        statusMessage.value = 'Getting things ready...';
+        return true;
+      },
+    );
   }
 }

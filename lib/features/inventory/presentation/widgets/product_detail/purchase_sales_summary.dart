@@ -169,7 +169,7 @@ class _SummaryCard extends StatelessWidget {
                       flex: 2,
                       child: Text(
                         dateFmt.format(row.date),
-                        style: Theme.of(  context).textTheme.bodySmall!.copyWith(
+                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
                           fontSize: 11,
                           color: Colors.grey.shade700,
                         ),

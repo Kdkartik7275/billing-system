@@ -24,12 +24,15 @@ class AddProductDropdown extends StatelessWidget {
         Icons.keyboard_arrow_down_rounded,
         color: AppColors.textSecondary,
       ),
-      style:  Theme.of(context).textTheme.labelLarge!.copyWith(fontSize: 14.5, color: AppColors.textPrimary),
+      style: Theme.of(context).textTheme.labelLarge!.copyWith(
+        fontSize: 14.5,
+        color: AppColors.textPrimary,
+      ),
       dropdownColor: AppColors.surface,
       borderRadius: BorderRadius.circular(12),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle:  Theme.of(context).textTheme.labelLarge!.copyWith(
+        hintStyle: Theme.of(context).textTheme.labelLarge!.copyWith(
           color: AppColors.textPlaceholder,
           fontSize: 14.5,
         ),
@@ -53,7 +56,15 @@ class AddProductDropdown extends StatelessWidget {
         ),
       ),
       items: items
-          .map((e) => DropdownMenuItem<String>(value: e, child: Text(e,style: Theme.of(context).textTheme.labelLarge!.copyWith(),)))
+          .map(
+            (e) => DropdownMenuItem<String>(
+              value: e,
+              child: Text(
+                e,
+                style: Theme.of(context).textTheme.labelLarge!.copyWith(),
+              ),
+            ),
+          )
           .toList(),
       onChanged: onChanged,
     );

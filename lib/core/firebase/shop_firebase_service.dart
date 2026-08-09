@@ -9,8 +9,7 @@ class ShopFirebaseService {
   FirebaseApp? _app;
   FirebaseFirestore? _firestore;
 
-    bool get isInitialized => _app != null && _firestore != null;
-
+  bool get isInitialized => _app != null && _firestore != null;
 
   Future<void> initialize(FirebaseConfigEntity config) async {
     try {

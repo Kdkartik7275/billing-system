@@ -8,6 +8,7 @@ abstract interface class BillLocalDataSource {
   Future<List<BillModel>> getAllBills();
 
   Future<BillModel?> getBillById(String id);
+  Future<int> pruneSyncedBillsOlderThan(DateTime before);
 
   Future<List<BillModel>> getBillsByDateRange(DateTime start, DateTime end);
 
@@ -136,6 +137,20 @@ class BillLocalDataSourceImpl implements BillLocalDataSource {
     final code = _generateDeviceCode();
     await metaBox.put(key, code);
     return code;
+  }
+
+  @override
+  Future<int> pruneSyncedBillsOlderThan(DateTime before) async {
+    final staleBillIds = box.values
+        .where((bill) => bill.synced && bill.createdAt.isBefore(before))
+        .map((bill) => bill.id)
+        .toList();
+
+    if (staleBillIds.isEmpty) return 0;
+
+    await box.deleteAll(staleBillIds);
+
+    return staleBillIds.length;
   }
 
   String _generateDeviceCode() {

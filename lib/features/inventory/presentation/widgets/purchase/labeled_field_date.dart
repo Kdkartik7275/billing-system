@@ -52,18 +52,28 @@ class LabeledDateField extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(Icons.calendar_today_outlined, size: 16, color: Colors.grey.shade600),
+                Icon(
+                  Icons.calendar_today_outlined,
+                  size: 16,
+                  color: Colors.grey.shade600,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     value != null ? dateFmt.format(value!) : placeholder,
                     style: TextStyle(
                       fontSize: 13.5,
-                      color: value != null ? Colors.black87 : Colors.grey.shade400,
+                      color: value != null
+                          ? Colors.black87
+                          : Colors.grey.shade400,
                     ),
                   ),
                 ),
-                Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: Colors.grey.shade500),
+                Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  size: 18,
+                  color: Colors.grey.shade500,
+                ),
               ],
             ),
           ),

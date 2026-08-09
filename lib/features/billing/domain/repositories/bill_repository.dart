@@ -16,4 +16,5 @@ abstract class BillRepository {
   ResultFuture<String> getNextBillNumber();
   ResultFuture<List<BillEntity>> syncPendingBills();
   ResultFuture<void> hydrateFromRemote();
+  ResultFuture<int> pruneOldLocalBills();
 }

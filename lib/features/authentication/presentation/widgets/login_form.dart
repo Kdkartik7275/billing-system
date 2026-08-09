@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 
 import '../controller/login_controller.dart';
 
-
 class LoginForm extends StatelessWidget {
   const LoginForm({super.key, required this.controller});
 

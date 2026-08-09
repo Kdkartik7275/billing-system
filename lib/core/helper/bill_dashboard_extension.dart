@@ -74,7 +74,7 @@
 
 //     for (final bill in this) {
 //       for (final item in bill.items) {
-       
+
 //         final category = categoryFromSku(item.sku);
 //         totals[category] =
 //             (totals[category] ?? 0) + (item.unitPrice * item.quantity);

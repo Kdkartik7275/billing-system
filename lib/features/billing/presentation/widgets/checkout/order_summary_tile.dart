@@ -72,7 +72,9 @@ class OrderSummaryTile extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   "₹${lineTotal.toStringAsFixed(2)}",
-                  style: theme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+                  style: theme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ],
             ),

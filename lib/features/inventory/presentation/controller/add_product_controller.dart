@@ -80,7 +80,6 @@ class AddProductController extends GetxController {
   List<String> get categories =>
       _inventoryController.categories.map((c) => c.name).toList();
 
-
   // ---------------- LIFECYCLE ----------------
 
   @override

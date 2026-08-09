@@ -3,7 +3,6 @@ import 'package:billing_system/features/user/domain/entity/shop_entity.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive/hive.dart';
 
-
 part 'shop_model.g.dart';
 
 @HiveType(typeId: 4)
@@ -47,7 +46,7 @@ class ShopModel extends HiveObject {
   @HiveField(12)
   final DateTime updatedAt;
 
-   ShopModel({
+  ShopModel({
     required this.id,
     required this.shopName,
     required this.ownerUid,
@@ -77,8 +76,7 @@ class ShopModel extends HiveObject {
       subscriptionExpiry: json['subscriptionExpiry'] != null
           ? (json['subscriptionExpiry'] as Timestamp).toDate()
           : null,
-      firebaseConfig:
-          FirebaseConfigModel.fromJson(json['firebaseConfig']),
+      firebaseConfig: FirebaseConfigModel.fromJson(json['firebaseConfig']),
       createdAt: (json['createdAt'] as Timestamp).toDate(),
       updatedAt: (json['updatedAt'] as Timestamp).toDate(),
     );
@@ -132,8 +130,7 @@ class ShopModel extends HiveObject {
       isActive: entity.isActive,
       plan: entity.plan,
       subscriptionExpiry: entity.subscriptionExpiry,
-      firebaseConfig:
-          FirebaseConfigModel.fromEntity(entity.firebaseConfig),
+      firebaseConfig: FirebaseConfigModel.fromEntity(entity.firebaseConfig),
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     );

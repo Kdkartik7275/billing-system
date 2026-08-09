@@ -104,7 +104,6 @@ class _RequestForm extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          
           Padding(
             padding: const EdgeInsets.fromLTRB(28, 30, 28, 28),
             child: Form(
@@ -148,7 +147,9 @@ class _RequestForm extends StatelessWidget {
                   Text(
                     'Share a few details and our team will set up your account '
                     'and get in touch — this doesn\'t create a login right away.',
-                    style: textTheme.bodyMedium?.copyWith(color: Colors.black54),
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: Colors.black54,
+                    ),
                   ),
                   const SizedBox(height: 26),
 
@@ -348,7 +349,11 @@ class _Field extends StatelessWidget {
             hintText: hint,
             hintStyle: const TextStyle(color: Colors.black38),
             prefixIcon: maxLines == 1
-                ? Icon(icon, size: 20, color: AppColors.primary.withValues(alpha: 0.55))
+                ? Icon(
+                    icon,
+                    size: 20,
+                    color: AppColors.primary.withValues(alpha: 0.55),
+                  )
                 : null,
             filled: true,
             fillColor: const Color(0xFFF8F9FB),
@@ -475,9 +480,7 @@ class _GlowBlob extends StatelessWidget {
       width: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: RadialGradient(
-          colors: [color, color.withValues(alpha: 0)],
-        ),
+        gradient: RadialGradient(colors: [color, color.withValues(alpha: 0)]),
       ),
     );
   }

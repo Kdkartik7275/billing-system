@@ -229,7 +229,6 @@ class _ProductListCard extends StatelessWidget {
                         fit: BoxFit.cover,
                         placeholder: (_, __) => _thumbPlaceholder(),
                         errorWidget: (_, __, ___) => _thumbPlaceholder(),
-
                       )
                     : _thumbPlaceholder(),
               ),
@@ -535,7 +534,6 @@ class _ProductRow extends StatelessWidget {
                         fit: BoxFit.cover,
                         placeholder: (_, __) => _thumbPlaceholder(),
                         errorWidget: (_, __, ___) => _thumbPlaceholder(),
-                        
                       )
                     : _thumbPlaceholder(),
               ),
@@ -657,19 +655,19 @@ class _ProductRow extends StatelessWidget {
                   size: 18,
                   color: Colors.grey.shade700,
                 ),
-                onSelected: (action) async{
+                onSelected: (action) async {
                   switch (action) {
                     case 'view':
                       controller.selectProduct(product);
                       break;
                     case 'edit':
-                        final result = await Get.to<ProductEntity>(
-                                  () => EditProductPage(product: product),
-                                );
+                      final result = await Get.to<ProductEntity>(
+                        () => EditProductPage(product: product),
+                      );
 
-                                if (result != null) {
-                                  controller.updateProduct(result);
-                                }
+                      if (result != null) {
+                        controller.updateProduct(result);
+                      }
                       break;
                     case 'delete':
                       onDelete(product);

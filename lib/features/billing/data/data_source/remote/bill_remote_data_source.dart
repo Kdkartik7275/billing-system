@@ -10,8 +10,6 @@ abstract interface class BillRemoteDataSource {
 
   Future<BillModel> addBill(BillModel bill);
 
-  Future<List<BillModel>> getBillsForOutlet();
-
   Future<BillModel> updateBill(BillModel bill);
 
   Future<void> deleteBill(String id);
@@ -37,21 +35,6 @@ class BillRemoteDataSourceImpl implements BillRemoteDataSource {
       throw Exception('Failed to add bill: ${e.message}');
     } catch (e) {
       throw Exception('Failed to add bill: $e');
-    }
-  }
-
-  @override
-  Future<List<BillModel>> getBillsForOutlet() async {
-    try {
-      final snapshot = await firestore.collection(_collection).get();
-
-      return snapshot.docs
-          .map((doc) => BillModel.fromJson(doc.data()))
-          .toList();
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to fetch bills: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch bills: $e');
     }
   }
 

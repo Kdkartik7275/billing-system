@@ -15,11 +15,7 @@ class ProductImageModel extends HiveObject {
   @HiveField(2)
   final String? altText;
 
-  ProductImageModel({
-    required this.url,
-    this.isPrimary = false,
-    this.altText,
-  });
+  ProductImageModel({required this.url, this.isPrimary = false, this.altText});
 
   factory ProductImageModel.fromEntity(ProductImage entity) {
     return ProductImageModel(
@@ -30,11 +26,7 @@ class ProductImageModel extends HiveObject {
   }
 
   ProductImage toEntity() {
-    return ProductImage(
-      url: url,
-      isPrimary: isPrimary,
-      altText: altText,
-    );
+    return ProductImage(url: url, isPrimary: isPrimary, altText: altText);
   }
 
   factory ProductImageModel.fromJson(Map<String, dynamic> json) {
@@ -46,18 +38,10 @@ class ProductImageModel extends HiveObject {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'url': url,
-      'isPrimary': isPrimary,
-      'altText': altText,
-    };
+    return {'url': url, 'isPrimary': isPrimary, 'altText': altText};
   }
 
-  ProductImageModel copyWith({
-    String? url,
-    bool? isPrimary,
-    String? altText,
-  }) {
+  ProductImageModel copyWith({String? url, bool? isPrimary, String? altText}) {
     return ProductImageModel(
       url: url ?? this.url,
       isPrimary: isPrimary ?? this.isPrimary,

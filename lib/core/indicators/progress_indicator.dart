@@ -4,10 +4,6 @@ import 'package:flutter/material.dart';
 
 Center circularProgress(context) {
   return Center(
-    child: SpinKitFadingCircle(
-      size: 40.0,
-      color: AppColors.primary,
-    ),
+    child: SpinKitFadingCircle(size: 40.0, color: AppColors.primary),
   );
 }
-

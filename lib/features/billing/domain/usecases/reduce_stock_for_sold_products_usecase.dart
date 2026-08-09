@@ -4,16 +4,32 @@ import 'package:billing_system/features/billing/domain/entities/product_sales_ag
 import 'package:billing_system/features/inventory/domain/repositories/stock_repository.dart';
 import 'package:fpdart/fpdart.dart';
 
+class StockReductionResult {
+  final String productId;
+  final double newQuantity;
+
+  const StockReductionResult({
+    required this.productId,
+    required this.newQuantity,
+  });
+}
+
 class ReduceStockForSoldProductsUsecase
-    implements UseCaseWithParams<void, List<ProductSalesAggregate>> {
+    implements
+        UseCaseWithParams<
+          List<StockReductionResult>,
+          List<ProductSalesAggregate>
+        > {
   final StockRepository stockRepository;
 
-  ReduceStockForSoldProductsUsecase({
-    required this.stockRepository,
-  });
+  ReduceStockForSoldProductsUsecase({required this.stockRepository});
 
   @override
-  ResultFuture<void> call(List<ProductSalesAggregate> aggregates) async {
+  ResultFuture<List<StockReductionResult>> call(
+    List<ProductSalesAggregate> aggregates,
+  ) async {
+    final results = <StockReductionResult>[];
+
     for (final aggregate in aggregates) {
       final stockResult = await stockRepository.getStockForProduct(
         aggregate.product.id,
@@ -23,15 +39,25 @@ class ReduceStockForSoldProductsUsecase
       if (currentStock == null) continue;
 
       final newQuantity = currentStock.quantity - aggregate.quantitySold;
+      final clampedQuantity = newQuantity < 0 ? 0.0 : newQuantity;
 
       final updatedStock = currentStock.copyWith(
-        quantity: newQuantity < 0 ? 0 : newQuantity,
+        quantity: clampedQuantity,
         lastUpdated: DateTime.now(),
       );
 
-      await stockRepository.updateStock(updatedStock);
+      final updateResult = await stockRepository.updateStock(updatedStock);
+
+      updateResult.fold((_) {}, (_) {
+        results.add(
+          StockReductionResult(
+            productId: aggregate.product.id,
+            newQuantity: clampedQuantity,
+          ),
+        );
+      });
     }
 
-    return const Right(null);
+    return Right(results);
   }
 }

@@ -15,4 +15,5 @@ abstract interface class AuthenticationRepository {
     required String email,
     required String password,
   });
+  ResultFuture<void> logout();
 }

@@ -1,4 +1,3 @@
-
 class ProductSettings {
   final int lowStockThreshold;
 
@@ -38,6 +37,4 @@ class ProductSettings {
       isLoyaltyEligible: isLoyaltyEligible ?? this.isLoyaltyEligible,
     );
   }
-
-  
 }

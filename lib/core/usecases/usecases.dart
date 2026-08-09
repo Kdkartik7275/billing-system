@@ -1,4 +1,3 @@
-
 import 'package:billing_system/core/config/constants/typedefs.dart';
 
 abstract interface class UseCaseWithParams<Type, Params> {

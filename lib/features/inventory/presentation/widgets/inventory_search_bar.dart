@@ -44,7 +44,11 @@ class _InventorySearchBarState extends State<InventorySearchBar> {
         filled: true,
         fillColor: Colors.white,
 
-        prefixIcon: const Icon(Icons.search_rounded, size: 20,color: Colors.grey),
+        prefixIcon: const Icon(
+          Icons.search_rounded,
+          size: 20,
+          color: Colors.grey,
+        ),
 
         suffixIcon: ValueListenableBuilder<TextEditingValue>(
           valueListenable: _textController,

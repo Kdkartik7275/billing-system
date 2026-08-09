@@ -74,7 +74,7 @@ class ProductEntity {
     DateTime? updatedAt,
   }) {
     return ProductEntity(
-      id: id ?? this.id,        
+      id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
       sku: sku ?? this.sku,

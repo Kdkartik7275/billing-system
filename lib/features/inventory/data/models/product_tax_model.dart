@@ -16,16 +16,15 @@ class ProductTaxModel extends HiveObject {
   @HiveField(2)
   final String? hsnCode;
 
-   ProductTaxModel({
+  ProductTaxModel({
     this.gstPercent = 0,
     this.type = TaxTypeModel.exclusive,
     this.hsnCode,
   });
 
-   ProductTaxModel.exempt({
-    this.hsnCode,
-  }) : gstPercent = 0,
-       type = TaxTypeModel.exempt;
+  ProductTaxModel.exempt({this.hsnCode})
+    : gstPercent = 0,
+      type = TaxTypeModel.exempt;
 
   factory ProductTaxModel.fromEntity(ProductTax entity) {
     return ProductTaxModel(
@@ -54,11 +53,7 @@ class ProductTaxModel extends HiveObject {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'gstPercent': gstPercent,
-      'type': type.name,
-      'hsnCode': hsnCode,
-    };
+    return {'gstPercent': gstPercent, 'type': type.name, 'hsnCode': hsnCode};
   }
 
   ProductTaxModel copyWith({

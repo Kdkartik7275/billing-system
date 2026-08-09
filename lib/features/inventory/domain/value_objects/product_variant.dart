@@ -45,6 +45,4 @@ class ProductVariant {
       isActive: isActive ?? this.isActive,
     );
   }
-
-  
 }

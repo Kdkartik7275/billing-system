@@ -157,7 +157,11 @@ class _ImageTile extends StatelessWidget {
                 color: Colors.black54,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.close_rounded, size: 14, color: Colors.white),
+              child: const Icon(
+                Icons.close_rounded,
+                size: 14,
+                color: Colors.white,
+              ),
             ),
           ),
         ),
@@ -169,7 +173,10 @@ class _ImageTile extends StatelessWidget {
     return Container(
       color: AppColors.border.withValues(alpha: 0.3),
       alignment: Alignment.center,
-      child: const Icon(Icons.broken_image_outlined, color: AppColors.textSecondary),
+      child: const Icon(
+        Icons.broken_image_outlined,
+        color: AppColors.textSecondary,
+      ),
     );
   }
 }

@@ -4,7 +4,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-
 class RegisterShopLink extends StatelessWidget {
   const RegisterShopLink({super.key});
 
@@ -18,15 +17,18 @@ class RegisterShopLink extends StatelessWidget {
         child: RichText(
           textAlign: TextAlign.center,
           text: TextSpan(
-            style: textTheme.bodyMedium?.copyWith(color: Colors.black,fontSize: 15),
+            style: textTheme.bodyMedium?.copyWith(
+              color: Colors.black,
+              fontSize: 15,
+            ),
             children: [
               const TextSpan(text: "New to SmartPOS? "),
               TextSpan(
                 text: 'Register your shop',
-                style: Theme.of(  context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w600,
+                ),
                 recognizer: TapGestureRecognizer()
                   ..onTap = () => Get.to(() => const RegisterShopPage()),
               ),

@@ -96,6 +96,7 @@ class Bootstrap {
         getUserByIdUseCase: sl(),
         getShopByIdUseCase: sl(),
         shopFirebaseService: sl(),
+        logoutUsecase: sl(),
       ),
       permanent: true,
     );

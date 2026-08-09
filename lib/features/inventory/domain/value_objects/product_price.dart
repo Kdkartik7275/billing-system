@@ -1,4 +1,3 @@
-
 class ProductPrice {
   final double purchasePrice;
 
@@ -38,6 +37,4 @@ class ProductPrice {
       wholesalePrice: wholesalePrice ?? this.wholesalePrice,
     );
   }
-
-  
 }

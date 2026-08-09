@@ -72,14 +72,10 @@ class StockRepositoryImpl implements StockRepository {
   }
 
   @override
-  ResultFuture<StockEntity?> getStockForProduct(
-    String productId,
-  ) async {
+  ResultFuture<StockEntity?> getStockForProduct(String productId) async {
     try {
       if (await connectionChecker.isConnected) {
-        final remote = await remoteDataSource.getStockForProduct(
-          productId,
-        );
+        final remote = await remoteDataSource.getStockForProduct(productId);
 
         if (remote != null) {
           await localDataSource.createInitialStock(remote);
@@ -88,16 +84,12 @@ class StockRepositoryImpl implements StockRepository {
         return right(remote?.toEntity());
       }
 
-      final local = await localDataSource.getStockForProduct(
-        productId,
-      );
+      final local = await localDataSource.getStockForProduct(productId);
 
       return right(local?.toEntity());
     } catch (e) {
       try {
-        final local = await localDataSource.getStockForProduct(
-          productId,
-        );
+        final local = await localDataSource.getStockForProduct(productId);
 
         return right(local?.toEntity());
       } catch (_) {

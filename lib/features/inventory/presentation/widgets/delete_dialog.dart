@@ -21,7 +21,9 @@ class DeleteDialog extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xxl),
         child: Column(
@@ -34,27 +36,33 @@ class DeleteDialog extends StatelessWidget {
                 color: colorScheme.errorContainer,
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.delete_outline_rounded, color: colorScheme.onErrorContainer),
+              child: Icon(
+                Icons.delete_outline_rounded,
+                color: colorScheme.onErrorContainer,
+              ),
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
               title,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: AppSpacing.sm),
             Text.rich(
               TextSpan(
                 text: 'This will permanently remove ',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(color: colorScheme.onSurfaceVariant),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
                 children: [
                   TextSpan(
                     text: itemName,
                     style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
-                  const TextSpan(text: ' from your inventory. This action cannot be undone.'),
+                  const TextSpan(
+                    text: ' from your inventory. This action cannot be undone.',
+                  ),
                 ],
               ),
             ),

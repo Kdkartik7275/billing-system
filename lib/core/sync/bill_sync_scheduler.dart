@@ -1,6 +1,8 @@
 import 'package:billing_system/features/billing/domain/repositories/bill_repository.dart';
 import 'package:billing_system/features/billing/domain/usecases/aggregate_sold_quantities_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/reduce_stock_for_sold_products_usecase.dart';
+import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
+import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class BillSyncScheduler {
@@ -48,22 +50,31 @@ class BillSyncScheduler {
       (syncedBills) async {
         await metaBox.put(_lastSyncKey, DateTime.now().toIso8601String());
 
-        if (syncedBills.isEmpty) return;
+        if (syncedBills.isNotEmpty) {
+          final aggregateResult = await aggregateSoldQuantitiesUsecase(
+            syncedBills,
+          );
 
-        // ---------------- REDUCE STOCK, ONCE PER PRODUCT ----------------
-        final aggregateResult = await aggregateSoldQuantitiesUsecase(
-          syncedBills,
-        );
-
-        await aggregateResult.fold(
-          (_) async {
-            // Aggregation failed — stock reduction skipped this run.
-          },
-          (aggregates) async {
+          await aggregateResult.fold((_) async {}, (aggregates) async {
             if (aggregates.isEmpty) return;
-            await reduceStockForSoldProductsUsecase(aggregates);
-          },
-        );
+
+            final reductionResult = await reduceStockForSoldProductsUsecase(
+              aggregates,
+            );
+
+            reductionResult.fold((_) {}, (reductions) {
+              final inventoryController = Get.find<InventoryController>();
+              for (final r in reductions) {
+                inventoryController.updateStockQuantityLocally(
+                  r.productId,
+                  r.newQuantity,
+                );
+              }
+            });
+          });
+        }
+
+        await billRepository.pruneOldLocalBills();
       },
     );
   }

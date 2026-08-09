@@ -39,7 +39,9 @@ class InventoryProductCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: colorScheme.surface,
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+          border: Border.all(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,7 +61,8 @@ class InventoryProductCard extends StatelessWidget {
                             gaplessPlayback: true,
                             cacheWidth: 112,
                             cacheHeight: 112,
-                            errorBuilder: (_, __, ___) => _placeholder(colorScheme),
+                            errorBuilder: (_, __, ___) =>
+                                _placeholder(colorScheme),
                           )
                         : _placeholder(colorScheme),
                   ),
@@ -73,7 +76,10 @@ class InventoryProductCard extends StatelessWidget {
                         product.name,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -88,7 +94,11 @@ class InventoryProductCard extends StatelessWidget {
                   ),
                 ),
                 PopupMenuButton<String>(
-                  icon: Icon(Icons.more_vert_rounded, size: 18, color: colorScheme.onSurfaceVariant),
+                  icon: Icon(
+                    Icons.more_vert_rounded,
+                    size: 18,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                   onSelected: (action) {
                     switch (action) {
                       case 'view':
@@ -119,11 +129,16 @@ class InventoryProductCard extends StatelessWidget {
                 if (controller.brandName(product.brandId) != null)
                   _Tag(label: controller.brandName(product.brandId)!),
                 if (controller.supplierName(product.primarySupplierId) != null)
-                  _Tag(label: controller.supplierName(product.primarySupplierId)!),
+                  _Tag(
+                    label: controller.supplierName(product.primarySupplierId)!,
+                  ),
               ],
             ),
             const SizedBox(height: AppSpacing.md),
-            Divider(height: 1, color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+            Divider(
+              height: 1,
+              color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+            ),
             const SizedBox(height: AppSpacing.md),
             Row(
               children: [
@@ -136,7 +151,10 @@ class InventoryProductCard extends StatelessWidget {
                   label: 'Purchase',
                   value: '₹${product.price.purchasePrice.toStringAsFixed(0)}',
                 ),
-                _MetricColumn(label: 'Stock', value: '${stockQty.toStringAsFixed(0)} $unit'),
+                _MetricColumn(
+                  label: 'Stock',
+                  value: '${stockQty.toStringAsFixed(0)} $unit',
+                ),
                 StatusChip(status: status),
               ],
             ),
@@ -147,10 +165,14 @@ class InventoryProductCard extends StatelessWidget {
   }
 
   Widget _placeholder(ColorScheme colorScheme) => Container(
-        color: colorScheme.surfaceContainerHighest,
-        alignment: Alignment.center,
-        child: Icon(Icons.inventory_2_outlined, size: 22, color: colorScheme.onSurfaceVariant),
-      );
+    color: colorScheme.surfaceContainerHighest,
+    alignment: Alignment.center,
+    child: Icon(
+      Icons.inventory_2_outlined,
+      size: 22,
+      color: colorScheme.onSurfaceVariant,
+    ),
+  );
 }
 
 class _Tag extends StatelessWidget {
@@ -168,7 +190,10 @@ class _Tag extends StatelessWidget {
         color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(AppRadius.sm),
       ),
-      child: Text(label, style: TextStyle(fontSize: 10.5, color: colorScheme.onSurfaceVariant)),
+      child: Text(
+        label,
+        style: TextStyle(fontSize: 10.5, color: colorScheme.onSurfaceVariant),
+      ),
     );
   }
 }
@@ -178,7 +203,11 @@ class _MetricColumn extends StatelessWidget {
   final String value;
   final Color? valueColor;
 
-  const _MetricColumn({required this.label, required this.value, this.valueColor});
+  const _MetricColumn({
+    required this.label,
+    required this.value,
+    this.valueColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -188,11 +217,21 @@ class _MetricColumn extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(fontSize: 10.5, color: colorScheme.onSurfaceVariant)),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10.5,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
           const SizedBox(height: 2),
           Text(
             value,
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: valueColor),
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: valueColor,
+            ),
           ),
         ],
       ),

@@ -96,7 +96,9 @@ class LoginMobileLayout extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(
                     'Sign in to manage today\'s sales and stock.',
-                    style: textTheme.bodyMedium?.copyWith(color: Colors.black54),
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: Colors.black54,
+                    ),
                   ),
                   const SizedBox(height: 28),
                   LoginForm(controller: controller),
@@ -153,9 +155,7 @@ class _GlowBlob extends StatelessWidget {
       width: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: RadialGradient(
-          colors: [color, color.withValues(alpha: 0)],
-        ),
+        gradient: RadialGradient(colors: [color, color.withValues(alpha: 0)]),
       ),
     );
   }

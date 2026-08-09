@@ -20,9 +20,9 @@ class _AppInitializerPageState extends State<AppInitializerPage> {
   @override
   void initState() {
     super.initState();
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    _initialize();
-  });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initialize();
+    });
   }
 
   Future<void> _initialize() async {
@@ -44,7 +44,10 @@ class _AppInitializerPageState extends State<AppInitializerPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_initialized || !Get.put<ShopFirebaseService>(sl<ShopFirebaseService>()).isInitialized) {
+    if (!_initialized ||
+        !Get.put<ShopFirebaseService>(
+          sl<ShopFirebaseService>(),
+        ).isInitialized) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 

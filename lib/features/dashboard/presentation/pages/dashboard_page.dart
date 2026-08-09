@@ -30,6 +30,7 @@ class DashboardPage extends StatelessWidget {
         getUnsyncedBillsUsecase: sl(),
         aggregateSoldQuantitiesUsecase: sl(),
         reduceStockForSoldProductsUsecase: sl(),
+        billSyncScheduler: sl(),
       ),
     );
 

@@ -5,11 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class FetchingDetailsPage extends StatefulWidget {
-  const FetchingDetailsPage({
-    super.key,
-    required this.userId,
-    this.onDone,
-  });
+  const FetchingDetailsPage({super.key, required this.userId, this.onDone});
 
   final String userId;
   final VoidCallback? onDone;
@@ -38,7 +34,12 @@ class _FetchingDetailsPageState extends State<FetchingDetailsPage>
     )..repeat();
 
     _controller = Get.put<UserController>(
-      UserController(getUserByIdUseCase: sl(), getShopByIdUseCase: sl(),shopFirebaseService: sl()),
+      UserController(
+        getUserByIdUseCase: sl(),
+        getShopByIdUseCase: sl(),
+        shopFirebaseService: sl(),
+        logoutUsecase: sl(),
+      ),
     );
 
     _runFetch();

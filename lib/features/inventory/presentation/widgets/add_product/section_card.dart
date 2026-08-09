@@ -64,7 +64,7 @@ class SectionCard extends StatelessWidget {
                         subtitle,
                         style: Theme.of(context).textTheme.bodySmall!.copyWith(
                           color: AppColors.textSecondary,
-                          fontSize: 12.5
+                          fontSize: 12.5,
                         ),
                       ),
                     ],

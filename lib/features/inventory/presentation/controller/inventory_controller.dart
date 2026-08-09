@@ -291,6 +291,21 @@ class InventoryController extends GetxController {
     );
   }
 
+  void updateStockQuantityLocally(String productId, double newQuantity) {
+    final index = stockRecords.indexWhere((s) => s.productId == productId);
+
+    if (index == -1) {
+      return;
+    }
+
+    stockRecords[index] = stockRecords[index].copyWith(
+      quantity: newQuantity,
+      lastUpdated: DateTime.now(),
+    );
+
+    stockRecords.refresh();
+  }
+
   Future<void> refreshProducts() async {
     await loadProducts();
   }

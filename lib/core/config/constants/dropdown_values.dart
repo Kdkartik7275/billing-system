@@ -1,5 +1,3 @@
-import 'package:billing_system/features/inventory/presentation/widgets/purchase/labeled_dropdown.dart';
-
 final List<String> suppliers = const [
   'Samsung India Pvt Ltd',
   'Reliance Digital',

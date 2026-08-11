@@ -137,8 +137,6 @@ class _ProductDetailTabletLayoutState extends State<ProductDetailTabletLayout> {
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                       children: buildProductDetailTabContent(
                         tabIndex: _tabIndex,
-                        batches: productController.stockBatches,
-                        movements: productController.stockMovements,
                         current: current,
                       ),
                     ),

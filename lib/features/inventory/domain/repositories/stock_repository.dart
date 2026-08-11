@@ -46,4 +46,19 @@ abstract class StockRepository {
     required DateTime dueDate,
     String? notes,
   });
+
+  // -------------- Sell Stock --------------
+  ResultFuture<void> sellStock({
+    required String productId,
+    required String warehouseId,
+    required int quantity,
+    required double price,
+    required DateTime saleDate,
+    double? discount,
+    required double tax,
+    required String paymentMethod,
+    String? reason,
+    String? referenceId,
+    String? notes,
+  });
 }

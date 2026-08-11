@@ -2,9 +2,7 @@ import 'package:barcode_widget/barcode_widget.dart';
 import 'package:billing_system/core/config/theme/app_colors.dart';
 import 'package:billing_system/core/helper/functions.dart';
 import 'package:billing_system/features/inventory/domain/entities/product_entity.dart';
-import 'package:billing_system/features/inventory/domain/entities/stock_batch_entity.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_entity.dart';
-import 'package:billing_system/features/inventory/domain/entities/stock_movement_entity.dart';
 import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/product_detail/batch_summary_data.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/product_detail/detail_section_card.dart';
@@ -14,6 +12,7 @@ import 'package:billing_system/features/inventory/presentation/widgets/product_d
 import 'package:billing_system/features/inventory/presentation/widgets/product_detail/status_pill.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/product_detail/stock_movement_table.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/purchase/purchase_sheet.dart';
+import 'package:billing_system/features/inventory/presentation/widgets/sale/sale_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -39,36 +38,25 @@ const List<IconData> kProductDetailTabIcons = [
 /// Used identically by every breakpoint layout.
 List<Widget> buildProductDetailTabContent({
   required int tabIndex,
-  required List<StockBatchEntity> batches,
-  required List<StockMovementEntity> movements,
   required ProductEntity current,
 }) {
   switch (tabIndex) {
     case 1:
-      return [BatchSummaryTable(batches: batches)];
+      return [BatchSummaryTable()];
     case 2:
-      return [StockMovementTable(movements: movements)];
+      return [StockMovementTable(isAdjustmentTab: false)];
     case 3:
       return [
-        StockMovementTable(
-          title: 'Stock Adjustments',
-          movements: movements
-              .where((m) => m.type == StockMovementType.adjustment)
-              .toList(),
-        ),
+        StockMovementTable(title: 'Stock Adjustments', isAdjustmentTab: true),
       ];
     case 0:
     default:
       return [
-        BatchSummaryTable(batches: batches, maxRows: 3),
+        BatchSummaryTable(maxRows: 3),
         const SizedBox(height: 14),
-        StockMovementTable(movements: movements, maxRows: 5),
+        StockMovementTable(isAdjustmentTab: false, maxRows: 5),
         const SizedBox(height: 14),
-        PurchaseSalesSummaryRow(
-          batches: batches,
-          movements: movements,
-          sellingPrice: current.price.sellingPrice,
-        ),
+        PurchaseSalesSummaryRow(sellingPrice: current.price.sellingPrice),
       ];
   }
 }
@@ -83,38 +71,17 @@ List<QuickAction> buildProductQuickActions(ProductEntity product) => [
     onTap: () => showAddPurchaseSheet(Get.context!, product: product),
   ),
   QuickAction(
-    icon: Icons.compare_arrows_rounded,
+    icon: Icons.point_of_sale_rounded,
     color: Colors.blue.shade600,
-    title: 'Transfer Stock',
-    subtitle: 'Move to another warehouse',
-    onTap: () {},
+    title: 'Add Sale',
+    subtitle: 'Record a manual sale',
+    onTap: () => showAddSaleSheet(Get.context!, product: product),
   ),
   QuickAction(
     icon: Icons.tune_rounded,
     color: Colors.orange.shade600,
     title: 'Adjust Stock',
     subtitle: 'Adjust quantity',
-    onTap: () {},
-  ),
-  QuickAction(
-    icon: Icons.description_outlined,
-    color: Colors.purple.shade400,
-    title: 'Purchase History',
-    subtitle: 'View all purchases',
-    onTap: () {},
-  ),
-  QuickAction(
-    icon: Icons.show_chart_rounded,
-    color: Colors.blue.shade400,
-    title: 'Sales History',
-    subtitle: 'View all sales',
-    onTap: () {},
-  ),
-  QuickAction(
-    icon: Icons.undo_rounded,
-    color: Colors.red.shade400,
-    title: 'Returns',
-    subtitle: 'View returns',
     onTap: () {},
   ),
 ];

@@ -34,6 +34,7 @@ class InventoryTabletLayout extends StatelessWidget {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 32, 16, 16),
                   children: [
+                    const SizedBox(height: 10),
                     Obx(
                       () => InventoryHeaderBar(
                         title: 'Inventory',

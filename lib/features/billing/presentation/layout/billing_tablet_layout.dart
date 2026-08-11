@@ -46,6 +46,7 @@ class _BillingTabletLayoutState extends State<BillingTabletLayout> {
               flex: 2,
               child: Column(
                 children: [
+                  const SizedBox(height: 20),
                   BillingSearchBar(
                     controller: _textController,
                     onChanged: (val) {},

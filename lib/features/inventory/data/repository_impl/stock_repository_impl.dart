@@ -23,6 +23,10 @@ class StockRepositoryImpl implements StockRepository {
     required this.connectionChecker,
   });
 
+  static const _refreshInterval = Duration(hours: 24);
+
+  // ---------------- WRITES — REMOTE FIRST, UNCHANGED ----------------
+
   @override
   ResultFuture<StockEntity> createInitialStock(StockEntity stock) async {
     try {
@@ -39,62 +43,6 @@ class StockRepositoryImpl implements StockRepository {
       return right(result.toEntity());
     } catch (e) {
       return left(FirebaseFailure(message: e.toString()));
-    }
-  }
-
-  @override
-  ResultFuture<List<StockEntity>> getAllStock() async {
-    try {
-      if (await connectionChecker.isConnected) {
-        final remoteStock = await remoteDataSource.getAllStock();
-
-        await localDataSource.clear();
-
-        for (final stock in remoteStock) {
-          await localDataSource.createInitialStock(stock);
-        }
-
-        return right(remoteStock.map((e) => e.toEntity()).toList());
-      }
-
-      final localStock = await localDataSource.getAllStock();
-
-      return right(localStock.map((e) => e.toEntity()).toList());
-    } catch (e) {
-      try {
-        final localStock = await localDataSource.getAllStock();
-
-        return right(localStock.map((e) => e.toEntity()).toList());
-      } catch (_) {
-        return left(FirebaseFailure(message: e.toString()));
-      }
-    }
-  }
-
-  @override
-  ResultFuture<StockEntity?> getStockForProduct(String productId) async {
-    try {
-      if (await connectionChecker.isConnected) {
-        final remote = await remoteDataSource.getStockForProduct(productId);
-
-        if (remote != null) {
-          await localDataSource.createInitialStock(remote);
-        }
-
-        return right(remote?.toEntity());
-      }
-
-      final local = await localDataSource.getStockForProduct(productId);
-
-      return right(local?.toEntity());
-    } catch (e) {
-      try {
-        final local = await localDataSource.getStockForProduct(productId);
-
-        return right(local?.toEntity());
-      } catch (_) {
-        return left(FirebaseFailure(message: e.toString()));
-      }
     }
   }
 
@@ -141,127 +89,21 @@ class StockRepositoryImpl implements StockRepository {
   }
 
   @override
-  ResultFuture<List<StockBatchEntity>> getAllStockBatches() async {
+  ResultFuture<StockEntity> updateStock(StockEntity stock) async {
     try {
-      if (await connectionChecker.isConnected) {
-        final remote = await remoteDataSource.getAllStockBatches();
-
-        await localDataSource.clearStockBatches();
-
-        for (final batch in remote) {
-          await localDataSource.createStockBatch(batch);
-        }
-
-        return right(remote.map((e) => e.toEntity()).toList());
+      if (!await connectionChecker.isConnected) {
+        return left(FirebaseFailure(message: 'No Internet Connection'));
       }
 
-      final local = await localDataSource.getAllStockBatches();
+      final model = StockModel.fromEntity(stock);
 
-      return right(local.map((e) => e.toEntity()).toList());
+      final result = await remoteDataSource.updateStock(model);
+
+      await localDataSource.updateStock(result);
+
+      return right(result.toEntity());
     } catch (e) {
-      try {
-        final local = await localDataSource.getAllStockBatches();
-
-        return right(local.map((e) => e.toEntity()).toList());
-      } catch (_) {
-        return left(FirebaseFailure(message: e.toString()));
-      }
-    }
-  }
-
-  @override
-  ResultFuture<List<StockMovementEntity>> getAllStockMovements() async {
-    try {
-      if (await connectionChecker.isConnected) {
-        final remote = await remoteDataSource.getAllStockMovements();
-
-        await localDataSource.clearStockMovements();
-
-        for (final movement in remote) {
-          await localDataSource.createStockMovement(movement);
-        }
-
-        return right(remote.map((e) => e.toEntity()).toList());
-      }
-
-      final local = await localDataSource.getAllStockMovements();
-
-      return right(local.map((e) => e.toEntity()).toList());
-    } catch (e) {
-      try {
-        final local = await localDataSource.getAllStockMovements();
-
-        return right(local.map((e) => e.toEntity()).toList());
-      } catch (_) {
-        return left(FirebaseFailure(message: e.toString()));
-      }
-    }
-  }
-
-  @override
-  ResultFuture<List<StockBatchEntity>> getStockBatchesForProduct(
-    String productId,
-  ) async {
-    try {
-      if (await connectionChecker.isConnected) {
-        final remote = await remoteDataSource.getStockBatchesForProduct(
-          productId,
-        );
-
-        await localDataSource.replaceStockBatchesForProduct(productId, remote);
-
-        return right(remote.map((e) => e.toEntity()).toList());
-      }
-
-      final local = await localDataSource.getStockBatchesForProduct(productId);
-
-      return right(local.map((e) => e.toEntity()).toList());
-    } catch (e) {
-      try {
-        final local = await localDataSource.getStockBatchesForProduct(
-          productId,
-        );
-
-        return right(local.map((e) => e.toEntity()).toList());
-      } catch (_) {
-        return left(FirebaseFailure(message: e.toString()));
-      }
-    }
-  }
-
-  @override
-  ResultFuture<List<StockMovementEntity>> getStockMovementsForProduct(
-    String productId,
-  ) async {
-    try {
-      if (await connectionChecker.isConnected) {
-        final remote = await remoteDataSource.getStockMovementsForProduct(
-          productId,
-        );
-
-        await localDataSource.replaceStockMovementsForProduct(
-          productId,
-          remote,
-        );
-
-        return right(remote.map((e) => e.toEntity()).toList());
-      }
-
-      final local = await localDataSource.getStockMovementsForProduct(
-        productId,
-      );
-
-      return right(local.map((e) => e.toEntity()).toList());
-    } catch (e) {
-      try {
-        final local = await localDataSource.getStockMovementsForProduct(
-          productId,
-        );
-
-        return right(local.map((e) => e.toEntity()).toList());
-      } catch (_) {
-        return left(FirebaseFailure(message: e.toString()));
-      }
+      return left(FirebaseFailure(message: e.toString()));
     }
   }
 
@@ -306,7 +148,6 @@ class StockRepositoryImpl implements StockRepository {
         notes: notes,
       );
 
-      // Update local cache
       await localDataSource.createInitialStock(result.stock);
       await localDataSource.createStockBatch(result.batch);
       await localDataSource.createStockMovement(result.movement);
@@ -318,19 +159,179 @@ class StockRepositoryImpl implements StockRepository {
   }
 
   @override
-  ResultFuture<StockEntity> updateStock(StockEntity stock) async {
+  ResultFuture<void> sellStock({
+    required String productId,
+    required String warehouseId,
+    required int quantity,
+    required double price,
+    required DateTime saleDate,
+    double? discount,
+    required double tax,
+    required String paymentMethod,
+    String? reason,
+    String? referenceId,
+    String? notes,
+  }) async {
     try {
       if (!await connectionChecker.isConnected) {
         return left(FirebaseFailure(message: 'No Internet Connection'));
       }
 
-      final model = StockModel.fromEntity(stock);
+      final result = await remoteDataSource.sellStock(
+        productId: productId,
+        warehouseId: warehouseId,
+        quantity: quantity,
+        price: price,
+        saleDate: saleDate,
+        discount: discount,
+        tax: tax,
+        paymentMethod: paymentMethod,
+        reason: reason,
+        referenceId: referenceId,
+        notes: notes,
+      );
 
-      final result = await remoteDataSource.updateStock(model);
+      await localDataSource.updateStock(result.$1);
 
-      await localDataSource.updateStock(result);
+      for (final batch in result.$2) {
+        await localDataSource.updateStockBatch(batch);
+      }
 
-      return right(result.toEntity());
+      await localDataSource.createStockMovement(result.$3);
+
+      return right(null);
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  // ---------------- GET ALL STOCK — ONCE-DAILY ----------------
+
+  @override
+  ResultFuture<List<StockEntity>> getAllStock() async {
+    return await _fetchAllOncePerDay<StockModel, StockEntity>(
+      cacheKey: 'stock',
+      remoteCall: remoteDataSource.getAllStock,
+      localCall: localDataSource.getAllStock,
+      replaceLocal: (items) async {
+        await localDataSource.clear();
+        for (final item in items) {
+          await localDataSource.createInitialStock(item);
+        }
+      },
+      toEntity: (m) => m.toEntity(),
+    );
+  }
+
+  // ---------------- GET ALL BATCHES — ONCE-DAILY ----------------
+
+  @override
+  ResultFuture<List<StockBatchEntity>> getAllStockBatches() async {
+    return await _fetchAllOncePerDay<StockBatchModel, StockBatchEntity>(
+      cacheKey: 'batches',
+      remoteCall: remoteDataSource.getAllStockBatches,
+      localCall: localDataSource.getAllStockBatches,
+      replaceLocal: (items) async {
+        await localDataSource.clearStockBatches();
+        for (final item in items) {
+          await localDataSource.createStockBatch(item);
+        }
+      },
+      toEntity: (m) => m.toEntity(),
+    );
+  }
+
+  // ---------------- GET ALL MOVEMENTS — ONCE-DAILY ----------------
+
+  @override
+  ResultFuture<List<StockMovementEntity>> getAllStockMovements() async {
+    return await _fetchAllOncePerDay<StockMovementModel, StockMovementEntity>(
+      cacheKey: 'movements',
+      remoteCall: remoteDataSource.getAllStockMovements,
+      localCall: localDataSource.getAllStockMovements,
+      replaceLocal: (items) async {
+        await localDataSource.clearStockMovements();
+        for (final item in items) {
+          await localDataSource.createStockMovement(item);
+        }
+      },
+      toEntity: (m) => m.toEntity(),
+    );
+  }
+
+  // ---------------- SHARED ONCE-DAILY FETCH LOGIC ----------------
+
+  ResultFuture<List<E>> _fetchAllOncePerDay<M, E>({
+    required String cacheKey,
+    required Future<List<M>> Function() remoteCall,
+    required Future<List<M>> Function() localCall,
+    required Future<void> Function(List<M> items) replaceLocal,
+    required E Function(M model) toEntity,
+  }) async {
+    try {
+      final lastFetched = await localDataSource.getLastFetchedAt(cacheKey);
+      final isStale =
+          lastFetched == null ||
+          DateTime.now().difference(lastFetched) >= _refreshInterval;
+
+      if (!isStale) {
+        final local = await localCall();
+        return right(local.map(toEntity).toList());
+      }
+
+      if (await connectionChecker.isConnected) {
+        try {
+          final remoteItems = await remoteCall();
+          await replaceLocal(remoteItems);
+          await localDataSource.setLastFetchedAt(cacheKey, DateTime.now());
+
+          return right(remoteItems.map(toEntity).toList());
+        } catch (_) {
+          final local = await localCall();
+          return right(local.map(toEntity).toList());
+        }
+      }
+
+      final local = await localCall();
+      return right(local.map(toEntity).toList());
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  // ---------------- PER-PRODUCT LOOKUPS — LOCAL ONLY ----------------
+
+  @override
+  ResultFuture<StockEntity?> getStockForProduct(String productId) async {
+    try {
+      final local = await localDataSource.getStockForProduct(productId);
+      return right(local?.toEntity());
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultFuture<List<StockBatchEntity>> getStockBatchesForProduct(
+    String productId,
+  ) async {
+    try {
+      final local = await localDataSource.getStockBatchesForProduct(productId);
+      return right(local.map((e) => e.toEntity()).toList());
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultFuture<List<StockMovementEntity>> getStockMovementsForProduct(
+    String productId,
+  ) async {
+    try {
+      final local = await localDataSource.getStockMovementsForProduct(
+        productId,
+      );
+      return right(local.map((e) => e.toEntity()).toList());
     } catch (e) {
       return left(FirebaseFailure(message: e.toString()));
     }

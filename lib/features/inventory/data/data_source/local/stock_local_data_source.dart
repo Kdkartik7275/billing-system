@@ -29,6 +29,8 @@ abstract interface class StockLocalDataSource {
   Future<List<StockBatchModel>> getStockBatchesForProduct(String productId);
 
   Future<StockBatchModel> createStockBatch(StockBatchModel batch);
+  Future<StockBatchModel> updateStockBatch(StockBatchModel batch);
+
   Future<StockModel> updateStock(StockModel stock);
 
   Future<void> clear();
@@ -46,17 +48,23 @@ abstract interface class StockLocalDataSource {
   Future<void> clearStockMovements();
 
   Future<void> clearStockBatches();
+
+  // ---------------- DAILY FETCH GATE ----------------
+  Future<DateTime?> getLastFetchedAt(String key);
+  Future<void> setLastFetchedAt(String key, DateTime time);
 }
 
 class StockLocalDataSourceImpl implements StockLocalDataSource {
   final Box<StockModel> stockBox;
   final Box<StockMovementModel> movementBox;
   final Box<StockBatchModel> batchBox;
+  final Box metaBox;
 
   const StockLocalDataSourceImpl({
     required this.stockBox,
     required this.movementBox,
     required this.batchBox,
+    required this.metaBox,
   });
 
   // ======================================================
@@ -146,7 +154,6 @@ class StockLocalDataSourceImpl implements StockLocalDataSource {
     String productId,
     List<StockMovementModel> movements,
   ) async {
-    // Remove existing movements for this product
     final keysToDelete = movementBox.values
         .where((e) => e.productId == productId)
         .map((e) => e.key)
@@ -154,7 +161,6 @@ class StockLocalDataSourceImpl implements StockLocalDataSource {
 
     await movementBox.deleteAll(keysToDelete);
 
-    // Insert latest movements
     for (final movement in movements) {
       await movementBox.put(movement.id, movement);
     }
@@ -165,7 +171,6 @@ class StockLocalDataSourceImpl implements StockLocalDataSource {
     String productId,
     List<StockBatchModel> batches,
   ) async {
-    // Remove existing batches for this product
     final keysToDelete = batchBox.values
         .where((e) => e.productId == productId)
         .map((e) => e.key)
@@ -173,7 +178,6 @@ class StockLocalDataSourceImpl implements StockLocalDataSource {
 
     await batchBox.deleteAll(keysToDelete);
 
-    // Insert latest batches
     for (final batch in batches) {
       await batchBox.put(batch.id, batch);
     }
@@ -184,6 +188,29 @@ class StockLocalDataSourceImpl implements StockLocalDataSource {
     await stockBox.put(stock.id, stock);
     return stock;
   }
+
+  @override
+  Future<StockBatchModel> updateStockBatch(StockBatchModel batch) async {
+    await batchBox.put(batch.id, batch);
+    return batch;
+  }
+
+  // ======================================================
+  // Daily Fetch Gate
+  // ======================================================
+
+  @override
+  Future<DateTime?> getLastFetchedAt(String key) async {
+    final raw = metaBox.get('stock_last_fetched_$key') as String?;
+    if (raw == null) return null;
+    return DateTime.tryParse(raw);
+  }
+
+  @override
+  Future<void> setLastFetchedAt(String key, DateTime time) async {
+    await metaBox.put('stock_last_fetched_$key', time.toIso8601String());
+  }
+
   // ======================================================
   // Utilities
   // ======================================================

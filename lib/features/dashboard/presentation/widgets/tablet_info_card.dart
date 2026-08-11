@@ -1,5 +1,6 @@
 import 'package:billing_system/core/config/theme/app_radius.dart';
 import 'package:billing_system/features/billing/presentation/controllers/billing_controller.dart';
+import 'package:billing_system/features/user/presentation/controller/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -13,6 +14,7 @@ class TabletSmartPosCard extends StatelessWidget {
     final now = DateTime.now();
     final dateStr = "${now.day} ${_month(now.month)}, ${now.year}";
     final timeStr = TimeOfDay.fromDateTime(now).format(context);
+    final shop = Get.find<UserController>().shop.value;
 
     return Container(
       decoration: BoxDecoration(
@@ -53,11 +55,11 @@ class TabletSmartPosCard extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Smart POS',
+                    Text(
+                      shop?.shopName ?? 'Smart POS',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.w700,
                       ),
                     ),

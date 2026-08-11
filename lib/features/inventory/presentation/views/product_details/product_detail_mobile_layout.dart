@@ -2,7 +2,6 @@ import 'package:billing_system/core/shared/product_detail_shared.dart';
 import 'package:billing_system/features/inventory/domain/entities/product_entity.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_entity.dart';
 import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
-import 'package:billing_system/features/inventory/presentation/controller/product_detail_controller.dart';
 import 'package:billing_system/features/inventory/presentation/views/add_product/edit_product_page.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/product_detail/detail_section_card.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/product_detail/product_stats_row.dart';
@@ -32,7 +31,6 @@ class _ProductDetailMobileLayoutState extends State<ProductDetailMobileLayout> {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<InventoryController>();
-    final productController = Get.find<ProductDetailController>();
 
     return Obx(() {
       final current = controller.products.firstWhere(
@@ -111,8 +109,7 @@ class _ProductDetailMobileLayoutState extends State<ProductDetailMobileLayout> {
             const SizedBox(height: 14),
             ...buildProductDetailTabContent(
               tabIndex: _tabIndex,
-              batches: productController.stockBatches,
-              movements: productController.stockMovements,
+
               current: current,
             ),
           ],

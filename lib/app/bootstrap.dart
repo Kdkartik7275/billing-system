@@ -85,6 +85,7 @@ class Bootstrap {
     await Hive.openBox<BillModel>('bills');
     await Hive.openBox<BillingCartModel>('billing_cart');
     await Hive.openBox('billing_meta');
+    await Hive.openBox('inventory_meta');
     // Customer and coupon features are deactivated for MVP.
     // Uncomment when those features are implemented:
     // await Hive.openBox<CustomerModel>('customers');

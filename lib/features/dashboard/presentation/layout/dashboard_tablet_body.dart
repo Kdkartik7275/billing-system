@@ -8,6 +8,7 @@ import 'package:billing_system/features/dashboard/presentation/widgets/tablet_in
 import 'package:billing_system/features/dashboard/presentation/widgets/dashboard_stats_panel.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/low_stocks.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/sales_line_chart.dart';
+import 'package:billing_system/features/user/presentation/controller/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -18,6 +19,7 @@ class TabletDashboardBody extends GetView<BillingController> {
   Widget build(BuildContext context) {
     final topInset = MediaQuery.of(context).padding.top;
     const double headerHeight = 96;
+    final user = Get.find<UserController>().user.value;
 
     return Stack(
       children: [
@@ -103,20 +105,17 @@ class TabletDashboardBody extends GetView<BillingController> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Text(
-                            'Hello, Admin ',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          Text('👋', style: TextStyle(fontSize: 20)),
-                        ],
-                      ),
+                      Text(
+                          'Hello, ${user?.name ?? ''} ',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleMedium!
+                              .copyWith(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
                       const SizedBox(height: 3),
                       Text(
                         "Here's what's happening today",

@@ -83,6 +83,7 @@ import 'package:billing_system/features/inventory/domain/usecases/stock/get_stoc
 import 'package:billing_system/features/inventory/domain/usecases/stock/get_stocks_movement_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/get_stocks_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/purchase_stock_usecase.dart';
+import 'package:billing_system/features/inventory/domain/usecases/stock/sell_stock_usecase.dart';
 
 import 'package:billing_system/features/user/data/data_source/user_local_data_source.dart';
 import 'package:billing_system/features/user/data/data_source/user_remote_data_source.dart';

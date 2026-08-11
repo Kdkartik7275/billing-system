@@ -118,7 +118,7 @@ class _TransactionRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                (tx.grandTotal + tx.tax).toStringAsFixed(2),
+                (tx.grandTotal).toStringAsFixed(2),
                 style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 2),

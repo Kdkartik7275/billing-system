@@ -5,7 +5,6 @@ import 'package:billing_system/features/inventory/domain/entities/product_entity
 import 'package:billing_system/features/inventory/domain/entities/stock_entity.dart';
 import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
 import 'package:billing_system/features/inventory/presentation/views/add_product/edit_product_page.dart';
-import 'package:billing_system/features/inventory/presentation/widgets/product_detail/dummy_stock_data.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/product_detail/product_stats_row.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/product_detail/quick_action_grid.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/product_detail/segmented_tabbar.dart';
@@ -42,8 +41,6 @@ class _ProductDetailWebLayoutState extends State<ProductDetailWebLayout> {
         product: current,
         fallbackStock: widget.stock,
       );
-      final batches = DummyStockData.batches(current.id);
-      final movements = DummyStockData.movements(current.id);
 
       return Scaffold(
         backgroundColor: const Color(0xFFF5F6FA),
@@ -51,11 +48,7 @@ class _ProductDetailWebLayoutState extends State<ProductDetailWebLayout> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _buildTopBar(context, controller, current),
-            // Wrapping the whole content area in a scroll view is the fix
-            // for the overflow: the left/right panes size to their content
-            // (no internal Expanded/scroll), so when that content is taller
-            // than the viewport, the page itself needs to scroll rather than
-            // trying to force everything into a fixed-height Center/Row.
+
             Expanded(
               child: SingleChildScrollView(
                 child: Center(
@@ -130,8 +123,6 @@ class _ProductDetailWebLayoutState extends State<ProductDetailWebLayout> {
                                           CrossAxisAlignment.stretch,
                                       children: buildProductDetailTabContent(
                                         tabIndex: _tabIndex,
-                                        batches: batches,
-                                        movements: movements,
                                         current: current,
                                       ),
                                     ),

@@ -1,3 +1,4 @@
+import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_batch_entity.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_movement_entity.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/get_product_stock_batches_usecase.dart';
@@ -18,6 +19,8 @@ class ProductDetailController extends GetxController {
 
   RxList<StockBatchEntity> stockBatches = <StockBatchEntity>[].obs;
   RxList<StockMovementEntity> stockMovements = <StockMovementEntity>[].obs;
+  RxBool loadingStockBatches = RxBool(false);
+  RxBool loadingStockMovements = RxBool(false);
   @override
   void onInit() {
     super.onInit();
@@ -28,35 +31,47 @@ class ProductDetailController extends GetxController {
   }
 
   Future<void> fetchProductStockBatches(String productId) async {
-    final result = await getProductStockBatchesUsecase.call(productId);
-    result.fold(
-      (failure) {
-        Get.snackbar('Error', failure.message);
-      },
-      (batches) {
-        // Handle the fetched stock batches
-        debugPrint(
-          'Fetched ${batches.length} stock batches for product $productId',
-        );
-        stockBatches.value = batches;
-      },
-    );
+    try {
+      loadingStockBatches.value = true;
+      final result = await getProductStockBatchesUsecase.call(productId);
+      result.fold(
+        (failure) {
+          Get.snackbar('Error', failure.message);
+        },
+        (batches) {
+          debugPrint(
+            'Fetched ${batches.length} stock batches for product $productId',
+          );
+          stockBatches.value = batches;
+        },
+      );
+    } catch (e) {
+      AppSnackbar.error(message: e.toString());
+    } finally {
+      loadingStockBatches.value = false;
+    }
   }
 
   Future<void> fetchProductStockMovements(String productId) async {
-    final result = await getProductStockMovementsUsecase.call(productId);
-    result.fold(
-      (failure) {
-        Get.snackbar('Error', failure.message);
-      },
-      (movements) {
-        // Handle the fetched stock movements
-        debugPrint(
-          'Fetched ${movements.length} stock movements for product $productId',
-        );
-        stockMovements.value = movements;
-      },
-    );
+    try {
+      loadingStockMovements.value = true;
+      final result = await getProductStockMovementsUsecase.call(productId);
+      result.fold(
+        (failure) {
+          Get.snackbar('Error', failure.message);
+        },
+        (movements) {
+          debugPrint(
+            'Fetched ${movements.length} stock movements for product $productId',
+          );
+          stockMovements.value = movements;
+        },
+      );
+    } catch (e) {
+      AppSnackbar.error(message: e.toString());
+    } finally {
+      loadingStockMovements.value = false;
+    }
   }
 
   void deleteProduct() {

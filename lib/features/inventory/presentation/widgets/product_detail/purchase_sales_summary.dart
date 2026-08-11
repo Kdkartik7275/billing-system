@@ -1,20 +1,18 @@
-import 'package:billing_system/features/inventory/domain/entities/stock_batch_entity.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_movement_entity.dart';
+import 'package:billing_system/features/inventory/presentation/controller/product_detail_controller.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/product_detail/detail_section_card.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
-class PurchaseSalesSummaryRow extends StatelessWidget {
-  final List<StockBatchEntity> batches;
-  final List<StockMovementEntity> movements;
+class PurchaseSalesSummaryRow extends GetView<ProductDetailController> {
   final double sellingPrice;
   final VoidCallback? onViewPurchases;
   final VoidCallback? onViewSales;
 
   const PurchaseSalesSummaryRow({
     super.key,
-    required this.batches,
-    required this.movements,
+
     required this.sellingPrice,
     this.onViewPurchases,
     this.onViewSales,
@@ -22,68 +20,69 @@ class PurchaseSalesSummaryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sales = movements
-        .where((m) => m.type == StockMovementType.saleOut)
-        .toList();
+    return Obx(() {
+      final sales = controller.stockMovements
+          .where((m) => m.type == StockMovementType.saleOut)
+          .toList();
 
-    final totalPurchaseQty = batches.fold<double>(
-      0,
-      (sum, b) => sum + b.quantity,
-    );
-    final totalPurchaseValue = batches.fold<double>(
-      0,
-      (sum, b) => sum + (b.quantity * b.purchasePrice),
-    );
+      final totalPurchaseQty = controller.stockBatches.fold<double>(
+        0,
+        (sum, b) => sum + b.quantity,
+      );
+      final totalPurchaseValue = controller.stockBatches.fold<double>(
+        0,
+        (sum, b) => sum + (b.quantity * b.purchasePrice),
+      );
 
-    final totalSaleQty = sales.fold<double>(
-      0,
-      (sum, m) => sum + m.quantityChange.abs(),
-    );
-    final totalSaleValue = totalSaleQty * sellingPrice;
-
-    return Column(
-      children: [
-        _SummaryCard(
-          icon: Icons.shopping_cart_outlined,
-          title: 'Purchase Summary',
-          countLabel: 'Total Purchases',
-          totalCount: batches.length,
-          totalQty: totalPurchaseQty,
-          totalValue: totalPurchaseValue,
-          onViewAll: onViewPurchases,
-          rows: batches
-              .map(
-                (b) => _SummaryRowData(
-                  date: b.receivedAt,
-                  reference: b.batchNumber,
-                  qty: b.quantity,
-                  value: b.quantity * b.purchasePrice,
-                ),
-              )
-              .toList(),
-        ),
-        const SizedBox(height: 12),
-        _SummaryCard(
-          icon: Icons.show_chart_rounded,
-          title: 'Sales Summary',
-          countLabel: 'Total Sales',
-          totalCount: sales.length,
-          totalQty: totalSaleQty,
-          totalValue: totalSaleValue,
-          onViewAll: onViewSales,
-          rows: sales
-              .map(
-                (m) => _SummaryRowData(
-                  date: m.createdAt,
-                  reference: m.referenceId ?? m.id,
-                  qty: m.quantityChange.abs(),
-                  value: m.quantityChange.abs() * sellingPrice,
-                ),
-              )
-              .toList(),
-        ),
-      ],
-    );
+      final totalSaleQty = sales.fold<double>(
+        0,
+        (sum, m) => sum + m.quantityChange.abs(),
+      );
+      final totalSaleValue = totalSaleQty * sellingPrice;
+      return Column(
+        children: [
+          _SummaryCard(
+            icon: Icons.shopping_cart_outlined,
+            title: 'Purchase Summary',
+            countLabel: 'Total Purchases',
+            totalCount: controller.stockBatches.length,
+            totalQty: totalPurchaseQty,
+            totalValue: totalPurchaseValue,
+            onViewAll: onViewPurchases,
+            rows: controller.stockBatches
+                .map(
+                  (b) => _SummaryRowData(
+                    date: b.receivedAt,
+                    reference: b.batchNumber,
+                    qty: b.quantity,
+                    value: b.quantity * b.purchasePrice,
+                  ),
+                )
+                .toList(),
+          ),
+          const SizedBox(height: 12),
+          _SummaryCard(
+            icon: Icons.show_chart_rounded,
+            title: 'Sales Summary',
+            countLabel: 'Total Sales',
+            totalCount: sales.length,
+            totalQty: totalSaleQty,
+            totalValue: totalSaleValue,
+            onViewAll: onViewSales,
+            rows: sales
+                .map(
+                  (m) => _SummaryRowData(
+                    date: m.createdAt,
+                    reference: m.referenceId ?? m.id,
+                    qty: m.quantityChange.abs(),
+                    value: m.quantityChange.abs() * sellingPrice,
+                  ),
+                )
+                .toList(),
+          ),
+        ],
+      );
+    });
   }
 }
 

@@ -71,6 +71,12 @@ Future<void> _initHiveBoxes() async {
   final billingMetaBox = await Hive.openBox('billing_meta');
   sl.registerLazySingleton<Box>(() => billingMetaBox);
 
+  final inventoryMetaBox = await Hive.openBox('inventory_meta');
+  sl.registerLazySingleton<Box>(
+    () => inventoryMetaBox,
+    instanceName: 'inventoryMeta',
+  );
+
   // ==========================================================
   // Billing Module
   // ==========================================================
@@ -145,7 +151,10 @@ void _initProducts() {
     ),
   );
   sl.registerLazySingleton<ProductLocalDataSource>(
-    () => ProductLocalDataSourceImpl(box: sl()),
+    () => ProductLocalDataSourceImpl(
+      box: sl(),
+      metaBox: sl<Box>(instanceName: 'inventoryMeta'),
+    ),
   );
   // USECASES
   sl.registerLazySingleton(
@@ -250,6 +259,7 @@ void _initStocks() {
       batchBox: sl(),
       movementBox: sl(),
       stockBox: sl(),
+      metaBox: sl<Box>(instanceName: 'inventoryMeta'),
     ),
   );
   // USECASES
@@ -268,6 +278,7 @@ void _initStocks() {
   sl.registerLazySingleton(() => GetStockBatchesUsecase(repository: sl()));
   sl.registerLazySingleton(() => GetStocksMovementUsecase(repository: sl()));
   sl.registerLazySingleton(() => PurchaseStockUseCase(repository: sl()));
+  sl.registerLazySingleton(() => SellStockUsecase(repository: sl()));
 }
 
 void _initBilling() {

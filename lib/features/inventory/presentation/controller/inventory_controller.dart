@@ -2,6 +2,8 @@ import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/features/inventory/domain/usecases/brand/get_brands_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/category/get_categories_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/product/get_products_usecase.dart';
+import 'package:billing_system/features/inventory/domain/usecases/stock/get_stock_batches_usecase.dart';
+import 'package:billing_system/features/inventory/domain/usecases/stock/get_stocks_movement_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/get_stocks_usecase.dart';
 import 'package:billing_system/features/inventory/presentation/views/product_details/product_detail_page.dart';
 import 'package:flutter/rendering.dart';
@@ -23,6 +25,8 @@ class InventoryController extends GetxController {
   final GetCategoriesUsecase getCategoriesUsecase;
   final GetStocksUsecase getStocksUsecase;
   final GetBrandsUsecase getBrandsUsecase;
+  final GetStockBatchesUsecase getStockBatchesUsecase;
+  final GetStocksMovementUsecase getStocksMovementUsecase;
 
   final RxList<CategoryEntity> categories = <CategoryEntity>[].obs;
   final RxList<BrandEntity> brands = <BrandEntity>[].obs;
@@ -51,6 +55,8 @@ class InventoryController extends GetxController {
     required this.getCategoriesUsecase,
     required this.getStocksUsecase,
     required this.getBrandsUsecase,
+    required this.getStockBatchesUsecase,
+    required this.getStocksMovementUsecase
   });
 
   @override
@@ -126,6 +132,9 @@ class InventoryController extends GetxController {
     }
   }
 
+Future<void> loadStockBatches()async{
+  
+}
   String categoryName(String id) =>
       _firstOrNull(categories, (c) => c.id == id)?.name ?? 'Uncategorized';
 

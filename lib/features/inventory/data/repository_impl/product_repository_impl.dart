@@ -21,6 +21,10 @@ class ProductRepositoryImpl implements ProductRepository {
     required this.connectionChecker,
   });
 
+  static const _refreshInterval = Duration(hours: 24);
+
+  // ---------------- CREATE / UPDATE / DELETE — REMOTE FIRST, UNCHANGED ----------------
+
   @override
   ResultFuture<ProductEntity> addProduct(ProductEntity product) async {
     try {
@@ -35,103 +39,6 @@ class ProductRepositoryImpl implements ProductRepository {
       await localDataSource.addProduct(result);
 
       return right(result.toEntity());
-    } catch (e) {
-      return left(FirebaseFailure(message: e.toString()));
-    }
-  }
-
-  @override
-  ResultFuture<List<ProductEntity>> getAllProducts() async {
-    try {
-      final products = await _executeWithOfflineFallback<List<ProductModel>>(
-        remoteCall: remoteDataSource.getAllProducts,
-        localCall: localDataSource.getAllProducts,
-        cacheData: (products) async {
-          await localDataSource.clear();
-
-          for (final product in products) {
-            await localDataSource.addProduct(product);
-          }
-        },
-      );
-
-      return right(products.map((e) => e.toEntity()).toList());
-    } catch (e) {
-      return left(FirebaseFailure(message: e.toString()));
-    }
-  }
-
-  @override
-  ResultFuture<ProductEntity?> getProductById(String id) async {
-    try {
-      final product = await _executeWithOfflineFallback<ProductModel?>(
-        remoteCall: () => remoteDataSource.getProductById(id),
-        localCall: () => localDataSource.getProductById(id),
-        cacheData: (product) async {
-          if (product != null) {
-            await localDataSource.updateProduct(product);
-          }
-        },
-      );
-
-      return right(product?.toEntity());
-    } catch (e) {
-      return left(FirebaseFailure(message: e.toString()));
-    }
-  }
-
-  @override
-  ResultFuture<ProductEntity?> getProductByBarcode(String barcode) async {
-    try {
-      final product = await _executeWithOfflineFallback<ProductModel?>(
-        remoteCall: () => remoteDataSource.getProductByBarcode(barcode),
-        localCall: () => localDataSource.getProductByBarcode(barcode),
-        cacheData: (product) async {
-          if (product != null) {
-            await localDataSource.updateProduct(product);
-          }
-        },
-      );
-
-      return right(product?.toEntity());
-    } catch (e) {
-      return left(FirebaseFailure(message: e.toString()));
-    }
-  }
-
-  @override
-  ResultFuture<ProductEntity?> getProductBySku(String sku) async {
-    try {
-      final product = await _executeWithOfflineFallback<ProductModel?>(
-        remoteCall: () => remoteDataSource.getProductBySku(sku),
-        localCall: () => localDataSource.getProductBySku(sku),
-        cacheData: (product) async {
-          if (product != null) {
-            await localDataSource.updateProduct(product);
-          }
-        },
-      );
-
-      return right(product?.toEntity());
-    } catch (e) {
-      return left(FirebaseFailure(message: e.toString()));
-    }
-  }
-
-  @override
-  ResultFuture<List<ProductEntity>> searchProducts(String query) async {
-    try {
-      final products = await _executeWithOfflineFallback<List<ProductModel>>(
-        remoteCall: () => remoteDataSource.searchProducts(query),
-        localCall: () => localDataSource.searchProducts(query),
-        cacheData: (products) async {
-          for (final product in products) {
-            await localDataSource.updateProduct(product);
-          }
-        },
-      );
-
-      return right(products.map((e) => e.toEntity()).toList());
     } catch (e) {
       return left(FirebaseFailure(message: e.toString()));
     }
@@ -173,25 +80,94 @@ class ProductRepositoryImpl implements ProductRepository {
     }
   }
 
-  Future<T> _executeWithOfflineFallback<T>({
-    required Future<T> Function() remoteCall,
-    required Future<T> Function() localCall,
-    required Future<void> Function(T data) cacheData,
-  }) async {
+  // ---------------- GET ALL — ONCE-DAILY REMOTE FETCH, LOCAL OTHERWISE ----------------
+
+  @override
+  ResultFuture<List<ProductEntity>> getAllProducts() async {
     try {
-      if (await connectionChecker.isConnected) {
-        final remoteData = await remoteCall();
+      final lastFetched = await localDataSource.getLastFetchedAt();
+      final isStale =
+          lastFetched == null ||
+          DateTime.now().difference(lastFetched) >= _refreshInterval;
 
-        await cacheData(remoteData);
-
-        return remoteData;
+      // Already fetched today — just serve local, no remote read at all.
+      if (!isStale) {
+        final local = await localDataSource.getAllProducts();
+        return right(local.map((e) => e.toEntity()).toList());
       }
 
-      return await localCall();
-    } catch (_) {
-      return await localCall();
+      // Stale or never fetched — try remote once, refresh local cache.
+      if (await connectionChecker.isConnected) {
+        try {
+          final remoteProducts = await remoteDataSource.getAllProducts();
+
+          await localDataSource.clear();
+          for (final product in remoteProducts) {
+            await localDataSource.addProduct(product);
+          }
+          await localDataSource.setLastFetchedAt(DateTime.now());
+
+          return right(remoteProducts.map((e) => e.toEntity()).toList());
+        } catch (_) {
+          // Remote failed even though we're "online" — fall back to
+          // whatever's already local rather than surfacing an error.
+          final local = await localDataSource.getAllProducts();
+          return right(local.map((e) => e.toEntity()).toList());
+        }
+      }
+
+      // Offline and stale — best we can do is serve local anyway.
+      final local = await localDataSource.getAllProducts();
+      return right(local.map((e) => e.toEntity()).toList());
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
     }
   }
+
+  // ---------------- LOOKUPS — LOCAL ONLY ----------------
+
+
+  @override
+  ResultFuture<ProductEntity?> getProductById(String id) async {
+    try {
+      final product = await localDataSource.getProductById(id);
+      return right(product?.toEntity());
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultFuture<ProductEntity?> getProductByBarcode(String barcode) async {
+    try {
+      final product = await localDataSource.getProductByBarcode(barcode);
+      return right(product?.toEntity());
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultFuture<ProductEntity?> getProductBySku(String sku) async {
+    try {
+      final product = await localDataSource.getProductBySku(sku);
+      return right(product?.toEntity());
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultFuture<List<ProductEntity>> searchProducts(String query) async {
+    try {
+      final products = await localDataSource.searchProducts(query);
+      return right(products.map((e) => e.toEntity()).toList());
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  // ---------------- IMAGES — UNCHANGED ----------------
 
   @override
   ResultFuture<List<String>> uploadProductImages(List<File> images) async {

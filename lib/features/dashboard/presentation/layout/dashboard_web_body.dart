@@ -1,4 +1,3 @@
-import 'package:billing_system/core/config/theme/app_colors.dart';
 import 'package:billing_system/features/billing/presentation/controllers/billing_controller.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/category_pie_chart.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/dashboard_stats_panel.dart';
@@ -7,6 +6,7 @@ import 'package:billing_system/features/dashboard/presentation/widgets/low_stock
 import 'package:billing_system/features/dashboard/presentation/widgets/recent_transactions.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/sales_line_chart.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/tablet_info_card.dart';
+import 'package:billing_system/features/user/presentation/controller/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -17,6 +17,7 @@ class DashboardWebBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final topInset = MediaQuery.of(context).padding.top;
     const double headerHeight = 96;
+    final user = Get.find<UserController>().user;
 
     return Stack(
       children: [
@@ -51,8 +52,6 @@ class DashboardWebBody extends StatelessWidget {
           ),
         ),
 
-        // Solid opaque header bar — nothing can render through this,
-        // same as an AppBar behaves on mobile.
         Positioned(
           top: 0,
           left: 0,
@@ -69,19 +68,14 @@ class DashboardWebBody extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Text(
-                            'Hello, Admin ',
-                            style: TextStyle(
+                      Text(
+                        'Hello, ${user.value?.name ?? ''}',
+                        style: Theme.of(context).textTheme.titleMedium!
+                            .copyWith(
                               color: Colors.white,
-                              fontSize: 22,
+                              fontSize: 18,
                               fontWeight: FontWeight.w700,
                             ),
-                          ),
-                          Text('👋', style: TextStyle(fontSize: 20)),
-                        ],
                       ),
                       const SizedBox(height: 3),
                       Text(

@@ -19,12 +19,20 @@ abstract interface class ProductLocalDataSource {
   Future<void> deleteProduct(String id);
 
   Future<void> clear();
+
+  // ---------------- DAILY FETCH GATE ----------------
+  Future<DateTime?> getLastFetchedAt();
+
+  Future<void> setLastFetchedAt(DateTime time);
 }
 
 class ProductLocalDataSourceImpl implements ProductLocalDataSource {
   final Box<ProductModel> box;
+  final Box metaBox;
 
-  const ProductLocalDataSourceImpl({required this.box});
+  const ProductLocalDataSourceImpl({required this.box, required this.metaBox});
+
+  static const _lastFetchedKey = 'products_last_fetched_at';
 
   @override
   Future<ProductModel> addProduct(ProductModel product) async {
@@ -85,5 +93,19 @@ class ProductLocalDataSourceImpl implements ProductLocalDataSource {
   @override
   Future<void> clear() async {
     await box.clear();
+  }
+
+  // ---------------- DAILY FETCH GATE ----------------
+
+  @override
+  Future<DateTime?> getLastFetchedAt() async {
+    final raw = metaBox.get(_lastFetchedKey) as String?;
+    if (raw == null) return null;
+    return DateTime.tryParse(raw);
+  }
+
+  @override
+  Future<void> setLastFetchedAt(DateTime time) async {
+    await metaBox.put(_lastFetchedKey, time.toIso8601String());
   }
 }

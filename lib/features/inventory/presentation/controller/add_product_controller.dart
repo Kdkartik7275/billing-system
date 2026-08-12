@@ -4,6 +4,7 @@ import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/features/inventory/domain/entities/category_entity.dart';
 import 'package:billing_system/features/inventory/domain/entities/product_entity.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_entity.dart';
+import 'package:billing_system/features/inventory/domain/entities/unit_entity.dart';
 import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
 
 import 'package:billing_system/features/inventory/domain/usecases/product/add_product_usecase.dart';
@@ -76,9 +77,13 @@ class AddProductController extends GetxController {
   final RxString selectedBarcodeType = 'EAN-13'.obs;
   final RxString taxInclusive = 'Exclusive'.obs;
   final RxnString selectedCategory = RxnString();
+  final RxnString selectedUnit = RxnString();
 
   List<String> get categories =>
       _inventoryController.categories.map((c) => c.name).toList();
+
+  List<String> get units =>
+      _inventoryController.units.map((c) => c.name).toList();
 
   // ---------------- LIFECYCLE ----------------
 
@@ -139,15 +144,7 @@ class AddProductController extends GetxController {
     final matchedUnit = _inventoryController.units
         .where((u) => u.id == p.unitId)
         .firstOrNull;
-    final resolvedUnitName =
-        matchedUnit != null && units.contains(matchedUnit.name)
-        ? matchedUnit.name
-        : (units.contains(p.unitId) ? p.unitId : units.first);
-    if (resolvedUnitName != draftProduct.value.unitId) {
-      draftProduct.value = draftProduct.value.copyWith(
-        unitId: resolvedUnitName,
-      );
-    }
+    selectedUnit.value = matchedUnit?.name;
 
     final matchedCategory = _inventoryController.categories
         .where((c) => c.id == p.categoryId)
@@ -198,7 +195,7 @@ class AddProductController extends GetxController {
       barcode: '',
       categoryId: '',
       brandId: null,
-      unitId: units.first,
+      unitId: '',
       primarySupplierId: null,
       price: const ProductPrice(
         purchasePrice: 0,
@@ -288,22 +285,6 @@ class AddProductController extends GetxController {
   void selectBarcodeType(String? type) {
     if (type == null) return;
     selectedBarcodeType.value = type;
-  }
-
-  void selectCategory(String? categoryName) {
-    selectedCategory.value = categoryName;
-
-    final match = _findCategoryByName(categoryName);
-    updateCategory(match?.id);
-    _autoGenerateSku();
-  }
-
-  CategoryEntity? _findCategoryByName(String? name) {
-    if (name == null) return null;
-    for (final c in _inventoryController.categories) {
-      if (c.name == name) return c;
-    }
-    return null;
   }
 
   String get gstLabel {
@@ -554,10 +535,14 @@ class AddProductController extends GetxController {
       String categoryId = _inventoryController.categories
           .firstWhere((c) => c.name == draftProduct.value.categoryId)
           .id;
+      String unitId = _inventoryController.units
+          .firstWhere((c) => c.name == draftProduct.value.unitId)
+          .id;
 
       final product = draftProduct.value.copyWith(
         updatedAt: DateTime.now(),
         categoryId: categoryId,
+        unitId: unitId,
       );
 
       final result = await addProductUseCase.call(
@@ -609,9 +594,13 @@ class AddProductController extends GetxController {
       String categoryId = _inventoryController.categories
           .firstWhere((c) => c.name == draftProduct.value.categoryId)
           .id;
+      String unitId = _inventoryController.units
+          .firstWhere((c) => c.name == draftProduct.value.unitId)
+          .id;
       final product = draftProduct.value.copyWith(
         updatedAt: DateTime.now(),
         categoryId: categoryId,
+        unitId: unitId,
       );
 
       final result = await updateProductUseCase!.call(product);

@@ -10,6 +10,7 @@ import 'package:billing_system/features/inventory/domain/entities/stock_batch_en
 import 'package:billing_system/features/inventory/domain/entities/stock_entity.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_movement_entity.dart';
 import 'package:billing_system/features/inventory/domain/repositories/stock_repository.dart';
+import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 
 class StockRepositoryImpl implements StockRepository {
@@ -24,8 +25,11 @@ class StockRepositoryImpl implements StockRepository {
   });
 
   static const _refreshInterval = Duration(hours: 24);
+  static const _historyWindow = Duration(days: 60);
 
-  // ---------------- WRITES — REMOTE FIRST, UNCHANGED ----------------
+  // ==========================================================
+  // Writes — remote first, then local cache
+  // ==========================================================
 
   @override
   ResultFuture<StockEntity> createInitialStock(StockEntity stock) async {
@@ -60,6 +64,27 @@ class StockRepositoryImpl implements StockRepository {
       );
 
       await localDataSource.createStockBatch(result);
+
+      return right(result.toEntity());
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultFuture<StockBatchEntity> updateStockBatch(
+    StockBatchEntity batch,
+  ) async {
+    try {
+      if (!await connectionChecker.isConnected) {
+        return left(FirebaseFailure(message: 'No Internet Connection'));
+      }
+
+      final model = StockBatchModel.fromEntity(batch);
+
+      final result = await remoteDataSource.updateStockBatch(model);
+
+      await localDataSource.updateStockBatch(result);
 
       return right(result.toEntity());
     } catch (e) {
@@ -205,11 +230,13 @@ class StockRepositoryImpl implements StockRepository {
     }
   }
 
-  // ---------------- GET ALL STOCK — ONCE-DAILY ----------------
+  // ==========================================================
+  // Get all stock — once-daily (naturally bounded: 1 doc per product)
+  // ==========================================================
 
   @override
   ResultFuture<List<StockEntity>> getAllStock() async {
-    return await _fetchAllOncePerDay<StockModel, StockEntity>(
+    return _fetchAllOncePerDay<StockModel, StockEntity>(
       cacheKey: 'stock',
       remoteCall: remoteDataSource.getAllStock,
       localCall: localDataSource.getAllStock,
@@ -223,43 +250,88 @@ class StockRepositoryImpl implements StockRepository {
     );
   }
 
-  // ---------------- GET ALL BATCHES — ONCE-DAILY ----------------
+  // ==========================================================
+  // Get all batches / movements — LOCAL ONLY, never a global remote read
+  // ==========================================================
 
   @override
   ResultFuture<List<StockBatchEntity>> getAllStockBatches() async {
-    return await _fetchAllOncePerDay<StockBatchModel, StockBatchEntity>(
-      cacheKey: 'batches',
-      remoteCall: remoteDataSource.getAllStockBatches,
-      localCall: localDataSource.getAllStockBatches,
-      replaceLocal: (items) async {
-        await localDataSource.clearStockBatches();
-        for (final item in items) {
-          await localDataSource.createStockBatch(item);
-        }
-      },
-      toEntity: (m) => m.toEntity(),
-    );
+    try {
+      final local = await localDataSource.getAllStockBatches();
+      return right(local.map((e) => e.toEntity()).toList());
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
   }
-
-  // ---------------- GET ALL MOVEMENTS — ONCE-DAILY ----------------
 
   @override
   ResultFuture<List<StockMovementEntity>> getAllStockMovements() async {
-    return await _fetchAllOncePerDay<StockMovementModel, StockMovementEntity>(
-      cacheKey: 'movements',
-      remoteCall: remoteDataSource.getAllStockMovements,
-      localCall: localDataSource.getAllStockMovements,
-      replaceLocal: (items) async {
-        await localDataSource.clearStockMovements();
-        for (final item in items) {
-          await localDataSource.createStockMovement(item);
-        }
-      },
+    try {
+      final local = await localDataSource.getAllStockMovements();
+      return right(local.map((e) => e.toEntity()).toList());
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  // ==========================================================
+  // Per-product batches / movements — once per product per day, 60-day window
+  // ==========================================================
+
+  @override
+  ResultFuture<List<StockBatchEntity>> getStockBatchesForProduct(
+    String productId,
+  ) async {
+    return _fetchProductScopedOncePerDay<StockBatchModel, StockBatchEntity>(
+      cacheKey: 'batches_$productId',
+      remoteCall: () => remoteDataSource.getStockBatchesForProductSince(
+        productId,
+        DateTime.now().subtract(_historyWindow),
+      ),
+      localCall: () => localDataSource.getStockBatchesForProduct(productId),
+      replaceLocal: (items) =>
+          localDataSource.replaceStockBatchesForProduct(productId, items),
       toEntity: (m) => m.toEntity(),
     );
   }
 
-  // ---------------- SHARED ONCE-DAILY FETCH LOGIC ----------------
+  @override
+  ResultFuture<List<StockMovementEntity>> getStockMovementsForProduct(
+    String productId,
+  ) async {
+    return await _fetchProductScopedOncePerDay<
+      StockMovementModel,
+      StockMovementEntity
+    >(
+      cacheKey: 'movements_$productId',
+      remoteCall: () => remoteDataSource.getStockMovementsForProductSince(
+        productId,
+        DateTime.now().subtract(_historyWindow),
+      ),
+      localCall: () => localDataSource.getStockMovementsForProduct(productId),
+      replaceLocal: (items) =>
+          localDataSource.replaceStockMovementsForProduct(productId, items),
+      toEntity: (m) => m.toEntity(),
+    );
+  }
+
+  // ==========================================================
+  // Per-product stock lookup — local only
+  // ==========================================================
+
+  @override
+  ResultFuture<StockEntity?> getStockForProduct(String productId) async {
+    try {
+      final local = await localDataSource.getStockForProduct(productId);
+      return right(local?.toEntity());
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  // ==========================================================
+  // Shared fetch-gate helpers
+  // ==========================================================
 
   ResultFuture<List<E>> _fetchAllOncePerDay<M, E>({
     required String cacheKey,
@@ -299,39 +371,41 @@ class StockRepositoryImpl implements StockRepository {
     }
   }
 
-  // ---------------- PER-PRODUCT LOOKUPS — LOCAL ONLY ----------------
-
-  @override
-  ResultFuture<StockEntity?> getStockForProduct(String productId) async {
+  ResultFuture<List<E>> _fetchProductScopedOncePerDay<M, E>({
+    required String cacheKey,
+    required Future<List<M>> Function() remoteCall,
+    required Future<List<M>> Function() localCall,
+    required Future<void> Function(List<M> items) replaceLocal,
+    required E Function(M model) toEntity,
+  }) async {
     try {
-      final local = await localDataSource.getStockForProduct(productId);
-      return right(local?.toEntity());
-    } catch (e) {
-      return left(FirebaseFailure(message: e.toString()));
-    }
-  }
+      final lastFetched = await localDataSource.getLastFetchedAt(cacheKey);
+      final isStale =
+          lastFetched == null ||
+          DateTime.now().difference(lastFetched) >= _refreshInterval;
 
-  @override
-  ResultFuture<List<StockBatchEntity>> getStockBatchesForProduct(
-    String productId,
-  ) async {
-    try {
-      final local = await localDataSource.getStockBatchesForProduct(productId);
-      return right(local.map((e) => e.toEntity()).toList());
-    } catch (e) {
-      return left(FirebaseFailure(message: e.toString()));
-    }
-  }
+      if (!isStale) {
+        final local = await localCall();
+        return right(local.map(toEntity).toList());
+      }
 
-  @override
-  ResultFuture<List<StockMovementEntity>> getStockMovementsForProduct(
-    String productId,
-  ) async {
-    try {
-      final local = await localDataSource.getStockMovementsForProduct(
-        productId,
-      );
-      return right(local.map((e) => e.toEntity()).toList());
+      if (await connectionChecker.isConnected) {
+        try {
+          final remoteItems = await remoteCall();
+          await replaceLocal(remoteItems);
+          await localDataSource.setLastFetchedAt(cacheKey, DateTime.now());
+
+          return right(remoteItems.map(toEntity).toList());
+        } catch (e, stackTrace) {
+          debugPrint('[$cacheKey] remote fetch failed: $e');
+          debugPrint(stackTrace.toString());
+          final local = await localCall();
+          return right(local.map(toEntity).toList());
+        }
+      }
+
+      final local = await localCall();
+      return right(local.map(toEntity).toList());
     } catch (e) {
       return left(FirebaseFailure(message: e.toString()));
     }

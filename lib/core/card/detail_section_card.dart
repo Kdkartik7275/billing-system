@@ -19,7 +19,6 @@ class DetailSectionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(AppRadius.md),
-
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: .06),

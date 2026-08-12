@@ -1,11 +1,11 @@
 import 'package:barcode_widget/barcode_widget.dart';
+import 'package:billing_system/core/card/detail_section_card.dart';
 import 'package:billing_system/core/config/theme/app_colors.dart';
 import 'package:billing_system/core/helper/functions.dart';
 import 'package:billing_system/features/inventory/domain/entities/product_entity.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_entity.dart';
 import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/product_detail/batch_summary_data.dart';
-import 'package:billing_system/features/inventory/presentation/widgets/product_detail/detail_section_card.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/product_detail/product_gallery.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/product_detail/purchase_sales_summary.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/product_detail/quick_action_grid.dart';
@@ -15,10 +15,6 @@ import 'package:billing_system/features/inventory/presentation/widgets/purchase/
 import 'package:billing_system/features/inventory/presentation/widgets/sale/sale_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-// =====================================================================
-// TAB CONFIG — shared by tablet / web / mobile layouts
-// =====================================================================
 
 const List<String> kProductDetailTabs = [
   'Overview',

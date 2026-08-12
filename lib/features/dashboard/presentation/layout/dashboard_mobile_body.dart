@@ -35,8 +35,8 @@ class MobileDashboardBody extends StatelessWidget {
                 final items = [
                   DashboardStatItem(
                     title: "Today's Sales",
-                    value: "₹${0}",
-                    growth: "${0} orders today",
+                    value: "₹${billController.todaysSalesRevenue}",
+                    growth: "${billController.todaysBills.length} orders today",
                     icon: Icons.attach_money,
                     color: Colors.green,
                   ),
@@ -48,10 +48,10 @@ class MobileDashboardBody extends StatelessWidget {
                     color: Colors.blue,
                   ),
                   DashboardStatItem(
-                    title: "Revenue",
-                    value: "₹${0}",
-                    growth: "excl. tax",
-                    icon: Icons.show_chart,
+                    title: "Items Sold",
+                    value: "${billController.todaysItemsSold}",
+                    growth: "units today",
+                    icon: Icons.inventory_2_outlined,
                     color: Colors.deepPurple,
                   ),
                   DashboardStatItem(

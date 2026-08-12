@@ -7,6 +7,7 @@ import 'package:billing_system/features/dashboard/presentation/models/dashboard_
 import 'package:billing_system/features/dashboard/presentation/widgets/dashboard_drawer_navigation.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/logout_button.dart';
 import 'package:billing_system/features/inventory/presentation/views/inventory_page.dart';
+import 'package:billing_system/features/settings/presentations/view/setting_page.dart';
 import 'package:billing_system/features/user/presentation/controller/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -23,7 +24,7 @@ class DashboardMobileLayout extends StatefulWidget {
     DashboardMenu.employees: Center(child: Text('Employees')),
     DashboardMenu.suppliers: Center(child: Text('Suppliers')),
     DashboardMenu.reports: Center(child: Text('Reports')),
-    DashboardMenu.settings: Center(child: Text('Settings')),
+    DashboardMenu.settings: SettingPage(),
   };
 
   @override

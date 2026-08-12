@@ -1,6 +1,6 @@
+import 'package:billing_system/core/card/detail_section_card.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_batch_entity.dart';
 import 'package:billing_system/features/inventory/presentation/controller/product_detail_controller.dart';
-import 'package:billing_system/features/inventory/presentation/widgets/product_detail/detail_section_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';

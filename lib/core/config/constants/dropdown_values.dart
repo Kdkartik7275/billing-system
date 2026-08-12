@@ -5,14 +5,14 @@ final List<String> suppliers = const [
   'Global Traders Inc.',
 ];
 
-final List<String> units = const [
-  'Piece',
-  'Box',
-  'Kg',
-  'Litre',
-  'Pack',
-  'Dozen',
-];
+// final List<String> units = const [
+//   'Piece',
+//   'Box',
+//   'Kg',
+//   'Litre',
+//   'Pack',
+//   'Dozen',
+// ];
 
 final List<String> warehouses = const [
   'Main Store',

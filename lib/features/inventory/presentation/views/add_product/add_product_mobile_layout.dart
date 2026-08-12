@@ -79,8 +79,10 @@ class AddProductMobileLayout extends StatelessWidget {
                 Obx(
                   () => AddProductDropdown(
                     hint: 'Select unit',
-                    value: controller.draftProduct.value.unitId,
-                    items: units,
+                    value: controller.draftProduct.value.unitId.isEmpty
+                        ? null
+                        : controller.draftProduct.value.unitId,
+                    items: controller.units,
                     onChanged: controller.updateUnit,
                   ),
                 ),

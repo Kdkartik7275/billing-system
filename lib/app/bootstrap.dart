@@ -19,6 +19,7 @@ import 'package:billing_system/features/inventory/data/models/stock/stock_batch_
 import 'package:billing_system/features/inventory/data/models/stock/stock_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_movement_model.dart';
 import 'package:billing_system/features/inventory/data/models/tax_type.dart';
+import 'package:billing_system/features/inventory/data/models/unit/unit_model.dart';
 
 import 'package:billing_system/features/user/data/models/firebase_config_model.dart';
 import 'package:billing_system/features/user/data/models/shop_model.dart';
@@ -68,7 +69,8 @@ class Bootstrap {
       ..registerAdapter(PaymentSummaryModelAdapter())
       ..registerAdapter(BillItemModelAdapter())
       ..registerAdapter(BillModelAdapter())
-      ..registerAdapter(BillingCartModelAdapter());
+      ..registerAdapter(BillingCartModelAdapter())
+      ..registerAdapter(UnitModelAdapter());
 
     await Hive.openBox<ProductModel>('products');
     await Hive.openBox<CategoryModel>('categories');
@@ -86,6 +88,7 @@ class Bootstrap {
     await Hive.openBox<BillingCartModel>('billing_cart');
     await Hive.openBox('billing_meta');
     await Hive.openBox('inventory_meta');
+    await Hive.openBox<UnitModel>('units');
     // Customer and coupon features are deactivated for MVP.
     // Uncomment when those features are implemented:
     // await Hive.openBox<CustomerModel>('customers');

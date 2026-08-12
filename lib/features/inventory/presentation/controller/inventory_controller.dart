@@ -2,9 +2,8 @@ import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/features/inventory/domain/usecases/brand/get_brands_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/category/get_categories_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/product/get_products_usecase.dart';
-import 'package:billing_system/features/inventory/domain/usecases/stock/get_stock_batches_usecase.dart';
-import 'package:billing_system/features/inventory/domain/usecases/stock/get_stocks_movement_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/get_stocks_usecase.dart';
+import 'package:billing_system/features/inventory/domain/usecases/unit/get_units_usecase.dart';
 import 'package:billing_system/features/inventory/presentation/views/product_details/product_detail_page.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
@@ -23,10 +22,9 @@ enum StockFilter { all, inStock, lowStock, outOfStock }
 class InventoryController extends GetxController {
   final GetProductsUseCase getProductsUseCase;
   final GetCategoriesUsecase getCategoriesUsecase;
+  final GetUnitsUsecase getUnitsUsecase;
   final GetStocksUsecase getStocksUsecase;
   final GetBrandsUsecase getBrandsUsecase;
-  final GetStockBatchesUsecase getStockBatchesUsecase;
-  final GetStocksMovementUsecase getStocksMovementUsecase;
 
   final RxList<CategoryEntity> categories = <CategoryEntity>[].obs;
   final RxList<BrandEntity> brands = <BrandEntity>[].obs;
@@ -53,16 +51,21 @@ class InventoryController extends GetxController {
   InventoryController({
     required this.getProductsUseCase,
     required this.getCategoriesUsecase,
+    required this.getUnitsUsecase,
     required this.getStocksUsecase,
     required this.getBrandsUsecase,
-    required this.getStockBatchesUsecase,
-    required this.getStocksMovementUsecase
   });
 
   @override
   void onInit() {
     super.onInit();
-    Future.wait([loadProducts(), loadCategories(), loadStocks(), loadBrands()]);
+    Future.wait([
+      loadProducts(),
+      loadCategories(),
+      loadStocks(),
+      loadBrands(),
+      loadUnits(),
+    ]);
   }
 
   List<ProductEntity> get lowStockProducts {
@@ -101,6 +104,21 @@ class InventoryController extends GetxController {
     }
   }
 
+  Future<void> loadUnits() async {
+    isLoading.value = true;
+    errorMessage.value = null;
+    try {
+      final result = await getUnitsUsecase.call();
+      result.fold((err) => AppSnackbar.error(message: err.message), (u) {
+        units.assignAll(u);
+      });
+    } catch (e) {
+      errorMessage.value = 'Failed to load units: ${e.toString()}';
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<void> loadBrands() async {
     isLoading.value = true;
     errorMessage.value = null;
@@ -132,11 +150,11 @@ class InventoryController extends GetxController {
     }
   }
 
-Future<void> loadStockBatches()async{
-  
-}
   String categoryName(String id) =>
       _firstOrNull(categories, (c) => c.id == id)?.name ?? 'Uncategorized';
+
+  String unitName(String id) =>
+      _firstOrNull(units, (c) => c.id == id)?.name ?? 'Uncategorized';
 
   String? brandName(String? id) {
     if (id == null) return null;
@@ -149,7 +167,7 @@ Future<void> loadStockBatches()async{
   }
 
   String unitShortCode(String id) =>
-      _firstOrNull(units, (u) => u.id == id)?.shortCode ?? 'pc';
+      _firstOrNull(units, (u) => u.id == id)?.shortName ?? 'pc';
 
   static T? _firstOrNull<T>(Iterable<T> items, bool Function(T) test) {
     for (final item in items) {

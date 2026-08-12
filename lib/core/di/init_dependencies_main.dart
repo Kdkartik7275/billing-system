@@ -10,11 +10,11 @@ class DependencyInjection {
     await _initHiveBoxes();
 
     _initCategory();
+    _initUnit();
     _initStocks();
     _initBrands();
     _initProducts();
     _initBilling();
-    // _initPOSBilling();
   }
 }
 
@@ -43,6 +43,9 @@ Future<void> _initHiveBoxes() async {
 
   final categoriesBox = await Hive.openBox<CategoryModel>('categories');
   sl.registerLazySingleton<Box<CategoryModel>>(() => categoriesBox);
+
+  final unitBox = await Hive.openBox<UnitModel>('units');
+  sl.registerLazySingleton<Box<UnitModel>>(() => unitBox);
 
   final brandsBox = await Hive.openBox<BrandModel>('brands');
   sl.registerLazySingleton<Box<BrandModel>>(() => brandsBox);
@@ -208,6 +211,33 @@ void _initCategory() {
   sl.registerLazySingleton(() => GetCategoriesUsecase(repository: sl()));
   sl.registerLazySingleton(() => GetCategoryByIdUsecase(repository: sl()));
   sl.registerLazySingleton(() => UpdateCategoryUsecase(repository: sl()));
+}
+
+void _initUnit() {
+  // DATASOURCE
+  sl.registerLazySingleton<UnitRepository>(
+    () => UnitRepositoryImpl(
+      remoteDataSource: sl<UnitRemoteDataSource>(),
+      localDataSource: sl<UnitLocalDataSource>(),
+      connectionChecker: sl<ConnectionChecker>(),
+    ),
+  );
+
+  // REPOSITORY
+  sl.registerLazySingleton<UnitRemoteDataSource>(
+    () => UnitRemoteDataSourceImpl(
+      firestore: sl<ShopFirebaseService>().firestore,
+    ),
+  );
+  sl.registerLazySingleton<UnitLocalDataSource>(
+    () => UnitLocalDataSourceImpl(unitBox: sl()),
+  );
+  // USECASES
+  sl.registerLazySingleton(() => AddUnitUsecase(repository: sl()));
+  sl.registerLazySingleton(() => DeleteUnitUsecase(repository: sl()));
+  sl.registerLazySingleton(() => GetUnitsUsecase(repository: sl()));
+  sl.registerLazySingleton(() => GetUnitByIdUsecase(repository: sl()));
+  sl.registerLazySingleton(() => UpdateUnitUsecase(repository: sl()));
 }
 
 void _initBrands() {

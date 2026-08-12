@@ -134,11 +134,18 @@ class AddProductWebLayout extends StatelessWidget {
                                       Obx(
                                         () => AddProductDropdown(
                                           hint: 'Select unit',
-                                          value: controller
-                                              .draftProduct
-                                              .value
-                                              .unitId,
-                                          items: units,
+                                          value:
+                                              controller
+                                                  .draftProduct
+                                                  .value
+                                                  .unitId
+                                                  .isEmpty
+                                              ? null
+                                              : controller
+                                                    .draftProduct
+                                                    .value
+                                                    .unitId,
+                                          items: controller.units,
                                           onChanged: controller.updateUnit,
                                         ),
                                       ),
@@ -245,22 +252,20 @@ class AddProductWebLayout extends StatelessWidget {
                               ],
                             ),
                             const SizedBox(height: 20),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const FieldLabel('Wholesale Price (₹)'),
-                                  AddProductTextfield(
-                                    controller: controller.wholesalePriceCtrl,
-                                    hint: '0.00',
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(
-                                          decimal: true,
-                                        ),
-                                    prefixText: '₹ ',
-                                  ),
-                                ],
-                              ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const FieldLabel('Wholesale Price (₹)'),
+                                AddProductTextfield(
+                                  controller: controller.wholesalePriceCtrl,
+                                  hint: '0.00',
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                        decimal: true,
+                                      ),
+                                  prefixText: '₹ ',
+                                ),
+                              ],
                             ),
                           ],
                         ),

@@ -77,6 +77,18 @@ class BillingController extends GetxController {
     }).toList();
   }
 
+  double get todaysSalesRevenue {
+    return todaysBills.fold(0.0, (sum, bill) => sum + bill.grandTotal);
+  }
+
+  int get todaysItemsSold {
+    return todaysBills.fold<int>(
+      0,
+      (sum, bill) =>
+          sum + bill.items.fold<int>(0, (s, item) => s + item.quantity.toInt()),
+    );
+  }
+
   List<BillEntity> get todaysBills {
     final now = DateTime.now();
 

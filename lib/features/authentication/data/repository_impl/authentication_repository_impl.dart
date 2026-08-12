@@ -2,6 +2,7 @@ import 'package:billing_system/core/config/constants/typedefs.dart';
 import 'package:billing_system/core/errors/failure.dart';
 import 'package:billing_system/features/authentication/data/data_source/authentication_remote_data_source.dart';
 import 'package:billing_system/features/authentication/domain/repository/authentication_repository.dart';
+import 'package:billing_system/features/inventory/data/models/unit/unit_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:billing_system/core/di/init_dependencies.dart';
@@ -76,6 +77,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
         sl<Box<StockMovementModel>>().clear(),
         sl<Box<UserModel>>().clear(),
         sl<Box<ShopModel>>().clear(),
+        sl<Box<UnitModel>>().clear(),
         sl<Box>().clear(),
         sl<Box>(instanceName: 'inventoryMeta').clear(),
         sl<Box<BillModel>>().clear(),

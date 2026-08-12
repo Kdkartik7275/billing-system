@@ -1,3 +1,5 @@
+import 'dart:core';
+
 import 'package:billing_system/features/inventory/data/models/stock/stock_batch_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_movement_model.dart';
@@ -15,14 +17,17 @@ abstract interface class StockRemoteDataSource {
 
   Future<StockModel> createInitialStock(StockModel stock);
 
+  Future<StockModel> updateStock(StockModel stock);
+
   // ==========================
   // Stock Movement
   // ==========================
 
   Future<List<StockMovementModel>> getAllStockMovements();
 
-  Future<List<StockMovementModel>> getStockMovementsForProduct(
+  Future<List<StockMovementModel>> getStockMovementsForProductSince(
     String productId,
+    DateTime since,
   );
 
   Future<StockMovementModel> createStockMovement(StockMovementModel movement);
@@ -33,9 +38,18 @@ abstract interface class StockRemoteDataSource {
 
   Future<List<StockBatchModel>> getAllStockBatches();
 
-  Future<List<StockBatchModel>> getStockBatchesForProduct(String productId);
+  Future<List<StockBatchModel>> getStockBatchesForProductSince(
+    String productId,
+    DateTime since,
+  );
 
   Future<StockBatchModel> createStockBatch(StockBatchModel batch);
+
+  Future<StockBatchModel> updateStockBatch(StockBatchModel batch);
+
+  // ==========================
+  // Purchase / Sell
+  // ==========================
 
   Future<
     ({StockModel stock, StockBatchModel batch, StockMovementModel movement})
@@ -57,8 +71,6 @@ abstract interface class StockRemoteDataSource {
     required DateTime dueDate,
     String? notes,
   });
-
-  Future<StockModel> updateStock(StockModel stock);
 
   Future<(StockModel, List<StockBatchModel>, StockMovementModel)> sellStock({
     required String productId,
@@ -136,6 +148,22 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
     }
   }
 
+  @override
+  Future<StockModel> updateStock(StockModel stock) async {
+    try {
+      await firestore
+          .collection(_stockCollection)
+          .doc(stock.id)
+          .update(stock.toJson());
+
+      return stock;
+    } on FirebaseException catch (e) {
+      throw Exception('Failed to update stock: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to update stock: $e');
+    }
+  }
+
   // ==========================================================
   // Stock Movement
   // ==========================================================
@@ -177,13 +205,15 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
   }
 
   @override
-  Future<List<StockMovementModel>> getStockMovementsForProduct(
+  Future<List<StockMovementModel>> getStockMovementsForProductSince(
     String productId,
+    DateTime since,
   ) async {
     try {
       final snapshot = await firestore
           .collection(_movementCollection)
           .where('productId', isEqualTo: productId)
+          .where('createdAt', isGreaterThanOrEqualTo: since.toIso8601String())
           .get();
 
       return snapshot.docs
@@ -217,6 +247,22 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
   }
 
   @override
+  Future<StockBatchModel> updateStockBatch(StockBatchModel batch) async {
+    try {
+      await firestore
+          .collection(_batchCollection)
+          .doc(batch.id)
+          .update(batch.toJson());
+
+      return batch;
+    } on FirebaseException catch (e) {
+      throw Exception('Failed to update stock batch: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to update stock batch: $e');
+    }
+  }
+
+  @override
   Future<List<StockBatchModel>> getAllStockBatches() async {
     try {
       final snapshot = await firestore.collection(_batchCollection).get();
@@ -232,13 +278,15 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
   }
 
   @override
-  Future<List<StockBatchModel>> getStockBatchesForProduct(
+  Future<List<StockBatchModel>> getStockBatchesForProductSince(
     String productId,
+    DateTime since,
   ) async {
     try {
       final snapshot = await firestore
           .collection(_batchCollection)
           .where('productId', isEqualTo: productId)
+          .where('receivedAt', isGreaterThanOrEqualTo: since.toIso8601String())
           .get();
 
       return snapshot.docs
@@ -250,6 +298,10 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
       throw Exception('Failed to fetch stock batches: $e');
     }
   }
+
+  // ==========================================================
+  // Purchase
+  // ==========================================================
 
   @override
   Future<
@@ -317,7 +369,7 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
         final movementRef = firestore.collection(_movementCollection).doc();
 
         movement = StockMovementModel(
-          id: Uuid().v4(),
+          id: const Uuid().v4(),
           productId: productId,
           warehouseId: warehouseId,
           variantId: null,
@@ -362,21 +414,9 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
     }
   }
 
-  @override
-  Future<StockModel> updateStock(StockModel stock) async {
-    try {
-      await firestore
-          .collection(_stockCollection)
-          .doc(stock.id)
-          .update(stock.toJson());
-
-      return stock;
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to update stock: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to update stock: $e');
-    }
-  }
+  // ==========================================================
+  // Sell
+  // ==========================================================
 
   @override
   Future<(StockModel, List<StockBatchModel>, StockMovementModel)> sellStock({
@@ -480,7 +520,6 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
 
         transaction.set(movementRef, movement.toJson());
 
-        // ---------------- SALE RECORD (mirrors 'purchases' doc) ----------------
         final saleRef = firestore.collection('sales').doc();
 
         transaction.set(saleRef, {

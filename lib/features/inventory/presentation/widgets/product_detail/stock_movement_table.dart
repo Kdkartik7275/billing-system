@@ -1,6 +1,6 @@
+import 'package:billing_system/core/card/detail_section_card.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_movement_entity.dart';
 import 'package:billing_system/features/inventory/presentation/controller/product_detail_controller.dart';
-import 'package:billing_system/features/inventory/presentation/widgets/product_detail/detail_section_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:intl/intl.dart';
@@ -24,15 +24,16 @@ class StockMovementTable extends GetView<ProductDetailController> {
     final dateFmt = DateFormat('dd MMM yyyy, hh:mm a');
 
     return Obx(() {
-      final movements = isAdjustmentTab
-          ? controller.stockMovements
-                .where((m) => m.type == StockMovementType.adjustment)
-                .toList()
-          : controller.stockMovements;
+      final sortedMovements = isAdjustmentTab
+    ? controller.stockMovements
+        .where((m) => m.type == StockMovementType.adjustment)
+        .toList()
+    : (List<StockMovementEntity>.from(controller.stockMovements)
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt)));
 
       final rows = maxRows != null
-          ? movements.take(maxRows!).toList()
-          : movements;
+          ? sortedMovements.take(maxRows!).toList()
+          : sortedMovements;
 
       return DetailSectionCard(
         child: Column(

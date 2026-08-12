@@ -1,9 +1,9 @@
+import 'package:billing_system/core/card/detail_section_card.dart';
 import 'package:billing_system/core/shared/product_detail_shared.dart';
 import 'package:billing_system/features/inventory/domain/entities/product_entity.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_entity.dart';
 import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
 import 'package:billing_system/features/inventory/presentation/views/add_product/edit_product_page.dart';
-import 'package:billing_system/features/inventory/presentation/widgets/product_detail/detail_section_card.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/product_detail/product_stats_row.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/product_detail/quick_action_grid.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/product_detail/segmented_tabbar.dart';

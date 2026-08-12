@@ -11,6 +11,8 @@ abstract class StockRepository {
 
   ResultFuture<StockEntity> createInitialStock(StockEntity stock);
 
+  ResultFuture<StockEntity> updateStock(StockEntity stock);
+
   // ------------- Stock Movement --------------
   ResultFuture<List<StockMovementEntity>> getAllStockMovements();
   ResultFuture<List<StockMovementEntity>> getStockMovementsForProduct(
@@ -26,7 +28,7 @@ abstract class StockRepository {
     String productId,
   );
   ResultFuture<StockBatchEntity> createStockBatch(StockBatchEntity batch);
-  ResultFuture<StockEntity> updateStock(StockEntity stock);
+  ResultFuture<StockBatchEntity> updateStockBatch(StockBatchEntity batch);
 
   // -------------- Purchase Stock --------------
   ResultFuture<void> purchaseStock({

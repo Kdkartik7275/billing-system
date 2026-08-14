@@ -1,3 +1,4 @@
+import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/features/inventory/domain/entities/product_entity.dart';
 import 'package:get/get.dart';
 
@@ -10,6 +11,10 @@ class CartItem {
 
 class CartController extends GetxController {
   final RxMap<String, CartItem> cartItems = <String, CartItem>{}.obs;
+
+  final int Function(String productId) getAvailableStock;
+
+  CartController({required this.getAvailableStock});
 
   // ---------------- QUANTITY GETTERS ----------------
 
@@ -40,24 +45,48 @@ class CartController extends GetxController {
     );
   }
 
-  // Explicit: always subtotal + tax, never derived any other way.
   double get totalAmount => subtotal + totalTax;
 
-  // ---------------- CART ACTIONS ----------------
+  // ---------------- CART ACTIONS (STOCK-AWARE INTERNALLY) ----------------
 
   void addToCart(ProductEntity product) {
+    final availableStock = getAvailableStock(product.id);
+
+    if (availableStock <= 0) {
+      AppSnackbar.error(message: '${product.name} is out of stock');
+      return;
+    }
+
     final existing = cartItems[product.id];
+
     if (existing != null) {
+      if (existing.quantity >= availableStock) {
+        AppSnackbar.error(
+          message: 'Only $availableStock in stock for ${product.name}',
+        );
+        return;
+      }
       existing.quantity++;
     } else {
       cartItems[product.id] = CartItem(product: product, quantity: 1);
     }
+
     cartItems.refresh();
   }
 
   void incrementQuantity(String productId) {
     final item = cartItems[productId];
     if (item == null) return;
+
+    final availableStock = getAvailableStock(productId);
+
+    if (item.quantity >= availableStock) {
+      AppSnackbar.error(
+        message: 'Only $availableStock in stock for ${item.product.name}',
+      );
+      return;
+    }
+
     item.quantity++;
     cartItems.refresh();
   }

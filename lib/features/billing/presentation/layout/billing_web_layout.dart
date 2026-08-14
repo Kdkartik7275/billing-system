@@ -32,7 +32,12 @@ class _BillingWebLayoutState extends State<BillingWebLayout> {
     super.initState();
     controller = Get.find<BillingController>();
     inventoryController = Get.find<InventoryController>();
-    cartController = Get.put<CartController>(CartController());
+    cartController = Get.put<CartController>(
+      CartController(
+        getAvailableStock: (productId) =>
+            inventoryController.stockQuantityFor(productId).toInt(),
+      ),
+    );
   }
 
   @override

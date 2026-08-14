@@ -2,6 +2,7 @@ import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/features/inventory/domain/entities/product_entity.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_movement_entity.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/adjust_stock_usecase.dart';
+import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -64,6 +65,19 @@ class AdjustStockController extends GetxController {
       result.fold((failure) => AppSnackbar.error(message: failure.message), (
         _,
       ) {
+        final inventoryController = Get.find<InventoryController>();
+        final currentQuantity = inventoryController.stockQuantityFor(
+          product.id,
+        );
+        final delta = direction.value == AdjustmentDirection.increase
+            ? quantity.value
+            : -quantity.value;
+        final newQuantity = currentQuantity + delta;
+
+        inventoryController.updateStockQuantityLocally(
+          product.id,
+          newQuantity < 0 ? 0 : newQuantity,
+        );
         Get.back(result: true);
         AppSnackbar.success(message: 'Stock adjusted successfully');
       });

@@ -30,7 +30,12 @@ class _BillingMobileLayoutState extends State<BillingMobileLayout> {
     super.initState();
     controller = Get.find<BillingController>();
     inventoryController = Get.find<InventoryController>();
-    cartController = Get.put<CartController>(CartController());
+    cartController = Get.put<CartController>(
+      CartController(
+        getAvailableStock: (productId) =>
+            inventoryController.stockQuantityFor(productId).toInt(),
+      ),
+    );
   }
 
   void _openCartSheet() {
@@ -112,7 +117,7 @@ class _BillingMobileLayoutState extends State<BillingMobileLayout> {
                     final product = products[index];
 
                     return BillingProductCard(
-                      imageUrl: product.images.first.url,
+                      imageUrl: product.primaryImageUrl ?? '',
                       name: product.name,
                       sku: product.sku,
                       stock: inventoryController

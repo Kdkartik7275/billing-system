@@ -29,8 +29,12 @@ class _BillingTabletLayoutState extends State<BillingTabletLayout> {
     super.initState();
     controller = Get.find<BillingController>();
     inventoryController = Get.find<InventoryController>();
-    cartController = Get.put<CartController>(CartController());
-  }
+cartController = Get.put<CartController>(
+  CartController(
+    getAvailableStock: (productId) =>
+        inventoryController.stockQuantityFor(productId).toInt(),
+  ),
+);  }
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +98,7 @@ class _BillingTabletLayoutState extends State<BillingTabletLayout> {
                           final product = products[index];
 
                           return BillingProductCard(
-                            imageUrl: product.images.first.url,
+                            imageUrl: product.primaryImageUrl ?? '',
                             name: product.name,
                             sku: product.sku,
                             stock: inventoryController

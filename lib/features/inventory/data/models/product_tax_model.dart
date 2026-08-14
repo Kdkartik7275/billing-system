@@ -1,3 +1,4 @@
+import 'package:billing_system/core/config/constants/hive_type_ids.dart';
 import 'package:billing_system/features/inventory/data/models/tax_type.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -5,7 +6,7 @@ import '../../domain/value_objects/product_tax.dart';
 
 part 'product_tax_model.g.dart';
 
-@HiveType(typeId: 7)
+@HiveType(typeId: HiveTypeIds.productTaxModel)
 class ProductTaxModel extends HiveObject {
   @HiveField(0)
   final double gstPercent;

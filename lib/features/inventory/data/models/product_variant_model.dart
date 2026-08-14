@@ -1,10 +1,11 @@
+import 'package:billing_system/core/config/constants/hive_type_ids.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../domain/value_objects/product_variant.dart';
 
 part 'product_variant_model.g.dart';
 
-@HiveType(typeId: 15)
+@HiveType(typeId: HiveTypeIds.variantAttributeModel)
 class VariantAttributeModel extends HiveObject {
   @HiveField(0)
   final String name;
@@ -41,7 +42,7 @@ class VariantAttributeModel extends HiveObject {
   }
 }
 
-@HiveType(typeId: 9)
+@HiveType(typeId: HiveTypeIds.productVariantModel)
 class ProductVariantModel extends HiveObject {
   @HiveField(0)
   final String id;

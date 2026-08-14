@@ -1,10 +1,11 @@
+import 'package:billing_system/core/config/constants/hive_type_ids.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../domain/value_objects/product_image.dart';
 
 part 'product_image_model.g.dart';
 
-@HiveType(typeId: 10)
+@HiveType(typeId: HiveTypeIds.productImageModel)
 class ProductImageModel extends HiveObject {
   @HiveField(0)
   final String url;

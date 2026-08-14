@@ -1,9 +1,10 @@
+import 'package:billing_system/core/config/constants/hive_type_ids.dart';
 import 'package:billing_system/features/billing/domain/entities/bill_item_entity.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 part 'bill_item_model.g.dart';
 
-@HiveType(typeId: 26)
+@HiveType(typeId: HiveTypeIds.billItemModel)
 class BillItemModel {
   @HiveField(0)
   final String id;

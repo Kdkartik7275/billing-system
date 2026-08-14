@@ -14,7 +14,7 @@ class SettingWebLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFFF5F6F8),
+      color: Colors.white,
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(32),
         child: Center(

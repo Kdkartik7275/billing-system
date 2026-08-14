@@ -1,9 +1,10 @@
+import 'package:billing_system/core/config/constants/hive_type_ids.dart';
 import 'package:billing_system/features/inventory/domain/entities/brand_entity.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 part 'brand_model.g.dart';
 
-@HiveType(typeId: 13)
+@HiveType(typeId: HiveTypeIds.brandModel)
 class BrandModel extends HiveObject {
   @HiveField(0)
   final String id;

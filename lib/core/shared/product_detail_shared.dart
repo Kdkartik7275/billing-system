@@ -5,6 +5,7 @@ import 'package:billing_system/core/helper/functions.dart';
 import 'package:billing_system/features/inventory/domain/entities/product_entity.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_entity.dart';
 import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
+import 'package:billing_system/features/inventory/presentation/widgets/adjust/adjust_stock_sheet.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/product_detail/batch_summary_data.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/product_detail/product_gallery.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/product_detail/purchase_sales_summary.dart';
@@ -78,7 +79,7 @@ List<QuickAction> buildProductQuickActions(ProductEntity product) => [
     color: Colors.orange.shade600,
     title: 'Adjust Stock',
     subtitle: 'Adjust quantity',
-    onTap: () {},
+    onTap: () => showAdjustStockSheet(Get.context!, product: product),
   ),
 ];
 

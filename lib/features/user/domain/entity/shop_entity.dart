@@ -1,3 +1,5 @@
+import 'package:billing_system/features/user/domain/entity/business_detail_entity.dart';
+
 class ShopEntity {
   final String id;
 
@@ -16,6 +18,7 @@ class ShopEntity {
   final DateTime? subscriptionExpiry;
 
   final FirebaseConfigEntity firebaseConfig;
+  final BusinessDetailsEntity businessDetails;
 
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -34,6 +37,7 @@ class ShopEntity {
     required this.firebaseConfig,
     required this.createdAt,
     required this.updatedAt,
+    required this.businessDetails,
   });
 }
 

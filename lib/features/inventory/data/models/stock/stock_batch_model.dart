@@ -1,9 +1,10 @@
+import 'package:billing_system/core/config/constants/hive_type_ids.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_batch_entity.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 part 'stock_batch_model.g.dart';
 
-@HiveType(typeId: 18)
+@HiveType(typeId: HiveTypeIds.stockBatchModel)
 class StockBatchModel extends HiveObject {
   @HiveField(0)
   final String id;

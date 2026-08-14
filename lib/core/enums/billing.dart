@@ -1,8 +1,9 @@
+import 'package:billing_system/core/config/constants/hive_type_ids.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 part 'billing.g.dart';
 
-@HiveType(typeId: 20)
+@HiveType(typeId: HiveTypeIds.billStatus)
 enum BillStatus {
   @HiveField(0)
   pending,
@@ -17,7 +18,7 @@ enum BillStatus {
   refunded,
 }
 
-@HiveType(typeId: 21)
+@HiveType(typeId: HiveTypeIds.paymentMethod)
 enum PaymentMethod {
   @HiveField(0)
   cash,

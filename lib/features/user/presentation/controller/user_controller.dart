@@ -62,6 +62,7 @@ class UserController extends GetxController {
       (fetchedShop) {
         // Handle success
         shop.value = fetchedShop;
+
         debugPrint('Fetched shop: ${fetchedShop.shopName}');
       },
     );

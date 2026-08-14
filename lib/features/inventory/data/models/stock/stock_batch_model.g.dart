@@ -8,7 +8,7 @@ part of 'stock_batch_model.dart';
 
 class StockBatchModelAdapter extends TypeAdapter<StockBatchModel> {
   @override
-  final int typeId = 18;
+  final int typeId = 16;
 
   @override
   StockBatchModel read(BinaryReader reader) {

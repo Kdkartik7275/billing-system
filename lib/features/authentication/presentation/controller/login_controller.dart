@@ -93,6 +93,8 @@ class LoginController extends GetxController {
       final uid = credential.user!.uid;
       const shopId = "SHOP_001";
 
+      final now = DateTime.now();
+
       // 2. Save User
       await FirebaseFirestore.instance.collection("users").doc(uid).set({
         "uid": uid,
@@ -102,8 +104,8 @@ class LoginController extends GetxController {
         "phone": "9876543210",
         "role": "owner",
         "isActive": true,
-        "createdAt": DateTime.now(),
-        "lastLogin": DateTime.now(),
+        "createdAt": now,
+        "lastLogin": now,
       });
 
       // 3. Save Shop
@@ -120,9 +122,21 @@ class LoginController extends GetxController {
 
         "isActive": true,
         "plan": "Premium",
+        "subscriptionExpiry": now.add(const Duration(days: 365)),
 
-        "subscriptionExpiry": DateTime.now().add(const Duration(days: 365)),
+        // 4. Business Details
+        "businessDetails": {
+          "gstNumber": "05ABCDE1234F1Z5",
+          "panNumber": "ABCDE1234F",
+          "shopImage": null,
+          "businessType": "Proprietorship",
+          "state": "Uttarakhand",
+          "fssaiLicense": null,
+          "currency": "INR",
+          "financialYearStart": "1st April",
+        },
 
+        // 5. Firebase Configuration
         "firebaseConfig": {
           "androidApiKey": "AIzaSyDur5N2OwxLW6Axo3tPwAIad7_Af4Ur_Pw",
           "iosApiKey": "AIzaSyBFDa_I0NqYbhzpr9VGnZ1lurURQXLAeuY",
@@ -131,8 +145,8 @@ class LoginController extends GetxController {
           "androidAppId": "1:762462200109:android:119d167c728d47e57e73a4",
           "iosAppId": "1:762462200109:ios:b8b0e4a3f6aa30f87e73a4",
           "webAppId": "1:762462200109:web:c5d984eb2c32dc017e73a4",
-          "projectId": "shopmarket-92dec",
 
+          "projectId": "shopmarket-92dec",
           "messagingSenderId": "762462200109",
 
           "storageBucket": "shopmarket-92dec.firebasestorage.app",
@@ -140,8 +154,8 @@ class LoginController extends GetxController {
           "authDomain": "shopmarket-92dec.firebaseapp.com",
         },
 
-        "createdAt": DateTime.now(),
-        "updatedAt": DateTime.now(),
+        "createdAt": now,
+        "updatedAt": now,
       });
 
       debugPrint("✅ Shop Registered Successfully");

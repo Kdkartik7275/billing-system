@@ -1,3 +1,4 @@
+import 'package:billing_system/core/config/constants/hive_type_ids.dart';
 import 'package:billing_system/features/billing/data/models/bill_item_model.dart';
 import 'package:billing_system/features/billing/data/models/coupon_model.dart';
 import 'package:billing_system/features/billing/data/models/customer_model.dart';
@@ -6,7 +7,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 part 'billing_cart_model.g.dart';
 
-@HiveType(typeId: 28)
+@HiveType(typeId: HiveTypeIds.billingCartModel)
 class BillingCartModel extends HiveObject {
   @HiveField(0)
   final List<BillItemModel> items;

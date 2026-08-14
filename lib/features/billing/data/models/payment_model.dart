@@ -1,10 +1,11 @@
+import 'package:billing_system/core/config/constants/hive_type_ids.dart';
 import 'package:billing_system/core/enums/billing.dart';
 import 'package:billing_system/features/billing/domain/entities/payment_entity.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 part 'payment_model.g.dart';
 
-@HiveType(typeId: 24)
+@HiveType(typeId: HiveTypeIds.paymentModel)
 class PaymentModel {
   @HiveField(0)
   final String id;

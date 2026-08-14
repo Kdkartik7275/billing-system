@@ -1,3 +1,5 @@
+import 'package:billing_system/core/config/constants/hive_type_ids.dart';
+import 'package:billing_system/features/user/data/models/business_details_model.dart';
 import 'package:billing_system/features/user/data/models/firebase_config_model.dart';
 import 'package:billing_system/features/user/domain/entity/shop_entity.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -5,7 +7,7 @@ import 'package:hive/hive.dart';
 
 part 'shop_model.g.dart';
 
-@HiveType(typeId: 4)
+@HiveType(typeId: HiveTypeIds.shopModel)
 class ShopModel extends HiveObject {
   @HiveField(0)
   final String id;
@@ -46,6 +48,9 @@ class ShopModel extends HiveObject {
   @HiveField(12)
   final DateTime updatedAt;
 
+  @HiveField(13)
+  final BusinessDetailsModel businessDetails;
+
   ShopModel({
     required this.id,
     required this.shopName,
@@ -60,6 +65,7 @@ class ShopModel extends HiveObject {
     required this.firebaseConfig,
     required this.createdAt,
     required this.updatedAt,
+    required this.businessDetails,
   });
 
   factory ShopModel.fromJson(Map<String, dynamic> json) {
@@ -79,6 +85,7 @@ class ShopModel extends HiveObject {
       firebaseConfig: FirebaseConfigModel.fromJson(json['firebaseConfig']),
       createdAt: (json['createdAt'] as Timestamp).toDate(),
       updatedAt: (json['updatedAt'] as Timestamp).toDate(),
+      businessDetails: BusinessDetailsModel.fromJson(json['businessDetails']),
     );
   }
 
@@ -97,6 +104,7 @@ class ShopModel extends HiveObject {
       'firebaseConfig': firebaseConfig.toJson(),
       'createdAt': createdAt,
       'updatedAt': updatedAt,
+      'businessDetails': businessDetails.toJson(),
     };
   }
 
@@ -113,6 +121,7 @@ class ShopModel extends HiveObject {
       plan: plan,
       subscriptionExpiry: subscriptionExpiry,
       firebaseConfig: firebaseConfig.toEntity(),
+      businessDetails: businessDetails.toEntity(),
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
@@ -131,6 +140,7 @@ class ShopModel extends HiveObject {
       plan: entity.plan,
       subscriptionExpiry: entity.subscriptionExpiry,
       firebaseConfig: FirebaseConfigModel.fromEntity(entity.firebaseConfig),
+      businessDetails: BusinessDetailsModel.fromEntity(entity.businessDetails),
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     );

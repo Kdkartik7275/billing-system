@@ -30,13 +30,14 @@ class ShopModelAdapter extends TypeAdapter<ShopModel> {
       firebaseConfig: fields[10] as FirebaseConfigModel,
       createdAt: fields[11] as DateTime,
       updatedAt: fields[12] as DateTime,
+      businessDetails: fields[13] as BusinessDetailsModel,
     );
   }
 
   @override
   void write(BinaryWriter writer, ShopModel obj) {
     writer
-      ..writeByte(13)
+      ..writeByte(14)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -62,7 +63,9 @@ class ShopModelAdapter extends TypeAdapter<ShopModel> {
       ..writeByte(11)
       ..write(obj.createdAt)
       ..writeByte(12)
-      ..write(obj.updatedAt);
+      ..write(obj.updatedAt)
+      ..writeByte(13)
+      ..write(obj.businessDetails);
   }
 
   @override

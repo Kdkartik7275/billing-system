@@ -1,9 +1,10 @@
+import 'package:billing_system/core/config/constants/hive_type_ids.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_movement_entity.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 part 'stock_movement_model.g.dart';
 
-@HiveType(typeId: 16)
+@HiveType(typeId: HiveTypeIds.stockMovementTypeModel)
 enum StockMovementTypeModel {
   @HiveField(0)
   purchaseIn,
@@ -33,7 +34,7 @@ enum StockMovementTypeModel {
   expired,
 }
 
-@HiveType(typeId: 17)
+@HiveType(typeId: HiveTypeIds.stockMovementModel)
 class StockMovementModel extends HiveObject {
   @HiveField(0)
   final String id;

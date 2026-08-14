@@ -1,3 +1,4 @@
+import 'package:billing_system/core/config/constants/hive_type_ids.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../domain/entities/product_entity.dart';
@@ -9,7 +10,7 @@ import 'product_variant_model.dart';
 
 part 'product_model.g.dart';
 
-@HiveType(typeId: 5)
+@HiveType(typeId: HiveTypeIds.productModel)
 class ProductModel extends HiveObject {
   @HiveField(0)
   final String id;

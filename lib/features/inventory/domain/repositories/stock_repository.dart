@@ -63,4 +63,5 @@ abstract class StockRepository {
     String? referenceId,
     String? notes,
   });
+  
 }

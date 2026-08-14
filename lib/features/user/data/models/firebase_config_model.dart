@@ -1,9 +1,10 @@
+import 'package:billing_system/core/config/constants/hive_type_ids.dart';
 import 'package:billing_system/features/user/domain/entity/shop_entity.dart';
 import 'package:hive/hive.dart';
 
 part 'firebase_config_model.g.dart';
 
-@HiveType(typeId: 3)
+@HiveType(typeId: HiveTypeIds.firebaseConfigModel)
 class FirebaseConfigModel {
   @HiveField(0)
   final String androidApiKey;

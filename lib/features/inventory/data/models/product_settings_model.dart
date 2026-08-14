@@ -1,10 +1,11 @@
+import 'package:billing_system/core/config/constants/hive_type_ids.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../domain/value_objects/product_settings.dart';
 
 part 'product_settings_model.g.dart';
 
-@HiveType(typeId: 8)
+@HiveType(typeId: HiveTypeIds.productSettingsModel)
 class ProductSettingsModel extends HiveObject {
   @HiveField(0)
   final int lowStockThreshold;

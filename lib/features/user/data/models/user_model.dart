@@ -1,10 +1,11 @@
+import 'package:billing_system/core/config/constants/hive_type_ids.dart';
 import 'package:billing_system/features/user/domain/entity/user_entity.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 part 'user_model.g.dart';
 
-@HiveType(typeId: 1)
+@HiveType(typeId: HiveTypeIds.userModel)
 class UserModel extends HiveObject {
   @HiveField(0)
   final String uid;

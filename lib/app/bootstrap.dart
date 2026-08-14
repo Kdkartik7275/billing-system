@@ -20,6 +20,10 @@ import 'package:billing_system/features/inventory/data/models/stock/stock_model.
 import 'package:billing_system/features/inventory/data/models/stock/stock_movement_model.dart';
 import 'package:billing_system/features/inventory/data/models/tax_type.dart';
 import 'package:billing_system/features/inventory/data/models/unit/unit_model.dart';
+import 'package:billing_system/features/settings/data/models/account_setting_model.dart';
+import 'package:billing_system/features/settings/data/models/security_setting_model.dart';
+import 'package:billing_system/features/settings/data/models/user_preferences_model.dart';
+import 'package:billing_system/features/user/data/models/business_details_model.dart';
 
 import 'package:billing_system/features/user/data/models/firebase_config_model.dart';
 import 'package:billing_system/features/user/data/models/shop_model.dart';
@@ -70,7 +74,11 @@ class Bootstrap {
       ..registerAdapter(BillItemModelAdapter())
       ..registerAdapter(BillModelAdapter())
       ..registerAdapter(BillingCartModelAdapter())
-      ..registerAdapter(UnitModelAdapter());
+      ..registerAdapter(UnitModelAdapter())
+      ..registerAdapter(BusinessDetailsModelAdapter())
+      ..registerAdapter(AccountSettingsModelAdapter())
+      ..registerAdapter(SecuritySettingsModelAdapter())
+      ..registerAdapter(UserPreferencesModelAdapter());
 
     await Hive.openBox<ProductModel>('products');
     await Hive.openBox<CategoryModel>('categories');

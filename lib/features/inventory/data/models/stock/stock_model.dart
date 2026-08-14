@@ -1,9 +1,10 @@
+import 'package:billing_system/core/config/constants/hive_type_ids.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_entity.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 part 'stock_model.g.dart';
 
-@HiveType(typeId: 14)
+@HiveType(typeId: HiveTypeIds.stockModel)
 class StockModel extends HiveObject {
   @HiveField(0)
   final String id;

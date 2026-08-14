@@ -309,6 +309,7 @@ void _initStocks() {
   sl.registerLazySingleton(() => GetStocksMovementUsecase(repository: sl()));
   sl.registerLazySingleton(() => PurchaseStockUseCase(repository: sl()));
   sl.registerLazySingleton(() => SellStockUsecase(repository: sl()));
+  sl.registerLazySingleton(() => AdjustStockUsecase(repository: sl()));
 }
 
 void _initBilling() {

@@ -76,7 +76,7 @@ class StockMovementModelAdapter extends TypeAdapter<StockMovementModel> {
 class StockMovementTypeModelAdapter
     extends TypeAdapter<StockMovementTypeModel> {
   @override
-  final int typeId = 16;
+  final int typeId = 18;
 
   @override
   StockMovementTypeModel read(BinaryReader reader) {

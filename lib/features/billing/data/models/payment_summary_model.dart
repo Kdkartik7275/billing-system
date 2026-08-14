@@ -1,10 +1,11 @@
+import 'package:billing_system/core/config/constants/hive_type_ids.dart';
 import 'package:billing_system/features/billing/data/models/payment_model.dart';
 import 'package:billing_system/features/billing/domain/entities/payment_summary_entity.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 part 'payment_summary_model.g.dart';
 
-@HiveType(typeId: 25)
+@HiveType(typeId: HiveTypeIds.paymentSummaryModel)
 class PaymentSummaryModel {
   @HiveField(0)
   final List<PaymentModel> payments;

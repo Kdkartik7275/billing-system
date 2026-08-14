@@ -8,7 +8,7 @@ part of 'product_image_model.dart';
 
 class ProductImageModelAdapter extends TypeAdapter<ProductImageModel> {
   @override
-  final int typeId = 10;
+  final int typeId = 11;
 
   @override
   ProductImageModel read(BinaryReader reader) {

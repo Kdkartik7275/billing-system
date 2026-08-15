@@ -67,15 +67,16 @@ class BillingController extends GetxController {
     selectedCategory.value = category;
   }
 
-  List<ProductEntity> get filteredProducts {
-    if (selectedCategory.value == 'All') {
-      return inventoryController.products;
-    }
-
-    return inventoryController.products.where((product) {
-      return product.categoryId == selectedCategory.value;
-    }).toList();
+ List<ProductEntity> get filteredProducts {
+  if (selectedCategory.value == 'All') {
+    return inventoryController.products;
   }
+
+  return inventoryController.products.where((product) {
+    return inventoryController.categoryName(product.categoryId) ==
+        selectedCategory.value;
+  }).toList();
+}
 
   double get todaysSalesRevenue {
     return todaysBills.fold(0.0, (sum, bill) => sum + bill.grandTotal);

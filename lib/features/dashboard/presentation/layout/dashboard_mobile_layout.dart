@@ -5,7 +5,6 @@ import 'package:billing_system/features/dashboard/presentation/controller/dashbo
 import 'package:billing_system/features/dashboard/presentation/layout/dashboard_mobile_body.dart';
 import 'package:billing_system/features/dashboard/presentation/models/dashboard_menu.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/dashboard_drawer_navigation.dart';
-import 'package:billing_system/features/dashboard/presentation/widgets/logout_button.dart';
 import 'package:billing_system/features/inventory/presentation/views/inventory_page.dart';
 import 'package:billing_system/features/settings/presentations/view/setting_page.dart';
 import 'package:billing_system/features/suppliers/presentation/view/supplier_page.dart';
@@ -98,7 +97,6 @@ class _DashboardMobileLayoutState extends State<DashboardMobileLayout> {
             ],
           ),
         ),
-        actions: [LogoutButton(), const SizedBox(width: 14)],
       ),
       drawer: const Drawer(elevation: 0, child: AppNavigationDrawer()),
       body: Obx(

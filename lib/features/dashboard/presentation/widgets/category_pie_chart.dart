@@ -35,6 +35,7 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Sales by Category', style: tt.titleMedium),
+
             const SizedBox(height: 8),
 
             if (categories.isEmpty)
@@ -52,6 +53,7 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
                           startDegreeOffset: -90,
                           sectionsSpace: 2,
                           centerSpaceRadius: 32,
+
                           pieTouchData: PieTouchData(
                             touchCallback: (event, response) {
                               setState(() {
@@ -65,6 +67,7 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
                               });
                             },
                           ),
+
                           sections: List.generate(categories.length, (i) {
                             final item = categories[i];
                             final isTouched = i == _touched;
@@ -82,13 +85,14 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
                       ),
                     ),
 
+                    const SizedBox(width: 8),
+
                     Expanded(
                       flex: 4,
                       child: ListView.separated(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
+                        padding: EdgeInsets.zero,
                         itemCount: categories.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 8),
+                        separatorBuilder: (_, _) => const SizedBox(height: 4),
                         itemBuilder: (context, i) {
                           final item = categories[i];
 
@@ -97,6 +101,7 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
                               : (item.amount / totalSales * 100);
 
                           final isSelected = i == _touched;
+                          final color = categoryColor(item.category);
 
                           return InkWell(
                             onTap: () {
@@ -108,42 +113,46 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,
-                                vertical: 6,
+                                vertical: 5,
                               ),
                               decoration: BoxDecoration(
                                 color: isSelected
-                                    ? categoryColor(
-                                        item.category,
-                                      ).withValues(alpha: 0.08)
+                                    ? color.withValues(alpha: 0.08)
                                     : null,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
                                 children: [
+                                  // Color indicator
                                   Container(
-                                    width: 12,
-                                    height: 12,
+                                    width: 11,
+                                    height: 11,
                                     decoration: BoxDecoration(
-                                      color: categoryColor(item.category),
+                                      color: color,
                                       shape: BoxShape.circle,
                                     ),
                                   ),
 
                                   const SizedBox(width: 8),
 
+                                  // Category name
                                   Expanded(
                                     child: Text(
                                       item.category,
+                                      maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: tt.bodyMedium,
                                     ),
                                   ),
 
+                                  const SizedBox(width: 4),
+
+                                  // Percentage
                                   Text(
                                     '${percentage.toStringAsFixed(0)}%',
                                     style: tt.bodyMedium?.copyWith(
                                       fontWeight: FontWeight.w600,
-                                      color: categoryColor(item.category),
+                                      color: color,
                                     ),
                                   ),
                                 ],

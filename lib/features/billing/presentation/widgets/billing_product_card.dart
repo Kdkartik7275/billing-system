@@ -58,6 +58,19 @@ class BillingProductCard extends StatelessWidget {
                     width: double.infinity,
                     height: double.infinity,
                     fit: BoxFit.cover,
+                    placeholder: (context, url) {
+                      return const Center(child: CircularProgressIndicator());
+                    },
+
+                    errorWidget: (context, url, error) {
+                      return Center(
+                        child: Icon(
+                          Icons.broken_image_outlined,
+                          color: Colors.grey.shade500,
+                          size: 40,
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),

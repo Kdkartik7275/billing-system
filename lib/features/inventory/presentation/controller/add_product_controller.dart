@@ -1,12 +1,8 @@
-import 'package:billing_system/core/config/constants/dropdown_values.dart';
 import 'package:billing_system/core/helper/functions.dart' as scanner;
 import 'package:billing_system/core/snackbars/snackbars.dart';
-import 'package:billing_system/features/inventory/domain/entities/category_entity.dart';
 import 'package:billing_system/features/inventory/domain/entities/product_entity.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_entity.dart';
-import 'package:billing_system/features/inventory/domain/entities/unit_entity.dart';
 import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
-
 import 'package:billing_system/features/inventory/domain/usecases/product/add_product_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/product/update_product_usecase.dart';
 import 'package:billing_system/features/inventory/domain/value_objects/product_image.dart';

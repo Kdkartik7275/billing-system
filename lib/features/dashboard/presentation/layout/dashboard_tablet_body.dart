@@ -3,7 +3,6 @@ import 'package:billing_system/features/billing/domain/entities/bill_entity.dart
 import 'package:billing_system/features/billing/presentation/controllers/billing_controller.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/category_pie_chart.dart';
 import 'package:billing_system/core/config/theme/app_radius.dart';
-import 'package:billing_system/features/dashboard/presentation/widgets/logout_button.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/tablet_info_card.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/dashboard_stats_panel.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/low_stocks.dart';
@@ -127,7 +126,6 @@ class TabletDashboardBody extends GetView<BillingController> {
                     ],
                   ),
                 ),
-                const LogoutButton(),
               ],
             ),
           ),

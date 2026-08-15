@@ -17,7 +17,7 @@ class InventoryFilterBar extends StatelessWidget {
       final filters = [
         _buildDropdown<String>(
           value: controller.selectedCategoryId.value,
-          items: [
+          items: [ 
             const DropdownMenuItem(value: 'All', child: Text('Category')),
             ...controller.categories.map(
               (e) => DropdownMenuItem(value: e.id, child: Text(e.name)),

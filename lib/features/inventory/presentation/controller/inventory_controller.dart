@@ -65,6 +65,7 @@ class InventoryController extends GetxController {
       loadStocks(),
       loadBrands(),
       loadUnits(),
+      
     ]);
   }
 

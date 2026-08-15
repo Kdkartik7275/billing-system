@@ -1,7 +1,6 @@
 import 'package:billing_system/features/billing/presentation/controllers/billing_controller.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/category_pie_chart.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/dashboard_stats_panel.dart';
-import 'package:billing_system/features/dashboard/presentation/widgets/logout_button.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/low_stocks.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/recent_transactions.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/sales_line_chart.dart';
@@ -88,7 +87,6 @@ class DashboardWebBody extends StatelessWidget {
                     ],
                   ),
                 ),
-                const LogoutButton(),
               ],
             ),
           ),

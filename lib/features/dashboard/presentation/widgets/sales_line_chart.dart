@@ -143,11 +143,11 @@ class SalesLineChart extends GetView<BillingController> {
                         dashArray: [6, 4],
                         label: HorizontalLineLabel(
                           show: true,
-                          alignment: Alignment.topRight,
+                          alignment: Alignment.topLeft,
                           padding: const EdgeInsets.only(bottom: 4, right: 4),
                           style: tt.bodySmall?.copyWith(
                             color: Colors.black,
-                            fontSize: 10,
+                            fontSize: 11,
                             fontWeight: FontWeight.w600,
                           ),
                           labelResolver: (_) =>
@@ -174,8 +174,8 @@ class SalesLineChart extends GetView<BillingController> {
                           return Text(
                             _formatCurrency(value),
                             style: tt.bodySmall?.copyWith(
-                              color: Colors.grey.shade500,
-                              fontSize: 10,
+                              color: Colors.grey.shade700,
+                              fontSize: 11,
                             ),
                           );
                         },

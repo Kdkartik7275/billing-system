@@ -32,7 +32,6 @@ import 'package:billing_system/features/user/domain/entity/user_entity.dart';
 import 'package:billing_system/features/user/presentation/controller/user_controller.dart';
 import 'package:billing_system/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -118,16 +117,17 @@ class Bootstrap {
   static Future<void> recoverFromFailure() async {
     try {
       await Hive.close();
-    } catch (_) {}
-
-    try {
-      await Hive.deleteFromDisk();
-    } catch (e) {
-      debugPrint(
-        'Bootstrap.recoverFromFailure: failed to delete Hive data: $e',
-      );
+    } catch (_) {
+      // ignore — boxes may not have been opened at all
     }
 
-    await Get.deleteAll(force: true);
+    try {
+      // Deletes every box's data from disk (registered adapters aren't required).
+      await Hive.deleteFromDisk();
+    } catch (e) {
+      // If this also fails there isn't much more we can safely do here;
+      // the login flow will still work since it doesn't depend on cached data.
+    }
+    await initialize();
   }
 }

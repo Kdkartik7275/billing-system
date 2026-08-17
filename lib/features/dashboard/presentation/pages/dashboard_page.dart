@@ -1,6 +1,5 @@
 import 'package:billing_system/core/config/responsive/adaptive_layout.dart';
 import 'package:billing_system/core/indicators/progress_indicator.dart';
-import 'package:billing_system/dummy_data.dart';
 import 'package:billing_system/features/billing/presentation/controllers/billing_controller.dart';
 import 'package:billing_system/features/dashboard/presentation/layout/dashboard_mobile_layout.dart';
 import 'package:billing_system/features/dashboard/presentation/layout/dashboard_tablet_layout.dart';

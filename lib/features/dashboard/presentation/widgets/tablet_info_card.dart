@@ -115,7 +115,8 @@ class TabletSmartPosCard extends StatelessWidget {
                   value: timeStr,
                 ),
                 const Spacer(),
-                _SyncButton(billsController: billsController),
+                if (billsController.pending.isNotEmpty)
+                  _SyncButton(billsController: billsController),
               ],
             ),
           ),

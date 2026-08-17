@@ -58,7 +58,7 @@ class _BillingWebLayoutState extends State<BillingWebLayout> {
                     children: [
                       BillingSearchBar(
                         controller: _textController,
-                        onChanged: (val) {},
+                        onChanged: controller.updateSearch,
                         onScanTap: () => BillingScanHandler.scanAndAddToCart(
                           context: context,
                           inventoryController: inventoryController,

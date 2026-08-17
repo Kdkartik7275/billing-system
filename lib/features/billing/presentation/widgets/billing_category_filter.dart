@@ -50,7 +50,7 @@ class BillingCategoryFilter extends StatelessWidget {
                       : Colors.white,
                   side: isSelected
                       ? BorderSide.none
-                      : BorderSide(color: Colors.grey.shade200),
+                      : BorderSide(color: Colors.grey.shade300, width: 1),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18),
                   ),

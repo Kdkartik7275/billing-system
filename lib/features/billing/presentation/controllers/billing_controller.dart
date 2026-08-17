@@ -27,6 +27,8 @@ class BillingController extends GetxController {
   final ReduceStockForSoldProductsUsecase reduceStockForSoldProductsUsecase;
   final BillSyncScheduler billSyncScheduler;
   final RxString selectedCategory = 'All'.obs;
+  final RxString searchQuery = ''.obs;
+
   final InventoryController inventoryController = Get.find();
 
   // Dashboard-scoped: last 7 days only.
@@ -67,16 +69,29 @@ class BillingController extends GetxController {
     selectedCategory.value = category;
   }
 
- List<ProductEntity> get filteredProducts {
-  if (selectedCategory.value == 'All') {
-    return inventoryController.products;
-  }
+  void updateSearch(String value) => searchQuery.value = value;
 
-  return inventoryController.products.where((product) {
-    return inventoryController.categoryName(product.categoryId) ==
-        selectedCategory.value;
-  }).toList();
-}
+  void clearSearch() => searchQuery.value = '';
+
+  List<ProductEntity> get filteredProducts {
+    var list = selectedCategory.value == 'All'
+        ? inventoryController.products.toList()
+        : inventoryController.products.where((product) {
+            return inventoryController.categoryName(product.categoryId) ==
+                selectedCategory.value;
+          }).toList();
+
+    final query = searchQuery.value.trim().toLowerCase();
+    if (query.isNotEmpty) {
+      list = list.where((p) {
+        return p.name.toLowerCase().contains(query) ||
+            p.sku.toLowerCase().contains(query) ||
+            p.barcode.contains(query);
+      }).toList();
+    }
+
+    return list;
+  }
 
   double get todaysSalesRevenue {
     return todaysBills.fold(0.0, (sum, bill) => sum + bill.grandTotal);

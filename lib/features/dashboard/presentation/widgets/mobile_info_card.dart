@@ -122,10 +122,11 @@ class SmartPosInfoCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 14),
-                SizedBox(
-                  width: double.infinity,
-                  child: SyncButton(billsController: billsController),
-                ),
+                if (billsController.pending.isNotEmpty)
+                  SizedBox(
+                    width: double.infinity,
+                    child: SyncButton(billsController: billsController),
+                  ),
               ],
             ),
           ),

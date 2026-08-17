@@ -1,5 +1,5 @@
 import 'package:billing_system/features/settings/presentations/widgets/account_card.dart';
-import 'package:billing_system/features/settings/presentations/widgets/logout_card.dart';
+import 'package:billing_system/features/settings/presentations/widgets/confirm_logout.dart';
 import 'package:billing_system/features/settings/presentations/widgets/nav_row.dart';
 import 'package:billing_system/features/settings/presentations/widgets/security_card.dart';
 import 'package:billing_system/features/settings/presentations/widgets/shop_info.dart';
@@ -7,6 +7,7 @@ import 'package:billing_system/features/settings/presentations/widgets/shop_info
 import 'package:billing_system/features/settings/presentations/widgets/subscription_card.dart';
 import 'package:billing_system/features/settings/presentations/widgets/user_information_card.dart';
 import 'package:flutter/material.dart';
+
 class SettingTabletLayout extends StatelessWidget {
   const SettingTabletLayout({super.key});
 
@@ -42,7 +43,6 @@ class SettingTabletLayout extends StatelessWidget {
                         onExportData: () {},
                       ),
                       const SizedBox(height: 20),
-                      LogoutCard(),
                     ],
                   ),
                 ),
@@ -56,15 +56,6 @@ class SettingTabletLayout extends StatelessWidget {
                       const SizedBox(height: 20),
                       SubscriptionCard(),
                       const SizedBox(height: 20),
-                      NotificationsRow(),
-                      const SizedBox(height: 14),
-                      PrivacyRow(),
-                      const SizedBox(height: 14),
-                      PreferencesRow(),
-                      const SizedBox(height: 14),
-                      HelpSupportRow(),
-                      const SizedBox(height: 14),
-                      AboutRow(),
                     ],
                   ),
                 ),

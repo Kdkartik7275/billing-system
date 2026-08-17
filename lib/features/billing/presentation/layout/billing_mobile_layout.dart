@@ -72,7 +72,7 @@ class _BillingMobileLayoutState extends State<BillingMobileLayout> {
             // --------- SEARCH FIELD ------------
             BillingSearchBar(
               controller: _textController,
-              onChanged: (val) {},
+              onChanged: controller.updateSearch,
               onScanTap: () => BillingScanHandler.scanAndAddToCart(
                 context: context,
                 inventoryController: inventoryController,

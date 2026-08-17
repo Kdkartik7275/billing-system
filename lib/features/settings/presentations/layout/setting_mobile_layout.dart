@@ -1,5 +1,5 @@
+import 'package:billing_system/features/settings/presentations/widgets/confirm_logout.dart';
 import 'package:billing_system/features/settings/presentations/widgets/account_card.dart';
-import 'package:billing_system/features/settings/presentations/widgets/logout_card.dart';
 import 'package:billing_system/features/settings/presentations/widgets/nav_row.dart';
 import 'package:billing_system/features/settings/presentations/widgets/security_card.dart';
 import 'package:billing_system/features/settings/presentations/widgets/shop_info.dart';
@@ -16,7 +16,7 @@ class SettingMobileLayout extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       children: [
-        ShopInformationCard(onEdit: () {}),
+        ShopInformationCard(),
         const SizedBox(height: 16),
         BusinessDetailsCard(),
         const SizedBox(height: 16),
@@ -32,17 +32,6 @@ class SettingMobileLayout extends StatelessWidget {
           onExportData: () {},
         ),
         const SizedBox(height: 16),
-        NotificationsRow(),
-        const SizedBox(height: 12),
-        PrivacyRow(),
-        const SizedBox(height: 12),
-        PreferencesRow(),
-        const SizedBox(height: 12),
-        HelpSupportRow(),
-        const SizedBox(height: 12),
-        AboutRow(),
-        const SizedBox(height: 16),
-        LogoutCard(),
       ],
     );
   }

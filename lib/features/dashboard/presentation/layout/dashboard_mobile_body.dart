@@ -65,7 +65,7 @@ class MobileDashboardBody extends StatelessWidget {
                 return DashboardStatsPanel(items: items);
               }),
               const SizedBox(height: 14),
-              const SalesLineChart(height: 260),
+              const SalesLineChart(height: 300),
               const SizedBox(height: 16),
               const CategoryPieChart(height: 280),
               const SizedBox(height: 16),

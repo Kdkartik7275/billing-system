@@ -1,5 +1,4 @@
 import 'package:billing_system/features/settings/presentations/widgets/account_card.dart';
-import 'package:billing_system/features/settings/presentations/widgets/logout_card.dart';
 import 'package:billing_system/features/settings/presentations/widgets/nav_row.dart';
 import 'package:billing_system/features/settings/presentations/widgets/security_card.dart';
 import 'package:billing_system/features/settings/presentations/widgets/shop_info.dart';
@@ -71,26 +70,6 @@ class SettingWebLayout extends StatelessWidget {
                             onConnectedDevices: () {},
                             onExportData: () {},
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 20),
-                    // Column 3 -- quick actions
-                    Expanded(
-                      flex: 3,
-                      child: Column(
-                        children: [
-                          NotificationsRow(),
-                          const SizedBox(height: 14),
-                          PrivacyRow(),
-                          const SizedBox(height: 14),
-                          PreferencesRow(),
-                          const SizedBox(height: 14),
-                          HelpSupportRow(),
-                          const SizedBox(height: 14),
-                          AboutRow(),
-                          const SizedBox(height: 20),
-                          LogoutCard(),
                         ],
                       ),
                     ),

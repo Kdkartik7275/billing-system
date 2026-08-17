@@ -1,6 +1,7 @@
 import 'package:billing_system/core/card/card_shell.dart';
 import 'package:billing_system/features/settings/presentations/widgets/action_row.dart';
 import 'package:billing_system/features/settings/presentations/widgets/card_header.dart';
+import 'package:billing_system/features/settings/presentations/widgets/confirm_logout.dart';
 import 'package:flutter/material.dart';
 
 class AccountCard extends StatelessWidget {
@@ -66,6 +67,15 @@ class AccountCard extends StatelessWidget {
             subtitle: 'Download a copy of your shop data',
             showDivider: false,
             onTap: onExportData,
+          ),
+          ActionRow(
+            icon: Icons.logout,
+            label: 'Log Out',
+            subtitle: 'Sign out of your account',
+            showDivider: false,
+            onTap: () => confirmLogout(context),
+            labelColor: Colors.red,
+            iconColor: Colors.red,
           ),
         ],
       ),

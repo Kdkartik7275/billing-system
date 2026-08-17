@@ -53,7 +53,7 @@ cartController = Get.put<CartController>(
                   const SizedBox(height: 20),
                   BillingSearchBar(
                     controller: _textController,
-                    onChanged: (val) {},
+                      onChanged: controller.updateSearch,
                     onScanTap: () => BillingScanHandler.scanAndAddToCart(
                       context: context,
                       inventoryController: inventoryController,

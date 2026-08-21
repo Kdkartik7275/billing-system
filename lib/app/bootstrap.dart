@@ -97,6 +97,9 @@ class Bootstrap {
     await Hive.openBox('billing_meta');
     await Hive.openBox('inventory_meta');
     await Hive.openBox<UnitModel>('units');
+
+    await Hive.openBox('settings');
+
     // Customer and coupon features are deactivated for MVP.
     // Uncomment when those features are implemented:
     // await Hive.openBox<CustomerModel>('customers');
@@ -109,6 +112,7 @@ class Bootstrap {
         getShopByIdUseCase: sl(),
         shopFirebaseService: sl(),
         logoutUsecase: sl(),
+        biometricService: sl()
       ),
       permanent: true,
     );
@@ -124,10 +128,7 @@ class Bootstrap {
     try {
       // Deletes every box's data from disk (registered adapters aren't required).
       await Hive.deleteFromDisk();
-    } catch (e) {
-      // If this also fails there isn't much more we can safely do here;
-      // the login flow will still work since it doesn't depend on cached data.
-    }
+    } catch (e) {}
     await initialize();
   }
 }

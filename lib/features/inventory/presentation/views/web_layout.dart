@@ -22,74 +22,69 @@ class InventoryWebLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.find<InventoryController>();
 
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.xxl,
-            vertical: AppSpacing.xxl,
-          ),
-          child: SizedBox(
-            width: double.infinity,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Obx(
-                  () => InventoryHeaderBar(
-                    title: 'Inventory',
-                    subtitle: '${controller.totalProductsCount} products',
-                    onRefresh: () => controller.refreshProducts(),
-                    onAddProduct: () async {
-                      final result = await Get.to<(ProductEntity, StockEntity)>(
-                        () => AddProductPage(),
-                      );
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: SizedBox(
+          width: double.infinity,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Obx(
+                () => InventoryHeaderBar(
+                  title: 'Inventory',
+                  subtitle: '${controller.totalProductsCount} products',
+                  onRefresh: () => controller.refreshProducts(),
+                  onAddProduct: () async {
+                    final result = await Get.to<(ProductEntity, StockEntity)>(
+                      () => AddProductPage(),
+                    );
 
-                      if (result != null) {
-                        final product = result.$1;
-                        final stock = result.$2;
-                        controller.products.insert(0, product);
-                        controller.stockRecords.insert(0, stock);
-                      }
-                    },
-                  ),
+                    if (result != null) {
+                      final product = result.$1;
+                      final stock = result.$2;
+                      controller.products.insert(0, product);
+                      controller.stockRecords.insert(0, stock);
+                    }
+                  },
                 ),
-                const SizedBox(height: AppSpacing.xxl),
-                Obx(
-                  () => InventoryStatsPanel(
-                    items: [
-                      InventoryStatItem(
-                        title: 'Total Products',
-                        value: '${controller.totalProductsCount}',
-                        icon: Icons.inventory_2_outlined,
-                        color: AppColors.primary,
-                      ),
-                      InventoryStatItem(
-                        title: 'Inventory Value',
-                        value: '₹${_fmt(controller.totalInventoryValue)}',
-                        icon: Icons.currency_rupee_rounded,
-                        color: Colors.green.shade600,
-                      ),
-                      InventoryStatItem(
-                        title: 'Low Stock',
-                        value: '${controller.lowStockCount}',
-                        icon: Icons.warning_amber_rounded,
-                        color: Colors.orange.shade700,
-                      ),
-                      InventoryStatItem(
-                        title: 'Categories',
-                        value: '${controller.categories.length}',
-                        icon: Icons.category_outlined,
-                        color: Colors.purple.shade600,
-                      ),
-                    ],
-                  ),
+              ),
+              const SizedBox(height: AppSpacing.xxl),
+              Obx(
+                () => InventoryStatsPanel(
+                  items: [
+                    InventoryStatItem(
+                      title: 'Total Products',
+                      value: '${controller.totalProductsCount}',
+                      icon: Icons.inventory_2_outlined,
+                      color: AppColors.primary,
+                    ),
+                    InventoryStatItem(
+                      title: 'Inventory Value',
+                      value: '₹${_fmt(controller.totalInventoryValue)}',
+                      icon: Icons.currency_rupee_rounded,
+                      color: Colors.green.shade600,
+                    ),
+                    InventoryStatItem(
+                      title: 'Low Stock',
+                      value: '${controller.lowStockCount}',
+                      icon: Icons.warning_amber_rounded,
+                      color: Colors.orange.shade700,
+                    ),
+                    InventoryStatItem(
+                      title: 'Categories',
+                      value: '${controller.categories.length}',
+                      icon: Icons.category_outlined,
+                      color: Colors.purple.shade600,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: AppSpacing.xl),
-                const InventoryFilterBar(),
-                const SizedBox(height: AppSpacing.xl),
-                Expanded(child: _MainTableArea(controller: controller)),
-              ],
-            ),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              const InventoryFilterBar(),
+              const SizedBox(height: AppSpacing.xl),
+              Expanded(child: _MainTableArea(controller: controller)),
+            ],
           ),
         ),
       ),

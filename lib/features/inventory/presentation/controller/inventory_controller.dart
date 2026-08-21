@@ -1,6 +1,7 @@
 import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/features/inventory/domain/usecases/brand/get_brands_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/category/get_categories_usecase.dart';
+import 'package:billing_system/features/inventory/domain/usecases/product/delete_product_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/product/get_products_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/get_stocks_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/unit/get_units_usecase.dart';
@@ -25,6 +26,7 @@ class InventoryController extends GetxController {
   final GetUnitsUsecase getUnitsUsecase;
   final GetStocksUsecase getStocksUsecase;
   final GetBrandsUsecase getBrandsUsecase;
+  final DeleteProductUseCase deleteProductUseCase;
 
   final RxList<CategoryEntity> categories = <CategoryEntity>[].obs;
   final RxList<BrandEntity> brands = <BrandEntity>[].obs;
@@ -46,6 +48,7 @@ class InventoryController extends GetxController {
   final RxBool sortAscending = true.obs;
 
   final RxBool isLoading = false.obs;
+  final RxBool deleting = false.obs;
   final RxnString errorMessage = RxnString();
 
   InventoryController({
@@ -54,6 +57,7 @@ class InventoryController extends GetxController {
     required this.getUnitsUsecase,
     required this.getStocksUsecase,
     required this.getBrandsUsecase,
+    required this.deleteProductUseCase,
   });
 
   @override
@@ -65,7 +69,6 @@ class InventoryController extends GetxController {
       loadStocks(),
       loadBrands(),
       loadUnits(),
-      
     ]);
   }
 
@@ -338,10 +341,16 @@ class InventoryController extends GetxController {
     await loadProducts();
   }
 
-  void deleteProduct(String productId) {
-    products.removeWhere((p) => p.id == productId);
-    stockRecords.removeWhere((s) => s.productId == productId);
-    stockBatches.removeWhere((b) => b.productId == productId);
+  void deleteProduct(String productId) async {
+    deleting.value = true;
+    final result = await deleteProductUseCase.call(productId);
+
+    result.fold((err) => AppSnackbar.error(message: err.message), (r) {
+      products.removeWhere((p) => p.id == productId);
+      stockRecords.removeWhere((s) => s.productId == productId);
+      stockBatches.removeWhere((b) => b.productId == productId);
+    });
+    deleting.value = false;
   }
 
   void updateProduct(ProductEntity updatedProduct) {

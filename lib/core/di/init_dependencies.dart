@@ -1,5 +1,6 @@
 import 'package:billing_system/core/firebase/shop_firebase_service.dart';
 import 'package:billing_system/core/network/connection_checker.dart';
+import 'package:billing_system/core/security/biometric_service.dart';
 import 'package:billing_system/core/services/storage/storage_service.dart';
 import 'package:billing_system/core/sync/bill_sync_scheduler.dart';
 import 'package:billing_system/features/authentication/data/data_source/authentication_remote_data_source.dart';

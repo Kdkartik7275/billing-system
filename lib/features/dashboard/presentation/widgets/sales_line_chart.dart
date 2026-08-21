@@ -1,3 +1,4 @@
+import 'package:billing_system/core/indicators/sales_chart_loading.dart';
 import 'package:billing_system/features/billing/presentation/controllers/billing_controller.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/chart_card.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -23,6 +24,13 @@ class SalesLineChart extends GetView<BillingController> {
     const highlight = Color(0xFFFF9F1C);
 
     return Obx(() {
+      if (controller.loading.value) {
+        return ChartCard(
+          height: height,
+          padding: const EdgeInsets.all(20),
+          child: const SalesChartSkeleton(),
+        );
+      }
       final spots = controller.weeklySalesSpots;
       final labels = controller.last7DaysLabels;
       final hasData = spots.isNotEmpty && spots.any((s) => s.y > 0);

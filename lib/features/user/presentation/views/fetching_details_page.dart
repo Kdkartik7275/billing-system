@@ -39,6 +39,7 @@ class _FetchingDetailsPageState extends State<FetchingDetailsPage>
         getShopByIdUseCase: sl(),
         shopFirebaseService: sl(),
         logoutUsecase: sl(),
+        biometricService: sl()
       ),
     );
 

@@ -35,7 +35,7 @@ class MobileDashboardBody extends StatelessWidget {
                 final items = [
                   DashboardStatItem(
                     title: "Today's Sales",
-                    value: "₹${billController.todaysSalesRevenue}",
+                    value: "₹${billController.formatCompactValue(billController.todaysSalesRevenue)}",
                     growth: "${billController.todaysBills.length} orders today",
                     icon: Icons.attach_money,
                     color: Colors.green,

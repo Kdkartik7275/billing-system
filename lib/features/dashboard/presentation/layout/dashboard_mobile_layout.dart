@@ -1,31 +1,14 @@
+import 'package:billing_system/core/config/constants/dashboard_pages.dart';
 import 'package:billing_system/core/config/theme/app_colors.dart';
 import 'package:billing_system/features/billing/presentation/controllers/billing_controller.dart';
-import 'package:billing_system/features/billing/presentation/views/billing_page.dart';
 import 'package:billing_system/features/dashboard/presentation/controller/dashboard_shell_controller.dart';
-import 'package:billing_system/features/dashboard/presentation/layout/dashboard_mobile_body.dart';
-import 'package:billing_system/features/dashboard/presentation/models/dashboard_menu.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/dashboard_drawer_navigation.dart';
-import 'package:billing_system/features/inventory/presentation/views/inventory_page.dart';
-import 'package:billing_system/features/settings/presentations/view/setting_page.dart';
-import 'package:billing_system/features/suppliers/presentation/view/supplier_page.dart';
 import 'package:billing_system/features/user/presentation/controller/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class DashboardMobileLayout extends StatefulWidget {
   const DashboardMobileLayout({super.key});
-
-  static const Map<DashboardMenu, Widget> _pages = {
-    DashboardMenu.dashboard: MobileDashboardBody(),
-    DashboardMenu.pos: BillingPage(),
-    DashboardMenu.inventory: InventoryPage(),
-    DashboardMenu.sales: Center(child: Text('Sales')),
-    DashboardMenu.customers: Center(child: Text('Customers')),
-    DashboardMenu.employees: Center(child: Text('Employees')),
-    DashboardMenu.suppliers: SupplierPage(),
-    DashboardMenu.reports: Center(child: Text('Reports')),
-    DashboardMenu.settings: SettingPage(),
-  };
 
   @override
   State<DashboardMobileLayout> createState() => _DashboardMobileLayoutState();
@@ -101,7 +84,7 @@ class _DashboardMobileLayoutState extends State<DashboardMobileLayout> {
       drawer: const Drawer(elevation: 0, child: AppNavigationDrawer()),
       body: Obx(
         () =>
-            DashboardMobileLayout._pages[controller.selectedMenu.value] ??
+            pages(0)[controller.selectedMenu.value] ??
             const Center(child: Text('Dashboard')),
       ),
     );

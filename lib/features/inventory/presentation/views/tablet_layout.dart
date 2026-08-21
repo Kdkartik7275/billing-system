@@ -24,7 +24,7 @@ class InventoryTabletLayout extends StatelessWidget {
       () => controller.isLoading.value
           ? circularProgress(context)
           : LoadingOverlay(
-              isLoading: controller.isLoading.value,
+              isLoading: controller.isLoading.value || controller.deleting.value,
               progressIndicator: circularProgress(context),
               color: Colors.black.withValues(alpha: 0.3),
               child: RefreshIndicator(

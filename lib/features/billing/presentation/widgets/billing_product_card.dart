@@ -58,6 +58,7 @@ class BillingProductCard extends StatelessWidget {
                     width: double.infinity,
                     height: double.infinity,
                     fit: BoxFit.cover,
+                    memCacheWidth: 300,
                     placeholder: (context, url) {
                       return const Center(child: CircularProgressIndicator());
                     },

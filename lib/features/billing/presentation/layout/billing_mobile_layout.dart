@@ -4,7 +4,7 @@ import 'package:billing_system/features/billing/presentation/widgets/billing_car
 import 'package:billing_system/features/billing/presentation/widgets/billing_cart_summary_panel.dart';
 import 'package:billing_system/features/billing/presentation/widgets/billing_category_filter.dart';
 import 'package:billing_system/features/billing/presentation/widgets/billing_empty_state.dart';
-import 'package:billing_system/features/billing/presentation/widgets/billing_product_card.dart';
+import 'package:billing_system/features/billing/presentation/widgets/billing_product_grid_tile.dart';
 import 'package:billing_system/features/billing/presentation/widgets/billing_search_bar.dart';
 import 'package:billing_system/features/billing/presentation/widgets/checkout/checkout_flow.dart';
 import 'package:billing_system/features/billing/presentation/widgets/scan/billing_scan_handler.dart';
@@ -94,11 +94,9 @@ class _BillingMobileLayoutState extends State<BillingMobileLayout> {
 
             const SizedBox(height: 12),
 
-            // ----------- PRODUCT GRID -----------
             Expanded(
               child: Obx(() {
                 final products = controller.filteredProducts;
-                cartController.cartItems.length;
 
                 if (products.isEmpty) {
                   return const BillingEmptyProductsView();
@@ -107,29 +105,17 @@ class _BillingMobileLayoutState extends State<BillingMobileLayout> {
                 return GridView.builder(
                   padding: const EdgeInsets.only(bottom: 16),
                   itemCount: products.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 14,
-                    crossAxisSpacing: 14,
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 210,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
                     childAspectRatio: .68,
                   ),
                   itemBuilder: (_, index) {
-                    final product = products[index];
-
-                    return BillingProductCard(
-                      imageUrl: product.primaryImageUrl ?? '',
-                      name: product.name,
-                      sku: product.sku,
-                      stock: inventoryController
-                          .stockQuantityFor(product.id)
-                          .toInt(),
-                      price: product.price.sellingPrice,
-                      quantity: cartController.quantityFor(product.id),
-                      onAdd: () => cartController.addToCart(product),
-                      onIncrement: () =>
-                          cartController.incrementQuantity(product.id),
-                      onDecrement: () =>
-                          cartController.decrementQuantity(product.id),
+                    return BillingProductGridTile(
+                      product: products[index],
+                      inventoryController: inventoryController,
+                      cartController: cartController,
                     );
                   },
                 );

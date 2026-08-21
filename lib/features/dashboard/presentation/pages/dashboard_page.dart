@@ -21,7 +21,8 @@ class DashboardPage extends StatelessWidget {
         getCategoriesUsecase: sl(),
         getStocksUsecase: sl(),
         getBrandsUsecase: sl(),
-        getUnitsUsecase: sl()
+        getUnitsUsecase: sl(),
+        deleteProductUseCase: sl()
       ),
     );
     final controller = Get.put(

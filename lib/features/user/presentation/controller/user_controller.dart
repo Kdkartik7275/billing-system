@@ -1,6 +1,8 @@
+import 'package:billing_system/app/app_settings.dart';
 import 'package:billing_system/core/config/routes/app_routes.dart';
 import 'package:billing_system/core/di/init_dependencies.dart';
 import 'package:billing_system/core/firebase/shop_firebase_service.dart';
+import 'package:billing_system/core/security/biometric_service.dart';
 import 'package:billing_system/features/authentication/domain/usecases/logout_usecase.dart';
 import 'package:billing_system/features/user/data/models/shop_model.dart';
 import 'package:billing_system/features/user/data/models/user_model.dart';
@@ -18,15 +20,18 @@ class UserController extends GetxController {
   final GetShopByIdUseCase _getShopByIdUseCase;
   final ShopFirebaseService _shopFirebaseService;
   final LogoutUsecase _logoutUsecase;
+  final BiometricService _biometricService;
 
   UserController({
     required GetUserByIdUseCase getUserByIdUseCase,
     required GetShopByIdUseCase getShopByIdUseCase,
     required ShopFirebaseService shopFirebaseService,
     required LogoutUsecase logoutUsecase,
+    required BiometricService biometricService,
   }) : _getUserByIdUseCase = getUserByIdUseCase,
        _getShopByIdUseCase = getShopByIdUseCase,
        _logoutUsecase = logoutUsecase,
+       _biometricService = biometricService,
        _shopFirebaseService = shopFirebaseService;
 
   final Rx<UserEntity?> user = Rx<UserEntity?>(null);
@@ -170,27 +175,129 @@ class UserController extends GetxController {
     }
   }
 
-  Future<String> checkSession() async {
-    final authUser = FirebaseAuth.instance.currentUser;
+  // Future<String> checkSession() async {
+  //   final authUser = FirebaseAuth.instance.currentUser;
 
-    if (authUser == null) {
+  //   if (authUser == null) {
+  //     return AppRoutes.login;
+  //   }
+
+  //   final restored = await restoreSession();
+
+  //   if (restored) {
+  //     return AppRoutes.dashboard;
+  //   }
+
+  //   final loaded = await fetchAccountDetails(userId: authUser.uid);
+
+  //   if (loaded) {
+  //     return AppRoutes.dashboard;
+  //   }
+
+  //   await FirebaseAuth.instance.signOut();
+  //   return AppRoutes.login;
+  // }
+
+  Future<bool> authenticateWithBiometric() async {
+    try {
+      if (!AppSettings.biometricEnabled) {
+        debugPrint('[UserController] Biometric login is disabled');
+
+        return true;
+      }
+
+      final available = await _biometricService.isAvailable();
+
+      if (!available) {
+        debugPrint('[UserController] Biometric authentication unavailable');
+
+        return true;
+      }
+
+      final biometrics = await _biometricService.getAvailableBiometrics();
+
+      if (biometrics.isEmpty) {
+        debugPrint('[UserController] No enrolled biometrics');
+
+        return true;
+      }
+
+      debugPrint('[UserController] Requesting biometric authentication');
+
+      final authenticated = await _biometricService.authenticate(
+        reason: 'Authenticate to access your billing software',
+      );
+
+      debugPrint('[UserController] Biometric result: $authenticated');
+
+      return authenticated;
+    } catch (e, stackTrace) {
+      debugPrint('[UserController] Biometric authentication error: $e');
+
+      debugPrint('[UserController] StackTrace: $stackTrace');
+
+      return false;
+    }
+  }
+
+  Future<String> checkSession() async {
+    try {
+      final authUser = FirebaseAuth.instance.currentUser;
+
+      if (authUser == null) {
+        debugPrint('[UserController] No Firebase session found');
+
+        return AppRoutes.login;
+      }
+
+      debugPrint('[UserController] Firebase session found');
+
+      final restored = await restoreSession();
+
+      if (restored) {
+        debugPrint('[UserController] Session restored successfully');
+
+        final authenticated = await authenticateWithBiometric();
+
+        if (!authenticated) {
+          debugPrint('[UserController] Biometric authentication failed');
+
+          return AppRoutes.login;
+        }
+
+        return AppRoutes.dashboard;
+      }
+
+      debugPrint('[UserController] Local session restore failed');
+
+      final loaded = await fetchAccountDetails(userId: authUser.uid);
+
+      if (loaded) {
+        debugPrint('[UserController] Account details loaded');
+
+        final authenticated = await authenticateWithBiometric();
+
+        if (!authenticated) {
+          debugPrint('[UserController] Biometric authentication failed');
+
+          return AppRoutes.login;
+        }
+
+        return AppRoutes.dashboard;
+      }
+
+      debugPrint('[UserController] Unable to load account');
+
+      await FirebaseAuth.instance.signOut();
+
+      return AppRoutes.login;
+    } catch (e, stackTrace) {
+      debugPrint('[UserController] checkSession error: $e');
+
+      debugPrint('[UserController] StackTrace: $stackTrace');
+
       return AppRoutes.login;
     }
-
-    final restored = await restoreSession();
-
-    if (restored) {
-      return AppRoutes.dashboard;
-    }
-
-    final loaded = await fetchAccountDetails(userId: authUser.uid);
-
-    if (loaded) {
-      return AppRoutes.dashboard;
-    }
-
-    await FirebaseAuth.instance.signOut();
-    return AppRoutes.login;
   }
 
   Future<bool> logout() async {

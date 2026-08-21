@@ -1,5 +1,6 @@
 import 'package:billing_system/features/billing/presentation/controllers/billing_controller.dart';
 import 'package:billing_system/features/billing/presentation/controllers/cart_controller.dart';
+import 'package:billing_system/features/billing/presentation/widgets/billing_product_grid_tile.dart';
 import 'package:billing_system/features/billing/presentation/widgets/checkout/checkout_flow.dart';
 import 'package:billing_system/features/billing/presentation/widgets/billing_cart_summary_panel.dart';
 import 'package:billing_system/features/billing/presentation/widgets/billing_category_filter.dart';
@@ -83,7 +84,6 @@ class _BillingWebLayoutState extends State<BillingWebLayout> {
                       Expanded(
                         child: Obx(() {
                           final products = controller.filteredProducts;
-                          cartController.cartItems.length;
 
                           if (products.isEmpty) {
                             return const BillingEmptyProductsView();
@@ -97,27 +97,13 @@ class _BillingWebLayoutState extends State<BillingWebLayout> {
                                   maxCrossAxisExtent: 210,
                                   mainAxisSpacing: 16,
                                   crossAxisSpacing: 16,
-                                  childAspectRatio: .68,
+                                  childAspectRatio: .80,
                                 ),
                             itemBuilder: (_, index) {
-                              final product = products[index];
-
-                              return BillingProductCard(
-                                imageUrl: product.primaryImageUrl ?? '',
-                                name: product.name,
-                                sku: product.sku,
-                                stock: inventoryController
-                                    .stockQuantityFor(product.id)
-                                    .toInt(),
-                                price: product.price.sellingPrice,
-                                quantity: cartController.quantityFor(
-                                  product.id,
-                                ),
-                                onAdd: () => cartController.addToCart(product),
-                                onIncrement: () => cartController
-                                    .incrementQuantity(product.id),
-                                onDecrement: () => cartController
-                                    .decrementQuantity(product.id),
+                              return BillingProductGridTile(
+                                product: products[index],
+                                inventoryController: inventoryController,
+                                cartController: cartController,
                               );
                             },
                           );

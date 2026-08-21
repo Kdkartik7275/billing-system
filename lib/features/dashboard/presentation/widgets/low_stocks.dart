@@ -147,7 +147,7 @@ class _LowStockTile extends GetView<InventoryController> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              '${controller.stockQuantityFor(product.id)} ${product.unitId}',
+              '${controller.stockQuantityFor(product.id).toInt()} ${controller.unitName(product.unitId)}',
               style: tt.bodySmall?.copyWith(
                 color:
                     controller.stockStatusFor(product) == StockStatus.outOfStock

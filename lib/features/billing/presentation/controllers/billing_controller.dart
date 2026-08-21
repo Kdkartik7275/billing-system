@@ -38,6 +38,7 @@ class BillingController extends GetxController {
   final RxList<BillEntity> pending = RxList<BillEntity>([]);
 
   final RxBool syncing = RxBool(false);
+  final RxBool loading = RxBool(false);
 
   BillingController({
     required this.getBillsByDateRangeUsecase,
@@ -55,6 +56,7 @@ class BillingController extends GetxController {
   }
 
   Future<void> _initializeBilling() async {
+    loading.value = true;
     await billSyncScheduler.hydrateIfNeeded();
 
     await getBills();
@@ -63,6 +65,7 @@ class BillingController extends GetxController {
     await billSyncScheduler.runIfDue();
 
     await getPendingBills();
+    loading.value = false;
   }
 
   void selectCategory(String category) {
@@ -292,4 +295,17 @@ class BillingController extends GetxController {
       syncing.value = false;
     }
   }
+
+  String formatCompactValue(double value) {
+  if (value >= 1000000) {
+    return '${_trimZero(value / 1000000)}M';
+  } else if (value >= 1000) {
+    return '${_trimZero(value / 1000)}k';
+  }
+  return value.toStringAsFixed(0);
+}
+
+String _trimZero(double value) {
+  return value % 1 == 0 ? value.toStringAsFixed(0) : value.toStringAsFixed(1);
+}
 }

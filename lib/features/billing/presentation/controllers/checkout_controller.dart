@@ -122,6 +122,10 @@ class CheckoutController extends GetxController {
 
   double get subtotal => cartController.subtotal;
   double get tax => cartController.totalTax;
+  bool get requiresAmountEntry =>
+      selectedMethod.value == PaymentMethodType.cash;
+
+  bool get requiresQrDisplay => selectedMethod.value == PaymentMethodType.upi;
 
   double get grandTotal {
     final total = subtotal + tax - discount.value;
@@ -164,6 +168,12 @@ class CheckoutController extends GetxController {
 
   void selectPaymentMethod(PaymentMethodType type) {
     selectedMethod.value = type;
+
+    if (type != PaymentMethodType.cash) {
+      amountReceived.value = grandTotal.toStringAsFixed(2);
+    } else {
+      amountReceived.value = '';
+    }
   }
 
   // ---------------- STEP NAVIGATION ----------------

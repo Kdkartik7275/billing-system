@@ -100,7 +100,7 @@ class TabletSmartPosCard extends StatelessWidget {
                 _InfoTile(
                   icon: Icons.calendar_today_rounded,
                   label: 'Today',
-                  value: dateStr,
+                  value: dateStr, 
                 ),
                 const SizedBox(width: 40),
                 Container(

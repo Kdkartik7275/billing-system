@@ -37,6 +37,7 @@ dependencies:
   cached_network_image: ^3.4.1
   intl: ^0.20.3
   barcode_widget: ^2.0.4
+  local_auth: ^3.0.2
 
 dev_dependencies:
   flutter_test:

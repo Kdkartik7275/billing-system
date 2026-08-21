@@ -1,4 +1,5 @@
 import 'package:billing_system/core/helper/functions.dart';
+import 'package:billing_system/core/indicators/category_chart_loading.dart';
 import 'package:billing_system/features/billing/presentation/controllers/billing_controller.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/chart_card.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -24,6 +25,14 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
     final tt = Theme.of(context).textTheme;
 
     return Obx(() {
+      if (controller.loading.value) {
+        return ChartCard(
+          width: widget.width,
+          height: widget.height,
+          padding: const EdgeInsets.all(16),
+          child: const CategoryPieChartSkeleton(),
+        );
+      }
       final categories = controller.salesByCategory;
       final totalSales = controller.totalCategorySales;
 

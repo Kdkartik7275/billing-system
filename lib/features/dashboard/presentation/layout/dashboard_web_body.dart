@@ -105,8 +105,9 @@ class _WebSummaryCards extends GetView<BillingController> {
       final items = [
         DashboardStatItem(
           title: "Today's Sales",
-          value: "₹${0}",
-          growth: "${0} orders today",
+          value:
+              "₹${controller.formatCompactValue(controller.todaysSalesRevenue)}",
+          growth: "${controller.todaysBills.length} orders today",
           icon: Icons.attach_money,
           color: Colors.green,
         ),
@@ -118,10 +119,10 @@ class _WebSummaryCards extends GetView<BillingController> {
           color: Colors.blue,
         ),
         DashboardStatItem(
-          title: "Revenue",
-          value: "₹${0}",
-          growth: "excl. tax",
-          icon: Icons.show_chart,
+          title: "Items Sold",
+          value: "${controller.todaysItemsSold}",
+          growth: "units today",
+          icon: Icons.inventory_2_outlined,
           color: Colors.deepPurple,
         ),
         DashboardStatItem(

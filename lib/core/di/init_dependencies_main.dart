@@ -30,6 +30,7 @@ void _initFirebase() {
   sl.registerLazySingleton<ConnectionChecker>(
     () => ConnectionCheckerImpl(InternetConnection()),
   );
+  sl.registerLazySingleton<BiometricService>(() => BiometricService());
 }
 
 // ----------------------- CORE -----------------------

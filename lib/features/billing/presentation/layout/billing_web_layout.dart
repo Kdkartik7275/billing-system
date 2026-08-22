@@ -5,7 +5,6 @@ import 'package:billing_system/features/billing/presentation/widgets/checkout/ch
 import 'package:billing_system/features/billing/presentation/widgets/billing_cart_summary_panel.dart';
 import 'package:billing_system/features/billing/presentation/widgets/billing_category_filter.dart';
 import 'package:billing_system/features/billing/presentation/widgets/billing_empty_state.dart';
-import 'package:billing_system/features/billing/presentation/widgets/billing_product_card.dart';
 import 'package:billing_system/features/billing/presentation/widgets/billing_search_bar.dart';
 import 'package:billing_system/features/billing/presentation/widgets/scan/billing_scan_handler.dart';
 import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';

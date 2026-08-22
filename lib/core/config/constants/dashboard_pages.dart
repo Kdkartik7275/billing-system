@@ -4,6 +4,7 @@ import 'package:billing_system/features/dashboard/presentation/layout/dashboard_
 import 'package:billing_system/features/dashboard/presentation/layout/dashboard_web_body.dart';
 import 'package:billing_system/features/dashboard/presentation/models/dashboard_menu.dart';
 import 'package:billing_system/features/inventory/presentation/views/inventory_page.dart';
+import 'package:billing_system/features/sales/presentation/view/sales_page.dart';
 import 'package:billing_system/features/settings/presentations/view/setting_page.dart';
 import 'package:billing_system/features/suppliers/presentation/view/supplier_page.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +17,7 @@ Map<DashboardMenu, Widget> pages(int index) => {
       : DashboardWebBody(),
   DashboardMenu.pos: BillingPage(),
   DashboardMenu.inventory: InventoryPage(),
-  DashboardMenu.sales: Center(child: Text('Sales')),
+  DashboardMenu.sales: SalesPage(),
   DashboardMenu.customers: Center(child: Text('Customers')),
   DashboardMenu.employees: Center(child: Text('Employees')),
   DashboardMenu.suppliers: SupplierPage(),

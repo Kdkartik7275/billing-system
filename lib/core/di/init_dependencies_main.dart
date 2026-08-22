@@ -352,6 +352,7 @@ void _initBilling() {
   sl.registerLazySingleton(() => GetBillByIdUsecase(repository: sl()));
   sl.registerLazySingleton(() => GetAllBillsUsecase(repository: sl()));
   sl.registerLazySingleton(() => GetBillsByDateRangeUsecase(repository: sl()));
+  sl.registerLazySingleton(() => GetBillsByDateUsecase(repository: sl()));
   sl.registerLazySingleton(() => UpdateBillStatusUsecase(repository: sl()));
   sl.registerLazySingleton(() => DeleteBillUsecase(repository: sl()));
   sl.registerLazySingleton(() => GetNextBillNumberUsecase(repository: sl()));

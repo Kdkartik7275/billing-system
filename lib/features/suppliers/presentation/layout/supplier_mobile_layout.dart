@@ -13,31 +13,28 @@ class SupplierMobileLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: const Color(0xFFF5F6F8),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-        child: Column(
-          children: [
-            SupplierSearchBar(onSearchChanged: (_) {}, onFilterTap: () {}),
-            const SizedBox(height: 16),
-            SupplierStatsCard(
-              totalSuppliers: 24,
-              activeSuppliers: 18,
-              totalPurchases: '₹3,45,670',
-              totalDue: '₹42,560',
-              suppliersWithDue: 8,
-            ),
-            const SizedBox(height: 16),
-            DuePaymentsCard(payments: kMockDuePayments, onViewAll: () {}),
-            const SizedBox(height: 16),
-            SupplierTabBar(onChanged: (_) {}),
-            const SizedBox(height: 16),
-            SupplierListCard(suppliers: kMockSuppliers),
-            const SizedBox(height: 20),
-            AddSupplierButton(onPressed: () {}),
-          ],
-        ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      child: Column(
+        children: [
+          SupplierSearchBar(onSearchChanged: (_) {}, onFilterTap: () {}),
+          const SizedBox(height: 16),
+          SupplierStatsCard(
+            totalSuppliers: 24,
+            activeSuppliers: 18,
+            totalPurchases: '₹3,45,670',
+            totalDue: '₹42,560',
+            suppliersWithDue: 8,
+          ),
+          const SizedBox(height: 16),
+          DuePaymentsCard(payments: kMockDuePayments, onViewAll: () {}),
+          const SizedBox(height: 16),
+          SupplierTabBar(onChanged: (_) {}),
+          const SizedBox(height: 16),
+          SupplierListCard(suppliers: kMockSuppliers),
+          const SizedBox(height: 20),
+          AddSupplierButton(onPressed: () {}),
+        ],
       ),
     );
   }

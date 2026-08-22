@@ -39,25 +39,25 @@ Future<void> printBill({
                 ),
               ),
             ),
-            if (shop.address != null) ...[
-              pw.SizedBox(height: 2),
-              pw.Center(
-                child: pw.Text(
-                  shop.address!,
-                  textAlign: pw.TextAlign.center,
-                  style: const pw.TextStyle(fontSize: 9),
-                ),
+            ...[
+            pw.SizedBox(height: 2),
+            pw.Center(
+              child: pw.Text(
+                shop.address!,
+                textAlign: pw.TextAlign.center,
+                style: const pw.TextStyle(fontSize: 9),
               ),
-            ],
-            if (shop.ownerPhone != null) ...[
-              pw.SizedBox(height: 2),
-              pw.Center(
-                child: pw.Text(
-                  'Ph: ${shop.ownerPhone}',
-                  style: const pw.TextStyle(fontSize: 9),
-                ),
+            ),
+          ],
+            ...[
+            pw.SizedBox(height: 2),
+            pw.Center(
+              child: pw.Text(
+                'Ph: ${shop.ownerPhone}',
+                style: const pw.TextStyle(fontSize: 9),
               ),
-            ],
+            ),
+          ],
 
             // if (shop. != null) ...[
             //   pw.SizedBox(height: 2),

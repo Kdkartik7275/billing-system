@@ -1,5 +1,6 @@
 import 'package:billing_system/features/billing/data/models/bill_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 
 abstract interface class BillRemoteDataSource {
   Future<List<BillModel>> getAllBills();
@@ -7,6 +8,7 @@ abstract interface class BillRemoteDataSource {
   Future<BillModel?> getBillById(String id);
 
   Future<List<BillModel>> getBillsByDateRange(DateTime start, DateTime end);
+  Future<List<BillModel>> getBillsByDate(DateTime start);
 
   Future<BillModel> addBill(BillModel bill);
 
@@ -118,6 +120,31 @@ class BillRemoteDataSourceImpl implements BillRemoteDataSource {
       throw Exception('Failed to update bill: ${e.message}');
     } catch (e) {
       throw Exception('Failed to update bill: $e');
+    }
+  }
+
+  @override
+  Future<List<BillModel>> getBillsByDate(DateTime date) async {
+    try {
+      final start = DateTime(date.year, date.month, date.day);
+
+      final end = start.add(const Duration(days: 1));
+
+      final snapshot = await firestore
+          .collection(_collection)
+          .where('createdAt', isGreaterThanOrEqualTo: start.toIso8601String())
+          .where('createdAt', isLessThan: end.toIso8601String())
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => BillModel.fromJson(doc.data()))
+          .toList();
+    } on FirebaseException catch (e) {
+      throw Exception('Failed to fetch bills by date: ${e.message}');
+    } catch (e) {
+      debugPrint(e.toString());
+      throw Exception('Failed to fetch bills by date: $e');
     }
   }
 

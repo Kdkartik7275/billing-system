@@ -10,6 +10,7 @@ abstract class BillRepository {
     DateTime start,
     DateTime end,
   );
+  ResultFuture<List<BillEntity>> getBillsByDate(DateTime date);
   ResultFuture<List<BillEntity>> getUnsyncedBills();
   ResultFuture<BillEntity> updateBillStatus(String id, BillStatus status);
   ResultFuture<void> deleteBill(String id);

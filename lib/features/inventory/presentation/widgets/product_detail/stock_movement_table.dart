@@ -25,11 +25,11 @@ class StockMovementTable extends GetView<ProductDetailController> {
 
     return Obx(() {
       final sortedMovements = isAdjustmentTab
-    ? controller.stockMovements
-        .where((m) => m.type == StockMovementType.adjustment)
-        .toList()
-    : (List<StockMovementEntity>.from(controller.stockMovements)
-        ..sort((a, b) => b.createdAt.compareTo(a.createdAt)));
+          ? controller.stockMovements
+                .where((m) => m.type == StockMovementType.adjustment)
+                .toList()
+          : (List<StockMovementEntity>.from(controller.stockMovements)
+              ..sort((a, b) => b.createdAt.compareTo(a.createdAt)));
 
       final rows = maxRows != null
           ? sortedMovements.take(maxRows!).toList()
@@ -120,9 +120,7 @@ class StockMovementTable extends GetView<ProductDetailController> {
 // ---------------- SKELETON LOADER ----------------
 
 class _StockMovementTableSkeleton extends StatefulWidget {
-  final int rowCount;
-
-  const _StockMovementTableSkeleton({this.rowCount = 5});
+  const _StockMovementTableSkeleton();
 
   @override
   State<_StockMovementTableSkeleton> createState() =>
@@ -158,7 +156,7 @@ class _StockMovementTableSkeletonState
           scrollDirection: Axis.horizontal,
           physics: const NeverScrollableScrollPhysics(),
           child: Column(
-            children: List.generate(widget.rowCount, (rowIndex) {
+            children: List.generate(5, (rowIndex) {
               final offset = (rowIndex * 0.12) % 1.0;
               final progress = (_controller.value + offset) % 1.0;
 

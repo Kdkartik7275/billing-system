@@ -11,6 +11,7 @@ abstract interface class BillLocalDataSource {
   Future<int> pruneSyncedBillsOlderThan(DateTime before);
 
   Future<List<BillModel>> getBillsByDateRange(DateTime start, DateTime end);
+  Future<List<BillModel>> getBillsByDate(DateTime start);
 
   Future<List<BillModel>> getUnsyncedBills();
 
@@ -75,6 +76,20 @@ class BillLocalDataSourceImpl implements BillLocalDataSource {
         .where(
           (bill) =>
               bill.createdAt.isAfter(start) && bill.createdAt.isBefore(end),
+        )
+        .toList();
+  }
+
+  @override
+  Future<List<BillModel>> getBillsByDate(DateTime date) async {
+    final start = DateTime(date.year, date.month, date.day);
+
+    final end = start.add(const Duration(days: 1));
+
+    return box.values
+        .where(
+          (bill) =>
+              !bill.createdAt.isBefore(start) && bill.createdAt.isBefore(end),
         )
         .toList();
   }

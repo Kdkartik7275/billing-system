@@ -19,7 +19,7 @@ class UpiQrSection extends StatelessWidget {
           'upi://pay?pa=your-shop-upi-id@bank&pn=YourShopName&am=${amount.toStringAsFixed(2)}&cu=INR';
 
       return Center(
-        child: Column(
+        child: Column( 
           children: [
             Text(
               "Scan to Pay",

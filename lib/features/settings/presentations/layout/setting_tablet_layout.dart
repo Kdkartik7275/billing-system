@@ -1,6 +1,4 @@
 import 'package:billing_system/features/settings/presentations/widgets/account_card.dart';
-import 'package:billing_system/features/settings/presentations/widgets/confirm_logout.dart';
-import 'package:billing_system/features/settings/presentations/widgets/nav_row.dart';
 import 'package:billing_system/features/settings/presentations/widgets/security_card.dart';
 import 'package:billing_system/features/settings/presentations/widgets/shop_info.dart';
 import 'package:billing_system/features/settings/presentations/widgets/shop_information_card.dart';

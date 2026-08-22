@@ -221,4 +221,33 @@ class BillRepositoryImpl implements BillRepository {
       return left(FirebaseFailure(message: e.toString()));
     }
   }
+
+  @override
+  ResultFuture<List<BillEntity>> getBillsByDate(DateTime date) async {
+    try {
+      final localBills = await localDataSource.getBillsByDate(date);
+
+      if (localBills.isNotEmpty) {
+        return right(localBills.map((bill) => bill.toEntity()).toList());
+      }
+
+      if (!await connectionChecker.isConnected) {
+        return const Right([]);
+      }
+
+      final remoteBills = await remoteDataSource.getBillsByDate(date);
+
+      if (remoteBills.isNotEmpty) {
+        final localModels = remoteBills
+            .map((bill) => bill.copyWith(synced: true))
+            .toList();
+
+        await localDataSource.saveAllBills(localModels);
+      }
+
+      return right(remoteBills.map((bill) => bill.toEntity()).toList());
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
 }

@@ -1,9 +1,13 @@
+import 'package:billing_system/core/helper/print_bill.dart';
 import 'package:billing_system/features/sales/presentation/controller/sales_controller.dart';
+import 'package:billing_system/features/sales/presentation/widgets/bill_details_dialog.dart';
 import 'package:billing_system/features/sales/presentation/widgets/sales_date_picker.dart';
 import 'package:billing_system/features/sales/presentation/widgets/sales_filter_chips.dart';
 import 'package:billing_system/features/sales/presentation/widgets/sales_row.dart';
-import 'package:billing_system/features/sales/presentation/widgets/sales_search_field.dart';
+import 'package:billing_system/features/sales/presentation/widgets/sales_scan_button.dart';
+import 'package:billing_system/features/sales/presentation/widgets/sales_scan_qr.dart';
 import 'package:billing_system/features/sales/presentation/widgets/sales_stat_bar.dart';
+import 'package:billing_system/features/user/presentation/controller/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -20,23 +24,41 @@ class SalesTabletLayout extends GetView<SalesController> {
           // ---------------- LEFT: FILTERS + STATS ----------------
           SizedBox(
             width: 300,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SalesDatePicker(controller: controller),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SalesDatePicker(controller: controller),
 
-                const SizedBox(height: 14),
+                  const SizedBox(height: 14),
 
-                SalesFilterChips(controller: controller),
+                  SalesFilterChips(controller: controller),
 
-                const SizedBox(height: 16),
+                  const SizedBox(height: 18),
 
-                SalesStatsBar(controller: controller),
+                  Obx(() {
+                    if (controller.isLoading.value) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 40),
+                        child: Center(
+                          child: CircularProgressIndicator(strokeWidth: 2.5),
+                        ),
+                      );
+                    }
 
-                const SizedBox(height: 20),
-
-                SalesSearchField(onChanged: controller.updateSearch),
-              ],
+                    return SalesStatsBar(
+                      controller: controller,
+                      vertical: true,
+                    );
+                  }),
+                ],
+              ),
             ),
           ),
 
@@ -47,12 +69,32 @@ class SalesTabletLayout extends GetView<SalesController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Sales List',
-                  style: Theme.of(context).textTheme.titleMedium,
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Sales List',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+
+                    SalesScanButton(
+                      onPressed: () async {
+                        final result = await Get.to<String>(
+                          () => const SalesQrScannerPage(),
+                        );
+
+                        if (result == null || result.isEmpty) {
+                          return;
+                        }
+
+                        await controller.handleScannedBill(result);
+                      },
+                    ),
+                  ],
                 ),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
 
                 Expanded(
                   child: Obx(() {
@@ -74,12 +116,34 @@ class SalesTabletLayout extends GetView<SalesController> {
                       );
                     }
 
-                    // ---------------- SALES LIST ----------------
-                    return ListView.builder(
+                    // ---------------- SALES GRID ----------------
+                    return GridView.builder(
                       padding: EdgeInsets.zero,
                       itemCount: bills.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 380,
+                            mainAxisExtent: 112,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                          ),
                       itemBuilder: (_, index) {
-                        return SaleRow(bill: bills[index]);
+                        final bill = bills[index];
+
+                        return InkWell(
+                          onTap: () => showDialog(
+                            context: context,
+                            builder: (_) => BillDetailsDialog(
+                              bill: bill,
+                              onPrintReceipt: () => printBill(
+                                bill: bill,
+                                shop: Get.find<UserController>().shop.value!,
+                              ),
+                            ),
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          child: SaleRow(bill: bill),
+                        );
                       },
                     );
                   }),

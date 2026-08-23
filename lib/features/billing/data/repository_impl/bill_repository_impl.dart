@@ -250,4 +250,26 @@ class BillRepositoryImpl implements BillRepository {
       return left(FirebaseFailure(message: e.toString()));
     }
   }
+
+  @override
+  ResultFuture<BillEntity?> getBillByInvoiceNo(String invoiceNo) async {
+    try {
+      final localbill = await localDataSource.getBillByInvoiceNo(invoiceNo);
+
+      if (localbill != null) {
+        return right(localbill.toEntity());
+      }
+      if (!await connectionChecker.isConnected) {
+        return left(FirebaseFailure(message: 'No Internet Connection!'));
+      }
+      final remoteBill = await remoteDataSource.getBillByInvoiceNo(invoiceNo);
+      if (remoteBill != null) {
+        await localDataSource.addBill(remoteBill);
+        return right(remoteBill.toEntity());
+      }
+      return right(null);
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
 }

@@ -113,6 +113,8 @@ void _initAuthentication() {
   );
   sl.registerLazySingleton(() => LoginUser(repository: sl()));
   sl.registerLazySingleton(() => LogoutUsecase(repository: sl()));
+  sl.registerLazySingleton(() => ForgotPasswordUsecase(repository: sl()));
+  sl.registerLazySingleton(() => ChangePasswordUsecase(repository: sl()));
 }
 
 void _initUser() {
@@ -350,6 +352,7 @@ void _initBilling() {
   // ---------------- USE CASES ----------------
   sl.registerLazySingleton(() => CreateBillUsecase(repository: sl()));
   sl.registerLazySingleton(() => GetBillByIdUsecase(repository: sl()));
+  sl.registerLazySingleton(() => GetBillByInvoiceUsecase(repository: sl()));
   sl.registerLazySingleton(() => GetAllBillsUsecase(repository: sl()));
   sl.registerLazySingleton(() => GetBillsByDateRangeUsecase(repository: sl()));
   sl.registerLazySingleton(() => GetBillsByDateUsecase(repository: sl()));

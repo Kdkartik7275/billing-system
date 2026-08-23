@@ -1,9 +1,13 @@
+import 'package:billing_system/core/helper/print_bill.dart';
 import 'package:billing_system/features/sales/presentation/controller/sales_controller.dart';
+import 'package:billing_system/features/sales/presentation/widgets/bill_details_dialog.dart';
 import 'package:billing_system/features/sales/presentation/widgets/sales_date_picker.dart';
 import 'package:billing_system/features/sales/presentation/widgets/sales_filter_chips.dart';
 import 'package:billing_system/features/sales/presentation/widgets/sales_row.dart';
-import 'package:billing_system/features/sales/presentation/widgets/sales_search_field.dart';
+import 'package:billing_system/features/sales/presentation/widgets/sales_scan_button.dart';
+import 'package:billing_system/features/sales/presentation/widgets/sales_scan_qr.dart';
 import 'package:billing_system/features/sales/presentation/widgets/sales_stat_bar.dart';
+import 'package:billing_system/features/user/presentation/controller/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -33,7 +37,19 @@ class SalesWebLayout extends GetView<SalesController> {
 
               SizedBox(
                 width: 320,
-                child: SalesSearchField(onChanged: controller.updateSearch),
+                child: SalesScanButton(
+                  onPressed: () async {
+                    final result = await Get.to<String>(
+                      () => const SalesQrScannerPage(),
+                    );
+
+                    if (result == null || result.isEmpty) {
+                      return;
+                    }
+
+                    await controller.handleScannedBill(result);
+                  },
+                ),
               ),
             ],
           ),
@@ -81,7 +97,20 @@ class SalesWebLayout extends GetView<SalesController> {
                   crossAxisSpacing: 12,
                 ),
                 itemBuilder: (_, index) {
-                  return SaleRow(bill: bills[index]);
+                  return InkWell(
+                    onTap: () => showDialog(
+                      context: context,
+                      builder: (_) => BillDetailsDialog(
+                        bill: bills[index],
+                        onPrintReceipt: () => printBill(
+                          bill: bills[index],
+                          shop: Get.find<UserController>().shop.value!,
+                        ),
+                      ),
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    child: SaleRow(bill: bills[index]),
+                  );
                 },
               );
             }),

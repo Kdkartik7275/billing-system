@@ -1,9 +1,13 @@
+import 'package:billing_system/core/helper/print_bill.dart';
 import 'package:billing_system/features/sales/presentation/controller/sales_controller.dart';
+import 'package:billing_system/features/sales/presentation/widgets/bill_details_dialog.dart';
 import 'package:billing_system/features/sales/presentation/widgets/sales_date_picker.dart';
 import 'package:billing_system/features/sales/presentation/widgets/sales_filter_chips.dart';
 import 'package:billing_system/features/sales/presentation/widgets/sales_row.dart';
-import 'package:billing_system/features/sales/presentation/widgets/sales_search_field.dart';
+import 'package:billing_system/features/sales/presentation/widgets/sales_scan_button.dart';
+import 'package:billing_system/features/sales/presentation/widgets/sales_scan_qr.dart';
 import 'package:billing_system/features/sales/presentation/widgets/sales_stat_bar.dart';
+import 'package:billing_system/features/user/presentation/controller/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -12,60 +16,111 @@ class SalesMobileLayout extends GetView<SalesController> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
+    return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-      children: [
-        const SizedBox(height: 16),
+      child: Column(
+        children: [
+          const SizedBox(height: 16),
 
-        SalesDatePicker(controller: controller),
-        const SizedBox(height: 14),
+          SalesDatePicker(controller: controller),
 
-        SalesFilterChips(controller: controller),
-        const SizedBox(height: 16),
+          const SizedBox(height: 14),
 
-        Obx(() {
-          if (controller.isLoading.value) {
-            return const Padding(
-              padding: EdgeInsets.symmetric(vertical: 100),
-              child: Center(child: CircularProgressIndicator()),
-            );
-          }
+          SalesFilterChips(controller: controller),
 
-          final bills = controller.filteredBills;
+          const SizedBox(height: 16),
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          // Everything above the list has fixed height.
+          Obx(() {
+            if (controller.isLoading.value) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 40),
+                child: Center(
+                  child: CircularProgressIndicator(strokeWidth: 2.5),
+                ),
+              );
+            }
+
+            return SalesStatsBar(controller: controller);
+          }),
+
+          const SizedBox(height: 20),
+
+          Row(
             children: [
-              SalesStatsBar(controller: controller),
-              const SizedBox(height: 20),
-
-              Text(
-                'Sales List',
-                style: Theme.of(context).textTheme.titleMedium,
+              Expanded(
+                child: Text(
+                  'Sales List',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
               ),
 
-              const SizedBox(height: 10),
+              SalesScanButton(
+                onPressed: () async {
+                  final result = await Get.to<String>(
+                    () => const SalesQrScannerPage(),
+                  );
 
-              SalesSearchField(onChanged: controller.updateSearch),
+                  if (result == null || result.isEmpty) {
+                    return;
+                  }
 
-              const SizedBox(height: 16),
-
-              if (bills.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 60),
-                  child: Center(
-                    child: Text(
-                      'No sales found',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ),
-                )
-              else
-                ...bills.map((bill) => SaleRow(bill: bill)),
+                  await controller.handleScannedBill(result);
+                },
+              ),
             ],
-          );
-        }),
-      ],
+          ),
+
+          const SizedBox(height: 12),
+
+          // ----------------------------------------------------------
+          // BILL LIST
+          // ----------------------------------------------------------
+          Expanded(
+            child: Obx(() {
+              if (controller.isLoading.value) {
+                return const Center(
+                  child: CircularProgressIndicator(strokeWidth: 2.5),
+                );
+              }
+
+              final bills = controller.filteredBills;
+
+              if (bills.isEmpty) {
+                return const Center(
+                  child: Text(
+                    'No sales found',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                );
+              }
+
+              return ListView.builder(
+                padding: EdgeInsets.zero,
+                itemCount: bills.length,
+                itemBuilder: (_, index) {
+                  final bill = bills[index];
+
+                  return InkWell(
+                    onTap: () => showDialog(
+                      context: context,
+                      builder: (_) => BillDetailsDialog(
+                        bill: bill,
+                        onPrintReceipt: () => printBill(
+                          bill: bill,
+                          shop: Get.find<UserController>().shop.value!,
+                        ),
+                      ),
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    child: SaleRow(bill: bill),
+                  );
+                },
+              );
+            }),
+          ),
+        ],
+      ),
     );
   }
 }

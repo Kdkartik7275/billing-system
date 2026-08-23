@@ -1,8 +1,9 @@
-
 import 'package:billing_system/core/card/card_shell.dart';
 import 'package:billing_system/features/settings/presentations/widgets/card_header.dart';
 import 'package:billing_system/features/settings/presentations/widgets/info_row.dart';
-import 'package:billing_system/features/settings/presentations/widgets/status_pill.dart' show StatusPill;
+import 'package:billing_system/features/settings/presentations/widgets/status_pill.dart'
+    show StatusPill;
+import 'package:billing_system/features/user/domain/entity/user_entity.dart';
 import 'package:billing_system/features/user/presentation/controller/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -26,26 +27,26 @@ class UserInformationCard extends GetView<UserController> {
               onEdit: onEdit,
             ),
             const SizedBox(height: 8),
-             InfoRow(
+            InfoRow(
               icon: Icons.person_outline,
               label: 'Name',
-              value: controller.user.value!.name,
+              value: controller.user.value?.name ?? 'User',
             ),
-             InfoRow(
+            InfoRow(
               icon: Icons.email_outlined,
               label: 'Email',
-              value: controller.user.value!.email,
+              value: controller.user.value?.email ?? 'user@gmail.com',
             ),
-             InfoRow(
+            InfoRow(
               icon: Icons.call_outlined,
               label: 'Phone',
-              value: controller.user.value!.phone,
+              value: controller.user.value?.phone ?? '',
             ),
             InfoRow(
               icon: Icons.groups_outlined,
               label: 'Role',
-              valueWidget:  StatusPill(
-                label: controller.user.value!.role.name,
+              valueWidget: StatusPill(
+                label: controller.user.value?.role.name ?? UserRole.owner.name,
                 bg: Color(0xFFFFF1D9),
                 fg: Color(0xFFE79A1E),
               ),

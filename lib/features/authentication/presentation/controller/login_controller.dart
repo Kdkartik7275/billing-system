@@ -5,7 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import 'package:billing_system/features/authentication/domain/usecases/login_user.dart';
 
 class LoginController extends GetxController {
@@ -18,13 +17,10 @@ class LoginController extends GetxController {
 
   final RxBool obscurePassword = true.obs;
   final RxBool isLoading = false.obs;
-  final RxBool rememberMe = false.obs;
   final RxnString errorMessage = RxnString();
 
   void toggleObscurePassword() =>
       obscurePassword.value = !obscurePassword.value;
-
-  void toggleRememberMe(bool? value) => rememberMe.value = value ?? false;
 
   String? validateEmail(String? value) {
     if (value == null || value.trim().isEmpty) return 'Email is required';
@@ -53,7 +49,7 @@ class LoginController extends GetxController {
       );
       result.fold(
         (failure) {
-          errorMessage.value = failure.message;
+          errorMessage.value = failure.message.split(':')[1];
         },
         (user) {
           if (user != null) {

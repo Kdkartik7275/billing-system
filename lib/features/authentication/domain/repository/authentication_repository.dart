@@ -16,4 +16,10 @@ abstract interface class AuthenticationRepository {
     required String password,
   });
   ResultFuture<void> logout();
+
+  ResultVoid forgotPassword(String email);
+   ResultVoid changeUserPassword({
+    required String oldPassword,
+    required String newPassword,
+  });
 }

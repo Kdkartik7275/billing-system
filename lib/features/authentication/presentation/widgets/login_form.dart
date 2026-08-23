@@ -1,4 +1,5 @@
 import 'package:billing_system/core/config/theme/app_colors.dart';
+import 'package:billing_system/features/authentication/presentation/widgets/forgot_password_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -111,49 +112,24 @@ class LoginForm extends StatelessWidget {
           ),
 
           const SizedBox(height: 14),
-          Row(
-            children: [
-              Obx(
-                () => SizedBox(
-                  height: 22,
-                  width: 22,
-                  child: Checkbox(
-                    value: controller.rememberMe.value,
-                    onChanged: controller.toggleRememberMe,
-                    activeColor: AppColors.primary,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () => showForgotPasswordDialog(context),
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(0, 0),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(
+                'Forgot password?',
+                style: textTheme.bodyMedium?.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(width: 8),
-              Text(
-                'Remember me',
-                style: textTheme.bodyMedium?.copyWith(color: Colors.black87),
-              ),
-              const Spacer(),
-              TextButton(
-                onPressed: () {
-                  // TODO: hook up forgot-password flow
-                },
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  minimumSize: const Size(0, 0),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(
-                  'Forgot password?',
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-
           const SizedBox(height: 28),
           Obx(
             () => SizedBox(

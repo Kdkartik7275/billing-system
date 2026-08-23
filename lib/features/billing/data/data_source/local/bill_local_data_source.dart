@@ -8,6 +8,7 @@ abstract interface class BillLocalDataSource {
   Future<List<BillModel>> getAllBills();
 
   Future<BillModel?> getBillById(String id);
+  Future<BillModel?> getBillByInvoiceNo(String invoiceNo);
   Future<int> pruneSyncedBillsOlderThan(DateTime before);
 
   Future<List<BillModel>> getBillsByDateRange(DateTime start, DateTime end);
@@ -172,5 +173,10 @@ class BillLocalDataSourceImpl implements BillLocalDataSource {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     final random = Random();
     return List.generate(4, (_) => chars[random.nextInt(chars.length)]).join();
+  }
+
+  @override
+  Future<BillModel?> getBillByInvoiceNo(String invoiceNo) async {
+    return box.values.firstWhere((bill) => bill.billNumber == invoiceNo);
   }
 }

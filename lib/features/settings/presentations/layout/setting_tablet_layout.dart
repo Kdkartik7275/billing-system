@@ -1,4 +1,5 @@
 import 'package:billing_system/features/settings/presentations/widgets/account_card.dart';
+import 'package:billing_system/features/settings/presentations/widgets/change_password_dialog.dart';
 import 'package:billing_system/features/settings/presentations/widgets/security_card.dart';
 import 'package:billing_system/features/settings/presentations/widgets/shop_info.dart';
 import 'package:billing_system/features/settings/presentations/widgets/shop_information_card.dart';
@@ -31,15 +32,11 @@ class SettingTabletLayout extends StatelessWidget {
                       BusinessDetailsCard(),
                       const SizedBox(height: 20),
                       SecurityCard(
-                        onChangePassword: () {},
-                        onViewSessions: () {},
+                        onChangePassword: () =>
+                            showChangePasswordDialog(context),
                       ),
                       const SizedBox(height: 20),
-                      AccountCard(
-                        onManageStaff: () {},
-                        onConnectedDevices: () {},
-                        onExportData: () {},
-                      ),
+                      AccountCard(onExportData: () {}),
                       const SizedBox(height: 20),
                     ],
                   ),

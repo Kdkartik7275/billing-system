@@ -6,6 +6,8 @@ import 'package:billing_system/core/sync/bill_sync_scheduler.dart';
 import 'package:billing_system/features/authentication/data/data_source/authentication_remote_data_source.dart';
 import 'package:billing_system/features/authentication/data/repository_impl/authentication_repository_impl.dart';
 import 'package:billing_system/features/authentication/domain/repository/authentication_repository.dart';
+import 'package:billing_system/features/authentication/domain/usecases/change_password_usecase.dart';
+import 'package:billing_system/features/authentication/domain/usecases/forgot_password_usecase.dart';
 import 'package:billing_system/features/authentication/domain/usecases/login_user.dart';
 import 'package:billing_system/features/authentication/domain/usecases/logout_usecase.dart';
 import 'package:billing_system/features/authentication/domain/usecases/request_shop_registration.dart';
@@ -24,6 +26,7 @@ import 'package:billing_system/features/billing/domain/usecases/create_bill_usec
 import 'package:billing_system/features/billing/domain/usecases/delete_bill_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/get_all_bills_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/get_bill_by_id_usecase.dart';
+import 'package:billing_system/features/billing/domain/usecases/get_bill_by_invoice_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/get_bills_by_date_range_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/get_bills_by_date_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/get_cart_usecase.dart';

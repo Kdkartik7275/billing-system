@@ -1,4 +1,5 @@
 import 'package:billing_system/features/settings/presentations/widgets/account_card.dart';
+import 'package:billing_system/features/settings/presentations/widgets/change_password_dialog.dart';
 import 'package:billing_system/features/settings/presentations/widgets/security_card.dart';
 import 'package:billing_system/features/settings/presentations/widgets/shop_info.dart';
 import 'package:billing_system/features/settings/presentations/widgets/shop_information_card.dart';
@@ -22,13 +23,11 @@ class SettingMobileLayout extends StatelessWidget {
         const SizedBox(height: 16),
         UserInformationCard(),
         const SizedBox(height: 16),
-        SecurityCard(onChangePassword: () {}, onViewSessions: () {}),
-        const SizedBox(height: 16),
-        AccountCard(
-          onManageStaff: () {},
-          onConnectedDevices: () {},
-          onExportData: () {},
+        SecurityCard(
+          onChangePassword: () => showChangePasswordDialog(context),
         ),
+        const SizedBox(height: 16),
+        AccountCard(onExportData: () {}),
         const SizedBox(height: 16),
       ],
     );

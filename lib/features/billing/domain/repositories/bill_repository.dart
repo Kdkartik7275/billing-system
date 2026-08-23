@@ -5,6 +5,7 @@ import 'package:billing_system/features/billing/domain/entities/bill_entity.dart
 abstract class BillRepository {
   ResultFuture<BillEntity> createBill(BillEntity bill);
   ResultFuture<BillEntity?> getBillById(String id);
+  ResultFuture<BillEntity?> getBillByInvoiceNo(String invoiceNo);
   ResultFuture<List<BillEntity>> getAllBills();
   ResultFuture<List<BillEntity>> getBillsByDateRange(
     DateTime start,

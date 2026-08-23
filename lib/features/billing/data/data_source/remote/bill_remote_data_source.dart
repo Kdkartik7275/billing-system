@@ -6,6 +6,7 @@ abstract interface class BillRemoteDataSource {
   Future<List<BillModel>> getAllBills();
 
   Future<BillModel?> getBillById(String id);
+  Future<BillModel?> getBillByInvoiceNo(String invoiceNo);
 
   Future<List<BillModel>> getBillsByDateRange(DateTime start, DateTime end);
   Future<List<BillModel>> getBillsByDate(DateTime start);
@@ -174,6 +175,27 @@ class BillRemoteDataSourceImpl implements BillRemoteDataSource {
       throw Exception('Failed to generate bill number: ${e.message}');
     } catch (e) {
       throw Exception('Failed to generate bill number: $e');
+    }
+  }
+
+  @override
+  Future<BillModel?> getBillByInvoiceNo(String invoiceNo) async {
+    try {
+      final snapshot = await firestore
+          .collection(_collection)
+          .where('billNumber', isEqualTo: invoiceNo)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isEmpty) {
+        return null;
+      }
+
+      return BillModel.fromJson(snapshot.docs.first.data());
+    } on FirebaseException catch (e) {
+      throw Exception('Failed to fetch bill: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to fetch bill: $e');
     }
   }
 }

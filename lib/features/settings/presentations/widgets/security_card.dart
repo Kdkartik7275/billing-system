@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 
 class SecurityCard extends StatefulWidget {
   final VoidCallback? onChangePassword;
-  final VoidCallback? onViewSessions;
   final bool initialTwoFactor;
   final bool initialBiometric;
   final ValueChanged<bool>? onTwoFactorChanged;
@@ -15,7 +14,6 @@ class SecurityCard extends StatefulWidget {
   const SecurityCard({
     super.key,
     this.onChangePassword,
-    this.onViewSessions,
     this.initialTwoFactor = false,
     this.initialBiometric = true,
     this.onTwoFactorChanged,
@@ -60,6 +58,7 @@ class _SecurityCardState extends State<SecurityCard> {
             },
           ),
           ToggleRow(
+            showDivider: false,
             icon: Icons.fingerprint,
             label: 'Biometric Login',
             subtitle: 'Use Face ID / fingerprint to sign in',
@@ -68,13 +67,6 @@ class _SecurityCardState extends State<SecurityCard> {
               setState(() => biometricEnabled = v);
               widget.onBiometricChanged?.call(v);
             },
-          ),
-          ActionRow(
-            icon: Icons.devices_outlined,
-            label: 'Active Sessions',
-            subtitle: '2 devices signed in',
-            showDivider: false,
-            onTap: widget.onViewSessions,
           ),
         ],
       ),

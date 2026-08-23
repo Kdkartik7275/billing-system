@@ -89,4 +89,30 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
       return left(FirebaseFailure(message: e.toString()));
     }
   }
+
+  @override
+  ResultVoid forgotPassword(String email) async {
+    try {
+      await remoteDataSource.forgotPassword(email);
+      return right(null);
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultVoid changeUserPassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    try {
+      await remoteDataSource.changeUserPassword(
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+      );
+      return right(null);
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
 }

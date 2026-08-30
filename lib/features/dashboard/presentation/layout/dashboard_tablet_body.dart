@@ -1,12 +1,15 @@
 import 'package:billing_system/core/enums/billing.dart';
 import 'package:billing_system/features/billing/domain/entities/bill_entity.dart';
 import 'package:billing_system/features/billing/presentation/controllers/billing_controller.dart';
+import 'package:billing_system/features/billing/presentation/controllers/cart_controller.dart';
+import 'package:billing_system/features/billing/presentation/widgets/scan/billing_scan_handler.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/category_pie_chart.dart';
 import 'package:billing_system/core/config/theme/app_radius.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/tablet_info_card.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/dashboard_stats_panel.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/low_stocks.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/sales_line_chart.dart';
+import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
 import 'package:billing_system/features/user/presentation/controller/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -27,7 +30,18 @@ class TabletDashboardBody extends GetView<BillingController> {
         ListView(
           padding: EdgeInsets.fromLTRB(20, 130 + topInset, 20, 12),
           children: [
-            const TabletSmartPosCard(),
+            TabletSmartPosCard(onScan: () => BillingScanHandler.scanAndAddToCart(
+                  context: context,
+                  inventoryController: Get.find<InventoryController>(),
+                  cartController: Get.put(
+                    CartController(
+                      getAvailableStock: (productId) =>
+                          Get.find<InventoryController>()
+                              .stockQuantityFor(productId)
+                              .toInt(),
+                    ),
+                  ),
+                ),),
             const SizedBox(height: 20),
             Obx(() {
               final items = [

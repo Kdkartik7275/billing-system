@@ -1,3 +1,4 @@
+import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/features/settings/presentations/widgets/account_card.dart';
 import 'package:billing_system/features/settings/presentations/widgets/change_password_dialog.dart';
 import 'package:billing_system/features/settings/presentations/widgets/security_card.dart';
@@ -34,6 +35,12 @@ class SettingTabletLayout extends StatelessWidget {
                       SecurityCard(
                         onChangePassword: () =>
                             showChangePasswordDialog(context),
+                        onTwoFactorChanged: (value) {
+                          AppSnackbar.info(
+                            message:
+                                'Two-Factor Authentication is not available yet.',
+                          );
+                        },
                       ),
                       const SizedBox(height: 20),
                       AccountCard(onExportData: () {}),

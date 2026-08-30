@@ -7,10 +7,6 @@ enum DashboardMenu {
 
   sales,
 
-  customers,
-
-  employees,
-
   suppliers,
 
   reports,

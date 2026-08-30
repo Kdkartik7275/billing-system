@@ -66,6 +66,7 @@ class BusinessDetailsCard extends GetView<UserController> {
             ),
 
             InfoRow(
+              showDivider: false,
               icon: Icons.event_outlined,
               label: 'Financial Year Start',
               value: businessDetails?.financialYearStart ?? '1st April',

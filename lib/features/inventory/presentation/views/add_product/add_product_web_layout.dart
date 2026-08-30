@@ -1,6 +1,7 @@
 // import 'package:billing_system/core/config/theme/app_colors.dart';
 import 'package:billing_system/core/config/constants/dropdown_values.dart';
 import 'package:billing_system/core/config/theme/app_colors.dart';
+import 'package:billing_system/core/helper/functions.dart';
 import 'package:billing_system/features/inventory/presentation/controller/add_product_controller.dart';
 import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/add_product/add_product_textfield.dart';
@@ -15,6 +16,15 @@ import 'package:get/get.dart';
 
 class AddProductWebLayout extends StatelessWidget {
   const AddProductWebLayout({super.key});
+
+    Future<void> _pickAndAddImage(AddProductController controller) async {
+    final file = await pickImage();
+    if (file == null) return;
+    controller.addImage(
+      file.path,
+      isPrimary: controller.draftProduct.value.images.isEmpty,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -117,7 +127,7 @@ class AddProductWebLayout extends StatelessWidget {
                                               .draftProduct
                                               .value
                                               .primarySupplierId,
-                                          items: suppliers,
+                                          items: controller.suppliers,
                                           onChanged: controller.updateSupplier,
                                         ),
                                       ),
@@ -550,7 +560,7 @@ class AddProductWebLayout extends StatelessWidget {
                                 icon: Icons.image_outlined,
                                 children: [
                                   ImageUploadGrid(
-                                    onUpload: () {},
+                                    onUpload: () => _pickAndAddImage(controller),
                                     controller: controller,
                                   ),
                                 ],
@@ -707,26 +717,7 @@ class AddProductWebLayout extends StatelessWidget {
                       ),
                     ),
             ),
-            const SizedBox(height: 10),
-            OutlinedButton(
-              onPressed: controller.isSaving.value
-                  ? null
-                  : controller.saveDraft,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.textPrimary,
-                side: const BorderSide(color: AppColors.border),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: Text(
-                'Save as Draft',
-                style: Theme.of(
-                  context,
-                ).textTheme.labelLarge!.copyWith(fontWeight: FontWeight.w600),
-              ),
-            ),
+
             const SizedBox(height: 10),
             OutlinedButton(
               onPressed: controller.isSaving.value ? null : controller.cancel,

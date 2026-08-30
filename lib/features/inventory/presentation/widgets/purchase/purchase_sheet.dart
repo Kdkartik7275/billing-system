@@ -146,7 +146,7 @@ class _AddPurchaseSheetState extends State<_AddPurchaseSheet> {
                             label: 'Supplier / Vendor',
                             required: true,
                             value: controller.supplierId.value,
-                            options: suppliers,
+                            options: controller.suppliers,
 
                             onChanged: (v) => controller.supplierId.value = v,
                           ),

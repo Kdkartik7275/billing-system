@@ -1,6 +1,8 @@
+import 'package:billing_system/features/inventory/data/models/stock/purchase_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_batch_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_movement_model.dart';
+import 'package:flutter/rendering.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 abstract interface class StockLocalDataSource {
@@ -52,18 +54,37 @@ abstract interface class StockLocalDataSource {
   // ---------------- DAILY FETCH GATE ----------------
   Future<DateTime?> getLastFetchedAt(String key);
   Future<void> setLastFetchedAt(String key, DateTime time);
+
+  // ---------- Purchase ----------
+
+  Future<List<PurchaseModel>> getAllPurchases();
+
+  Future<List<PurchaseModel>> getPurchasesForProduct(String productId);
+
+  Future<PurchaseModel> createPurchase(PurchaseModel purchase);
+
+  Future<void> replacePurchasesForProduct(
+    String productId,
+    List<PurchaseModel> purchases,
+  );
+
+  Future<void> clearPurchases();
 }
 
 class StockLocalDataSourceImpl implements StockLocalDataSource {
   final Box<StockModel> stockBox;
   final Box<StockMovementModel> movementBox;
   final Box<StockBatchModel> batchBox;
+  final Box<PurchaseModel> purchaseBox;
+
   final Box metaBox;
 
   const StockLocalDataSourceImpl({
     required this.stockBox,
     required this.movementBox,
     required this.batchBox,
+    required this.purchaseBox,
+
     required this.metaBox,
   });
 
@@ -212,6 +233,49 @@ class StockLocalDataSourceImpl implements StockLocalDataSource {
   }
 
   // ======================================================
+  // Purchases
+  // ======================================================
+
+  @override
+  Future<PurchaseModel> createPurchase(PurchaseModel purchase) async {
+    debugPrint("Purchase Saved locally");
+    await purchaseBox.put(purchase.id, purchase);
+    return purchase;
+  }
+
+  @override
+  Future<List<PurchaseModel>> getAllPurchases() async {
+    return purchaseBox.values.toList();
+  }
+
+  @override
+  Future<List<PurchaseModel>> getPurchasesForProduct(String productId) async {
+    return purchaseBox.values.where((e) => e.productId == productId).toList();
+  }
+
+  @override
+  Future<void> replacePurchasesForProduct(
+    String productId,
+    List<PurchaseModel> purchases,
+  ) async {
+    final keysToDelete = purchaseBox.values
+        .where((e) => e.productId == productId)
+        .map((e) => e.key)
+        .toList();
+
+    await purchaseBox.deleteAll(keysToDelete);
+
+    for (final purchase in purchases) {
+      await purchaseBox.put(purchase.id, purchase);
+    }
+  }
+
+  @override
+  Future<void> clearPurchases() async {
+    await purchaseBox.clear();
+  }
+
+  // ======================================================
   // Utilities
   // ======================================================
 
@@ -221,6 +285,7 @@ class StockLocalDataSourceImpl implements StockLocalDataSource {
       stockBox.clear(),
       movementBox.clear(),
       batchBox.clear(),
+      purchaseBox.clear(),
     ]);
   }
 }

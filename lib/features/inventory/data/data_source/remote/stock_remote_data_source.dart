@@ -1,5 +1,6 @@
 import 'dart:core';
 
+import 'package:billing_system/features/inventory/data/models/stock/purchase_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_batch_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_movement_model.dart';
@@ -52,7 +53,12 @@ abstract interface class StockRemoteDataSource {
   // ==========================
 
   Future<
-    ({StockModel stock, StockBatchModel batch, StockMovementModel movement})
+    ({
+      StockModel stock,
+      StockBatchModel batch,
+      StockMovementModel movement,
+      PurchaseModel purchase,
+    })
   >
   purchaseStock({
     required String productId,
@@ -85,6 +91,13 @@ abstract interface class StockRemoteDataSource {
     String? referenceId,
     String? notes,
   });
+
+  Future<List<PurchaseModel>> getAllPurchases();
+
+  Future<List<PurchaseModel>> getPurchasesForProductSince(
+    String productId,
+    DateTime since,
+  );
 }
 
 class StockRemoteDataSourceImpl implements StockRemoteDataSource {
@@ -95,6 +108,7 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
   static const _stockCollection = 'stocks';
   static const _movementCollection = 'stock_movements';
   static const _batchCollection = 'stock_batches';
+  static const _purchaseCollection = 'purchases';
 
   // ==========================================================
   // Stock
@@ -305,7 +319,12 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
 
   @override
   Future<
-    ({StockModel stock, StockBatchModel batch, StockMovementModel movement})
+    ({
+      StockModel stock,
+      StockBatchModel batch,
+      StockMovementModel movement,
+      PurchaseModel purchase,
+    })
   >
   purchaseStock({
     required String productId,
@@ -328,6 +347,7 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
       late StockModel updatedStock;
       late StockBatchModel batch;
       late StockMovementModel movement;
+      late PurchaseModel purchase;
 
       await firestore.runTransaction((transaction) async {
         final stockQuery = await firestore
@@ -385,32 +405,80 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
 
         transaction.set(movementRef, movement.toJson());
 
-        final purchaseRef = firestore.collection('purchases').doc();
+        // ---------------- PURCHASE RECORD (typed, not a raw map) ----------------
+        final purchaseRef = firestore.collection(_purchaseCollection).doc();
 
-        transaction.set(purchaseRef, {
-          'id': purchaseRef.id,
-          'productId': productId,
-          'supplierId': supplierId,
-          'warehouseId': warehouseId,
-          'invoiceNumber': invoiceNumber,
-          'purchaseDate': purchaseDate.toIso8601String(),
-          'billDate': billDate.toIso8601String(),
-          'quantity': quantity,
-          'price': price,
-          'discount': discount ?? 0,
-          'tax': tax,
-          'paymentMethod': paymentMethod,
-          'dueDate': dueDate.toIso8601String(),
-          'batchNumber': batchNumber,
-          'notes': notes,
-        });
+        purchase = PurchaseModel(
+          id: purchaseRef.id,
+          productId: productId,
+          supplierId: supplierId,
+          warehouseId: warehouseId,
+          invoiceNumber: invoiceNumber,
+          purchaseDate: purchaseDate,
+          billDate: billDate,
+          quantity: quantity,
+          price: price,
+          discount: discount ?? 0,
+          tax: tax,
+          paymentMethod: paymentMethod,
+          dueDate: dueDate,
+          batchNumber: batchNumber,
+          notes: notes,
+        );
+
+        transaction.set(purchaseRef, purchase.toJson());
       });
 
-      return (stock: updatedStock, batch: batch, movement: movement);
+      return (
+        stock: updatedStock,
+        batch: batch,
+        movement: movement,
+        purchase: purchase,
+      );
     } on FirebaseException catch (e) {
       throw Exception('Failed to purchase stock: ${e.message}');
     } catch (e) {
       throw Exception('Failed to purchase stock: $e');
+    }
+  }
+
+  @override
+  Future<List<PurchaseModel>> getAllPurchases() async {
+    try {
+      final snapshot = await firestore.collection(_purchaseCollection).get();
+
+      return snapshot.docs
+          .map((e) => PurchaseModel.fromJson(e.data()))
+          .toList();
+    } on FirebaseException catch (e) {
+      throw Exception('Failed to fetch purchases: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to fetch purchases: $e');
+    }
+  }
+
+  @override
+  Future<List<PurchaseModel>> getPurchasesForProductSince(
+    String productId,
+    DateTime since,
+  ) async {
+    try {
+      final snapshot = await firestore
+          .collection(_purchaseCollection)
+          .where('productId', isEqualTo: productId)
+          .where(
+            'purchaseDate',
+            isGreaterThanOrEqualTo: since.toIso8601String(),
+          )
+          .get();
+
+      return snapshot.docs
+          .map((e) => PurchaseModel.fromJson(e.data()))
+          .toList();
+    } on FirebaseException catch (e) {
+      throw Exception('Failed to fetch purchases: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to fetch purchases: $e');
     }
   }
 

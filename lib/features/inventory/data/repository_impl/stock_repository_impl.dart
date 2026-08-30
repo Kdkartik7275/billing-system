@@ -6,6 +6,7 @@ import 'package:billing_system/features/inventory/data/data_source/remote/stock_
 import 'package:billing_system/features/inventory/data/models/stock/stock_batch_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_movement_model.dart';
+import 'package:billing_system/features/inventory/domain/entities/purchase_entity.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_batch_entity.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_entity.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_movement_entity.dart';
@@ -176,6 +177,7 @@ class StockRepositoryImpl implements StockRepository {
       await localDataSource.createInitialStock(result.stock);
       await localDataSource.createStockBatch(result.batch);
       await localDataSource.createStockMovement(result.movement);
+      await localDataSource.createPurchase(result.purchase);
 
       return right(null);
     } catch (e) {
@@ -409,5 +411,40 @@ class StockRepositoryImpl implements StockRepository {
     } catch (e) {
       return left(FirebaseFailure(message: e.toString()));
     }
+  }
+
+  @override
+  ResultFuture<List<PurchaseEntity>> getAllPurchases() async {
+    try {
+      final localPurchases = await localDataSource.getAllPurchases();
+
+      if (localPurchases.isNotEmpty) {
+        return right(
+          localPurchases.map((purchase) => purchase.toEntity()).toList(),
+        );
+      }
+      if (!await connectionChecker.isConnected) {
+        return right([]);
+      }
+      final remotePurchases = await remoteDataSource.getAllPurchases();
+
+      for (var purchase in remotePurchases) {
+        await localDataSource.createPurchase(purchase);
+      }
+      return right(
+        remotePurchases.map((purchase) => purchase.toEntity()).toList(),
+      );
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultFuture<List<PurchaseEntity>> getPurchasesForProductSince(
+    String productId,
+    DateTime since,
+  ) {
+    // TODO: implement getPurchasesForProductSince
+    throw UnimplementedError();
   }
 }

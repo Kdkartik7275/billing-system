@@ -1,26 +1,20 @@
+import 'package:billing_system/features/suppliers/presentation/controller/suppliers_controller.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/add_supplier_button.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/due_payment_card.dart';
-import 'package:billing_system/features/suppliers/presentation/widgets/supplier_dummy_data.dart';
-import 'package:billing_system/features/suppliers/presentation/widgets/supplier_list_card.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/supplier_search_bar.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/supplier_stats_card.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/supplier_tab_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-class SupplierWebLayout extends StatelessWidget {
+class SupplierWebLayout extends GetView<SuppliersController> {
   const SupplierWebLayout({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(32, 28, 32, 40),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1440),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      children:[Row(
                 children: [
                   Expanded(
                     child: SupplierSearchBar(
@@ -29,7 +23,7 @@ class SupplierWebLayout extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  AddSupplierButton(onPressed: () {}, expand: false),
+                  AddSupplierButton(onPressed: () {}, expand: false,compact: false),
                 ],
               ),
               const SizedBox(height: 24),
@@ -68,24 +62,29 @@ class SupplierWebLayout extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 14),
-                        SupplierListCard(suppliers: kMockSuppliers),
+                        //  SupplierListCard(suppliers: kMockSuppliers),
                       ],
                     ),
                   ),
                   const SizedBox(width: 24),
                   Expanded(
                     flex: 2,
-                    child: DuePaymentsCard(
-                      payments: kMockDuePayments,
-                      onViewAll: () {},
-                    ),
+                    child: Obx(() {
+                      final payments = controller.duePayments.take(3).toList();
+
+                      if (payments.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+
+                      return DuePaymentsCard(
+                        payments: payments,
+                        onViewAll: () {},
+                        onTapPayment: (payment) {},
+                      );
+                    }),
                   ),
                 ],
-              ),
-            ],
-          ),
-        ),
-      ),
+              ),]
     );
   }
 }

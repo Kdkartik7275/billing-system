@@ -56,6 +56,7 @@ class SubscriptionCard extends StatelessWidget {
             ),
           ),
           InfoRow(
+            showDivider: false,
             icon: Icons.info_outline,
             label: 'Status',
             valueWidget: const StatusPill(

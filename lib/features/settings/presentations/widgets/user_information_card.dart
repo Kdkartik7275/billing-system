@@ -43,6 +43,7 @@ class UserInformationCard extends GetView<UserController> {
               value: controller.user.value?.phone ?? '',
             ),
             InfoRow(
+              showDivider: false,
               icon: Icons.groups_outlined,
               label: 'Role',
               valueWidget: StatusPill(

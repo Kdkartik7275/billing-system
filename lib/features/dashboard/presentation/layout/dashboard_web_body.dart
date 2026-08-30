@@ -1,10 +1,13 @@
 import 'package:billing_system/features/billing/presentation/controllers/billing_controller.dart';
+import 'package:billing_system/features/billing/presentation/controllers/cart_controller.dart';
+import 'package:billing_system/features/billing/presentation/widgets/scan/billing_scan_handler.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/category_pie_chart.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/dashboard_stats_panel.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/low_stocks.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/recent_transactions.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/sales_line_chart.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/tablet_info_card.dart';
+import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
 import 'package:billing_system/features/user/presentation/controller/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -27,7 +30,20 @@ class DashboardWebBody extends StatelessWidget {
           padding: EdgeInsets.fromLTRB(24, 130 + topInset, 24, 24),
           child: Column(
             children: [
-              const TabletSmartPosCard(),
+              TabletSmartPosCard(
+                onScan: () => BillingScanHandler.scanAndAddToCart(
+                  context: context,
+                  inventoryController: Get.find<InventoryController>(),
+                  cartController: Get.put(
+                    CartController(
+                      getAvailableStock: (productId) =>
+                          Get.find<InventoryController>()
+                              .stockQuantityFor(productId)
+                              .toInt(),
+                    ),
+                  ),
+                ),
+              ),
               const SizedBox(height: 24),
               _WebSummaryCards(),
               const SizedBox(height: 24),
@@ -41,6 +57,7 @@ class DashboardWebBody extends StatelessWidget {
               ),
               const SizedBox(height: 22),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Expanded(child: RecentTransactions()),
                   const SizedBox(width: 16),

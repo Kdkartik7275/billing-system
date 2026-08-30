@@ -10,11 +10,13 @@ class DependencyInjection {
     await _initHiveBoxes();
 
     _initCategory();
+    _initSupplier();
     _initUnit();
     _initStocks();
     _initBrands();
     _initProducts();
     _initBilling();
+   // registerBusinessAIDependencies(sl());
   }
 }
 
@@ -61,6 +63,12 @@ Future<void> _initHiveBoxes() async {
     'stock_movement',
   );
   sl.registerLazySingleton<Box<StockMovementModel>>(() => stockMovements);
+
+  final suppliers = await Hive.openBox<SupplierModel>('suppliers');
+  sl.registerLazySingleton<Box<SupplierModel>>(() => suppliers);
+
+  final purchasesBox = await Hive.openBox<PurchaseModel>('purchases');
+  sl.registerLazySingleton<Box<PurchaseModel>>(() => purchasesBox);
 
   // ==========================================================
   // User Module
@@ -216,6 +224,33 @@ void _initCategory() {
   sl.registerLazySingleton(() => UpdateCategoryUsecase(repository: sl()));
 }
 
+void _initSupplier() {
+  // DATASOURCE
+  sl.registerLazySingleton<SupplierRepository>(
+    () => SupplierRepositoryImpl(
+      remoteDataSource: sl<SupplierRemoteDataSource>(),
+      localDataSource: sl<SupplierLocalDataSource>(),
+      connectionChecker: sl<ConnectionChecker>(),
+    ),
+  );
+
+  // REPOSITORY
+  sl.registerLazySingleton<SupplierRemoteDataSource>(
+    () => SupplierRemoteDataSourceImpl(
+      firestore: sl<ShopFirebaseService>().firestore,
+    ),
+  );
+  sl.registerLazySingleton<SupplierLocalDataSource>(
+    () => SupplierLocalDataSourceImpl(box: sl()),
+  );
+  // USECASES
+  sl.registerLazySingleton(() => AddSupplierUsecase(repository: sl()));
+  sl.registerLazySingleton(() => DeleteSupplierUsecase(repository: sl()));
+  sl.registerLazySingleton(() => GetSuppliersUsecase(repository: sl()));
+  sl.registerLazySingleton(() => GetSupplierByIdUsecase(repository: sl()));
+  sl.registerLazySingleton(() => UpdateSupplierUsecase(repository: sl()));
+}
+
 void _initUnit() {
   // DATASOURCE
   sl.registerLazySingleton<UnitRepository>(
@@ -292,6 +327,7 @@ void _initStocks() {
       batchBox: sl(),
       movementBox: sl(),
       stockBox: sl(),
+      purchaseBox: sl(),
       metaBox: sl<Box>(instanceName: 'inventoryMeta'),
     ),
   );
@@ -300,7 +336,6 @@ void _initStocks() {
   sl.registerLazySingleton(() => GetProductStocksUsecase(repository: sl()));
   sl.registerLazySingleton(() => GetStocksUsecase(repository: sl()));
   sl.registerLazySingleton(() => CreateStockBatchUsecase(repository: sl()));
-
   sl.registerLazySingleton(() => CreateStockMovementUsecase(repository: sl()));
   sl.registerLazySingleton(
     () => GetProductStockBatchesUsecase(repository: sl()),
@@ -313,6 +348,7 @@ void _initStocks() {
   sl.registerLazySingleton(() => PurchaseStockUseCase(repository: sl()));
   sl.registerLazySingleton(() => SellStockUsecase(repository: sl()));
   sl.registerLazySingleton(() => AdjustStockUsecase(repository: sl()));
+  sl.registerLazySingleton(() => GetPurchasesUsecase(repository: sl()));
 }
 
 void _initBilling() {

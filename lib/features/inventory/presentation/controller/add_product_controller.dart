@@ -81,6 +81,9 @@ class AddProductController extends GetxController {
   List<String> get units =>
       _inventoryController.units.map((c) => c.name).toList();
 
+  List<String> get suppliers =>
+      _inventoryController.suppliers.map((s) => s.name).toList();
+
   // ---------------- LIFECYCLE ----------------
 
   @override
@@ -136,16 +139,6 @@ class AddProductController extends GetxController {
     taxInclusive.value = p.tax.type == TaxType.inclusive
         ? 'Inclusive'
         : 'Exclusive';
-
-    final matchedUnit = _inventoryController.units
-        .where((u) => u.id == p.unitId)
-        .firstOrNull;
-    selectedUnit.value = matchedUnit?.name;
-
-    final matchedCategory = _inventoryController.categories
-        .where((c) => c.id == p.categoryId)
-        .firstOrNull;
-    selectedCategory.value = matchedCategory?.name;
   }
 
   // ---------------- TEXT FIELD BINDINGS ----------------
@@ -534,11 +527,15 @@ class AddProductController extends GetxController {
       String unitId = _inventoryController.units
           .firstWhere((c) => c.name == draftProduct.value.unitId)
           .id;
+      String supplierId = _inventoryController.suppliers
+          .firstWhere((s) => s.name == draftProduct.value.primarySupplierId)
+          .id;
 
       final product = draftProduct.value.copyWith(
         updatedAt: DateTime.now(),
         categoryId: categoryId,
         unitId: unitId,
+        primarySupplierId: supplierId,
       );
 
       final result = await addProductUseCase.call(

@@ -24,7 +24,10 @@ class EditProductPage extends StatelessWidget {
         initialProduct: product.copyWith(
           categoryId: inventoryController.categoryName(product.categoryId),
           brandId: inventoryController.brandName(product.brandId),
-          unitId: inventoryController.unitName(product.unitId)
+          unitId: inventoryController.unitName(product.unitId),
+          primarySupplierId: inventoryController.supplierName(
+            product.primarySupplierId,
+          ),
         ),
         initialStockEntry: inventoryController.stockRecords.firstWhere(
           (stock) => stock.productId == product.id,

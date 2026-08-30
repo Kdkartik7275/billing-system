@@ -70,7 +70,7 @@ class AddProductMobileLayout extends StatelessWidget {
                   () => AddProductDropdown(
                     hint: 'Select supplier',
                     value: controller.draftProduct.value.primarySupplierId,
-                    items: suppliers,
+                    items: controller.suppliers,
                     onChanged: controller.updateSupplier,
                   ),
                 ),

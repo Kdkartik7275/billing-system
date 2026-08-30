@@ -4,6 +4,7 @@ import 'package:billing_system/features/inventory/domain/usecases/category/get_c
 import 'package:billing_system/features/inventory/domain/usecases/product/delete_product_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/product/get_products_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/get_stocks_usecase.dart';
+import 'package:billing_system/features/inventory/domain/usecases/supplier/get_suppliers_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/unit/get_units_usecase.dart';
 import 'package:billing_system/features/inventory/presentation/views/product_details/product_detail_page.dart';
 import 'package:flutter/rendering.dart';
@@ -26,6 +27,7 @@ class InventoryController extends GetxController {
   final GetUnitsUsecase getUnitsUsecase;
   final GetStocksUsecase getStocksUsecase;
   final GetBrandsUsecase getBrandsUsecase;
+  final GetSuppliersUsecase getSuppliersUsecase;
   final DeleteProductUseCase deleteProductUseCase;
 
   final RxList<CategoryEntity> categories = <CategoryEntity>[].obs;
@@ -58,6 +60,7 @@ class InventoryController extends GetxController {
     required this.getStocksUsecase,
     required this.getBrandsUsecase,
     required this.deleteProductUseCase,
+    required this.getSuppliersUsecase,
   });
 
   @override
@@ -69,6 +72,7 @@ class InventoryController extends GetxController {
       loadStocks(),
       loadBrands(),
       loadUnits(),
+      loadSuppliers(),
     ]);
   }
 
@@ -149,6 +153,21 @@ class InventoryController extends GetxController {
       });
     } catch (e) {
       errorMessage.value = 'Failed to load stocks: ${e.toString()}';
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> loadSuppliers() async {
+    isLoading.value = true;
+    errorMessage.value = null;
+    try {
+      final result = await getSuppliersUsecase.call();
+      result.fold((err) => AppSnackbar.error(message: err.message), (s) {
+        suppliers.assignAll(s);
+      });
+    } catch (e) {
+      errorMessage.value = 'Failed to load units: ${e.toString()}';
     } finally {
       isLoading.value = false;
     }

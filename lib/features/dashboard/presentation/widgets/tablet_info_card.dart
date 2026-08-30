@@ -5,7 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class TabletSmartPosCard extends StatelessWidget {
-  const TabletSmartPosCard({super.key, this.branchName = 'Main Branch'});
+  const TabletSmartPosCard({
+    super.key,
+    required this.onScan,
+    this.branchName = 'Main Branch',
+  });
+
+  final VoidCallback onScan;
   final String branchName;
 
   @override
@@ -100,7 +106,7 @@ class TabletSmartPosCard extends StatelessWidget {
                 _InfoTile(
                   icon: Icons.calendar_today_rounded,
                   label: 'Today',
-                  value: dateStr, 
+                  value: dateStr,
                 ),
                 const SizedBox(width: 40),
                 Container(
@@ -115,8 +121,11 @@ class TabletSmartPosCard extends StatelessWidget {
                   value: timeStr,
                 ),
                 const Spacer(),
-                if (billsController.pending.isNotEmpty)
+                if (billsController.pending.isNotEmpty) ...[
                   _SyncButton(billsController: billsController),
+                  const SizedBox(width: 12),
+                ],
+                _ScanButton(onScan: onScan),
               ],
             ),
           ),
@@ -139,6 +148,56 @@ class TabletSmartPosCard extends StatelessWidget {
     'Nov',
     'Dec',
   ][m - 1];
+}
+
+class _ScanButton extends StatelessWidget {
+  const _ScanButton({required this.onScan});
+
+  final VoidCallback onScan;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(24),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: onScan,
+        child: Container(
+          height: 40,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 26,
+                height: 26,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2F6FE4).withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.center_focus_strong_rounded,
+                  size: 14,
+                  color: Color(0xFF2F6FE4),
+                ),
+              ),
+              const SizedBox(width: 9),
+              const Text(
+                'Scan Now',
+                style: TextStyle(
+                  color: Color(0xFF1E4FC4),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _SyncButton extends StatelessWidget {

@@ -22,7 +22,8 @@ class DashboardPage extends StatelessWidget {
         getStocksUsecase: sl(),
         getBrandsUsecase: sl(),
         getUnitsUsecase: sl(),
-        deleteProductUseCase: sl()
+        deleteProductUseCase: sl(),
+        getSuppliersUsecase: sl(),
       ),
     );
     final controller = Get.put(
@@ -35,7 +36,7 @@ class DashboardPage extends StatelessWidget {
         billSyncScheduler: sl(),
       ),
     );
-    
+
     return Obx(
       () => LoadingOverlay(
         isLoading: controller.syncing.value,

@@ -1,9 +1,9 @@
-final List<String> suppliers = const [
-  'Samsung India Pvt Ltd',
-  'Reliance Digital',
-  'Local Distributor Co.',
-  'Global Traders Inc.',
-];
+// final List<String> suppliers = const [
+//   'Samsung India Pvt Ltd',
+//   'Reliance Digital',
+//   'Local Distributor Co.',
+//   'Global Traders Inc.',
+// ];
 
 // final List<String> units = const [
 //   'Piece',

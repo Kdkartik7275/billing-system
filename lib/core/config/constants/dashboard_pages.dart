@@ -18,8 +18,6 @@ Map<DashboardMenu, Widget> pages(int index) => {
   DashboardMenu.pos: BillingPage(),
   DashboardMenu.inventory: InventoryPage(),
   DashboardMenu.sales: SalesPage(),
-  DashboardMenu.customers: Center(child: Text('Customers')),
-  DashboardMenu.employees: Center(child: Text('Employees')),
   DashboardMenu.suppliers: SupplierPage(),
   DashboardMenu.reports: Center(child: Text('Reports')),
   DashboardMenu.settings: SettingPage(),

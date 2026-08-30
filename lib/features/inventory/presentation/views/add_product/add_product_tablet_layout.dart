@@ -119,7 +119,7 @@ class AddProductTabletLayout extends StatelessWidget {
                                           .draftProduct
                                           .value
                                           .primarySupplierId,
-                                      items: suppliers,
+                                      items: controller.suppliers,
                                       onChanged: controller.updateSupplier,
                                     ),
                                   ),
@@ -135,10 +135,18 @@ class AddProductTabletLayout extends StatelessWidget {
                                   Obx(
                                     () => AddProductDropdown(
                                       hint: 'Select unit',
-                                      value: controller.draftProduct.value.unitId.isEmpty
-                        ? null
-                        : controller.draftProduct.value.unitId,
-                    items: controller.units,
+                                      value:
+                                          controller
+                                              .draftProduct
+                                              .value
+                                              .unitId
+                                              .isEmpty
+                                          ? null
+                                          : controller
+                                                .draftProduct
+                                                .value
+                                                .unitId,
+                                      items: controller.units,
                                       onChanged: controller.updateUnit,
                                     ),
                                   ),

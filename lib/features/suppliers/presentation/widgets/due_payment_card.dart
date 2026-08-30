@@ -8,6 +8,7 @@ class DuePayment {
   final String amount;
   final String statusText;
   final Color statusColor;
+  final DateTime dueDate;
 
   const DuePayment({
     required this.initials,
@@ -17,6 +18,7 @@ class DuePayment {
     required this.amount,
     required this.statusText,
     required this.statusColor,
+    required this.dueDate,
   });
 }
 

@@ -15,9 +15,11 @@ import 'package:billing_system/features/inventory/data/models/product_price_mode
 import 'package:billing_system/features/inventory/data/models/product_settings_model.dart';
 import 'package:billing_system/features/inventory/data/models/product_tax_model.dart';
 import 'package:billing_system/features/inventory/data/models/product_variant_model.dart';
+import 'package:billing_system/features/inventory/data/models/stock/purchase_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_batch_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_movement_model.dart';
+import 'package:billing_system/features/inventory/data/models/supplier/supplier_model.dart';
 import 'package:billing_system/features/inventory/data/models/tax_type.dart';
 import 'package:billing_system/features/inventory/data/models/unit/unit_model.dart';
 import 'package:billing_system/features/settings/data/models/account_setting_model.dart';
@@ -78,7 +80,9 @@ class Bootstrap {
       ..registerAdapter(BusinessDetailsModelAdapter())
       ..registerAdapter(AccountSettingsModelAdapter())
       ..registerAdapter(SecuritySettingsModelAdapter())
-      ..registerAdapter(UserPreferencesModelAdapter());
+      ..registerAdapter(UserPreferencesModelAdapter())
+      ..registerAdapter(SupplierModelAdapter())
+      ..registerAdapter(PurchaseModelAdapter());
 
     await Hive.openBox<ProductModel>('products');
     await Hive.openBox<CategoryModel>('categories');
@@ -112,7 +116,7 @@ class Bootstrap {
         getShopByIdUseCase: sl(),
         shopFirebaseService: sl(),
         logoutUsecase: sl(),
-        biometricService: sl()
+        biometricService: sl(),
       ),
       permanent: true,
     );

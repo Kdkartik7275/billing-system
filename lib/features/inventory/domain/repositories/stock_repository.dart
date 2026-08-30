@@ -1,4 +1,5 @@
 import 'package:billing_system/core/config/constants/typedefs.dart';
+import 'package:billing_system/features/inventory/domain/entities/purchase_entity.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_batch_entity.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_movement_entity.dart';
 import '../entities/stock_entity.dart';
@@ -63,5 +64,10 @@ abstract class StockRepository {
     String? referenceId,
     String? notes,
   });
-  
+  ResultFuture<List<PurchaseEntity>> getAllPurchases();
+
+  ResultFuture<List<PurchaseEntity>> getPurchasesForProductSince(
+    String productId,
+    DateTime since,
+  );
 }

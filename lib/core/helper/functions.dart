@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:billing_system/core/scanner/barcode_scanner_page.dart';
@@ -100,4 +101,15 @@ const List<Color> _categoryPalette = [
 Color categoryColor(String category) {
   final hash = category.codeUnits.fold(0, (sum, unit) => sum + unit);
   return _categoryPalette[hash % _categoryPalette.length];
+}
+
+String generateId() {
+  final timestamp = DateTime.now().millisecondsSinceEpoch.toRadixString(36);
+
+  final random = Random()
+      .nextInt(36 * 36 * 36)
+      .toRadixString(36)
+      .padLeft(3, '0');
+
+  return '$timestamp$random';
 }

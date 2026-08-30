@@ -208,16 +208,7 @@ class _DrawerMenu extends StatelessWidget {
       title: 'Sales',
       menu: DashboardMenu.sales,
     ),
-    (
-      icon: Icons.people_outline,
-      title: 'Customers',
-      menu: DashboardMenu.customers,
-    ),
-    (
-      icon: Icons.badge_outlined,
-      title: 'Employees',
-      menu: DashboardMenu.employees,
-    ),
+
     (
       icon: Icons.local_shipping_outlined,
       title: 'Suppliers',

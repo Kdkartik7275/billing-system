@@ -1,24 +1,5 @@
+import 'package:billing_system/features/suppliers/presentation/controller/suppliers_controller.dart';
 import 'package:flutter/material.dart';
-
-class SupplierListItem {
-  final String initials;
-  final Color avatarColor;
-  final Color avatarBgColor;
-  final String name;
-  final String phone;
-  final String location;
-  final bool isActive;
-
-  const SupplierListItem({
-    required this.initials,
-    required this.avatarColor,
-    required this.avatarBgColor,
-    required this.name,
-    required this.phone,
-    required this.location,
-    required this.isActive,
-  });
-}
 
 class SupplierListCard extends StatelessWidget {
   final List<SupplierListItem> suppliers;
@@ -78,6 +59,7 @@ class _SupplierTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -90,26 +72,29 @@ class _SupplierTile extends StatelessWidget {
               backgroundColor: supplier.avatarBgColor,
               child: Text(
                 supplier.initials,
-                style: TextStyle(
+                style: theme.titleMedium!.copyWith(
                   color: supplier.avatarColor,
                   fontWeight: FontWeight.w700,
                 ),
               ),
             ),
+
             const SizedBox(width: 12),
+
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     supplier.name,
-                    style: const TextStyle(
-                      fontSize: 15.5,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF1A1C1E),
-                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.titleMedium!.copyWith(fontSize: 15.5),
                   ),
+
                   const SizedBox(height: 6),
+
+                  // PHONE
                   Row(
                     children: [
                       const Icon(
@@ -118,17 +103,26 @@ class _SupplierTile extends StatelessWidget {
                         color: Color(0xFF8B909A),
                       ),
                       const SizedBox(width: 6),
-                      Text(
-                        supplier.phone,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF6B7076),
+
+                      Expanded(
+                        child: Text(
+                          supplier.phone,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.titleSmall!.copyWith(
+                            fontSize: 13,
+                            color: Color(0xFF6B7076),
+                          ),
                         ),
                       ),
                     ],
                   ),
+
                   const SizedBox(height: 4),
+
+                  // ADDRESS
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Icon(
                         Icons.location_on_outlined,
@@ -136,11 +130,16 @@ class _SupplierTile extends StatelessWidget {
                         color: Color(0xFF8B909A),
                       ),
                       const SizedBox(width: 6),
-                      Text(
-                        supplier.location,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF6B7076),
+
+                      Expanded(
+                        child: Text(
+                          supplier.location,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.bodySmall!.copyWith(
+                            fontSize: 13,
+                            color: Color(0xFF6B7076),
+                          ),
                         ),
                       ),
                     ],
@@ -148,6 +147,9 @@ class _SupplierTile extends StatelessWidget {
                 ],
               ),
             ),
+
+            const SizedBox(width: 8),
+
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -173,7 +175,9 @@ class _SupplierTile extends StatelessWidget {
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 14),
+
                 InkWell(
                   onTap: onTapMore,
                   child: const Icon(

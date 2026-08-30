@@ -1,12 +1,16 @@
 import 'package:billing_system/core/config/theme/app_colors.dart';
 import 'package:billing_system/features/billing/presentation/controllers/billing_controller.dart';
+import 'package:billing_system/features/billing/presentation/controllers/cart_controller.dart';
+import 'package:billing_system/features/billing/presentation/widgets/scan/billing_scan_handler.dart';
 import 'package:billing_system/features/dashboard/presentation/controller/dashboard_shell_controller.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/category_pie_chart.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/dashboard_stats_panel.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/mobile_info_card.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/low_stocks.dart';
+import 'package:billing_system/features/dashboard/presentation/widgets/quick_billing_card.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/recent_transactions.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/sales_line_chart.dart';
+import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -31,11 +35,27 @@ class MobileDashboardBody extends StatelessWidget {
             children: [
               const SmartPosInfoCard(),
               const SizedBox(height: 16),
+              QuickBillingCard(
+                onScan: () => BillingScanHandler.scanAndAddToCart(
+                  context: context,
+                  inventoryController: Get.find<InventoryController>(),
+                  cartController: Get.put(
+                    CartController(
+                      getAvailableStock: (productId) =>
+                          Get.find<InventoryController>()
+                              .stockQuantityFor(productId)
+                              .toInt(),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
               Obx(() {
                 final items = [
                   DashboardStatItem(
                     title: "Today's Sales",
-                    value: "₹${billController.formatCompactValue(billController.todaysSalesRevenue)}",
+                    value:
+                        "₹${billController.formatCompactValue(billController.todaysSalesRevenue)}",
                     growth: "${billController.todaysBills.length} orders today",
                     icon: Icons.attach_money,
                     color: Colors.green,
@@ -65,6 +85,7 @@ class MobileDashboardBody extends StatelessWidget {
                 return DashboardStatsPanel(items: items);
               }),
               const SizedBox(height: 14),
+
               const SalesLineChart(height: 300),
               const SizedBox(height: 16),
               const CategoryPieChart(height: 280),

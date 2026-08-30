@@ -1,6 +1,7 @@
 import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/features/inventory/domain/entities/product_entity.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/purchase_stock_usecase.dart';
+import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -34,6 +35,12 @@ class AddPurchaseController extends GetxController {
   final RxDouble purchasePrice = 0.0.obs;
   final RxDouble discountPercent = 0.0.obs;
   final RxDouble taxPercent = 0.0.obs;
+
+  final InventoryController _inventoryController =
+      Get.find<InventoryController>();
+
+  List<String> get suppliers =>
+      _inventoryController.suppliers.map((s) => s.name).toList();
 
   @override
   void onInit() {
@@ -80,11 +87,14 @@ class AddPurchaseController extends GetxController {
       AppSnackbar.error(message: 'Please fill all required fields');
       return;
     }
+    String supplier = _inventoryController.suppliers
+        .firstWhere((s) => s.name == supplierId.value)
+        .id;
     final result = await purchaseStockUseCase.call(
       PurchaseStockParams(
         productId: product.id,
         warehouseId: warehouseId.value!,
-        supplierId: supplierId.value!,
+        supplierId: supplier,
 
         notes: notesController.text.trim(),
 
@@ -101,10 +111,10 @@ class AddPurchaseController extends GetxController {
       ),
     );
 
-    result.fold(
-      (failure) => Get.snackbar('Error', failure.message),
-      (success) => Get.back(result: true),
-    );
+    result.fold((failure) => Get.snackbar('Error', failure.message), (success) {
+      Get.back(result: true);
+      AppSnackbar.success(message: 'Purchase recorded successfully.');
+    });
   }
 
   @override

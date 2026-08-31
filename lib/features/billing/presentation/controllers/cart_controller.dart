@@ -102,6 +102,36 @@ class CartController extends GetxController {
     }
   }
 
+  void setQuantity(String productId, int quantity) {
+    if (quantity < 0) return;
+
+    final availableStock = getAvailableStock(productId);
+
+    if (quantity == 0) {
+      cartItems.remove(productId);
+      return;
+    }
+
+    final existing = cartItems[productId];
+
+    if (existing == null) {
+      AppSnackbar.error(message: 'Item is not in the cart.');
+      return;
+    }
+
+    if (quantity > availableStock) {
+      AppSnackbar.error(
+        message: 'Only $availableStock in stock for ${existing.product.name}',
+      );
+      existing.quantity = availableStock;
+      cartItems.refresh();
+      return;
+    }
+
+    existing.quantity = quantity;
+    cartItems.refresh();
+  }
+
   void removeFromCart(String productId) {
     cartItems.remove(productId);
   }

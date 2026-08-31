@@ -20,13 +20,17 @@ class MobileDashboardBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final billController = Get.find<BillingController>();
+
     return Stack(
       children: [
         Container(height: 56, color: const Color(0xFF0F0F14)),
         RefreshIndicator(
           onRefresh: () async {
             final dashboardController = Get.find<DashboardShellController>();
-            await dashboardController.refreshDashboard();
+            await dashboardController.refreshDashboard(
+              billController,
+              Get.find<InventoryController>(),
+            );
           },
           backgroundColor: Colors.white,
           color: AppColors.primary,

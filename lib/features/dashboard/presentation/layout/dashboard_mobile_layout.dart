@@ -19,10 +19,6 @@ class _DashboardMobileLayoutState extends State<DashboardMobileLayout> {
 
   final billsController = Get.find<BillingController>();
   final user = Get.find<UserController>().user;
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {

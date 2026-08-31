@@ -1,6 +1,8 @@
 import 'package:billing_system/features/suppliers/presentation/controller/suppliers_controller.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/add_supplier_button.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/due_payment_card.dart';
+import 'package:billing_system/features/suppliers/presentation/widgets/due_payment_dialog.dart';
+import 'package:billing_system/features/suppliers/presentation/widgets/supplier_list_card.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/supplier_search_bar.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/supplier_stats_card.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/supplier_tab_bar.dart';
@@ -29,16 +31,18 @@ class SupplierTabletLayout extends GetView<SuppliersController> {
           ],
         ),
         const SizedBox(height: 20),
-        SupplierStatsCard(
-          totalSuppliers: 24,
-          activeSuppliers: 18,
-          totalPurchases: '₹3,45,670',
-          totalDue: '₹42,560',
-          suppliersWithDue: 8,
+        Obx(
+          () => SupplierStatsCard(
+            totalSuppliers: controller.totalSuppliers,
+            activeSuppliers: controller.activeSuppliers,
+            totalPurchases:
+                '₹${controller.totalPurchaseAmount.toStringAsFixed(2)}',
+            totalDue: '₹${controller.totalDueAmount.toStringAsFixed(2)}',
+            suppliersWithDue: controller.suppliersWithDueCount,
+          ),
         ),
         const SizedBox(height: 20),
-        // Main list and due payments sit side by side once there's
-        // enough width for both to breathe.
+
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -60,17 +64,22 @@ class SupplierTabletLayout extends GetView<SuppliersController> {
                       ),
                       SizedBox(
                         width: 320,
-                        child: SupplierTabBar(onChanged: (_) {}),
+                        child: SupplierTabBar(onChanged: controller.selectTab),
                       ),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  // SupplierListCard(suppliers: kMockSuppliers),
+                  Obx(
+                    () => SupplierListCard(
+                      suppliers: controller.supplierListItems,
+                    ),
+                  ),
                 ],
               ),
             ),
           ],
         ),
+        const SizedBox(height: 16),
         Obx(() {
           final payments = controller.duePayments.take(3).toList();
 
@@ -81,7 +90,8 @@ class SupplierTabletLayout extends GetView<SuppliersController> {
           return DuePaymentsCard(
             payments: payments,
             onViewAll: () {},
-            onTapPayment: (payment) {},
+            onTapPayment: (payment) =>
+                showDuePaymentDetailDialog(context, payment: payment),
           );
         }),
       ],

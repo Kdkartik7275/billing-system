@@ -1,6 +1,8 @@
 import 'package:billing_system/features/suppliers/presentation/controller/suppliers_controller.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/add_supplier_button.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/due_payment_card.dart';
+import 'package:billing_system/features/suppliers/presentation/widgets/due_payment_dialog.dart';
+import 'package:billing_system/features/suppliers/presentation/widgets/supplier_list_card.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/supplier_search_bar.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/supplier_stats_card.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/supplier_tab_bar.dart';
@@ -14,77 +16,83 @@ class SupplierWebLayout extends GetView<SuppliersController> {
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-      children:[Row(
-                children: [
-                  Expanded(
-                    child: SupplierSearchBar(
-                      onSearchChanged: (_) {},
-                      onFilterTap: () {},
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  AddSupplierButton(onPressed: () {}, expand: false,compact: false),
-                ],
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: SupplierSearchBar(
+                onSearchChanged: (_) {},
+                onFilterTap: () {},
               ),
-              const SizedBox(height: 24),
-              SupplierStatsCard(
-                totalSuppliers: 24,
-                activeSuppliers: 18,
-                totalPurchases: '₹3,45,670',
-                totalDue: '₹42,560',
-                suppliersWithDue: 8,
-              ),
-              const SizedBox(height: 28),
-              Row(
+            ),
+            const SizedBox(width: 16),
+            AddSupplierButton(onPressed: () {}, expand: false, compact: false),
+          ],
+        ),
+        const SizedBox(height: 24),
+        Obx(
+          () => SupplierStatsCard(
+            totalSuppliers: controller.totalSuppliers,
+            activeSuppliers: controller.activeSuppliers,
+            totalPurchases:
+                '₹${controller.totalPurchaseAmount.toStringAsFixed(2)}',
+            totalDue: '₹${controller.totalDueAmount.toStringAsFixed(2)}',
+            suppliersWithDue: controller.suppliersWithDueCount,
+          ),
+        ),
+        const SizedBox(height: 28),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 3,
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    flex: 3,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Expanded(
-                              child: Text(
-                                'All Suppliers',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xFF1A1C1E),
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 340,
-                              child: SupplierTabBar(onChanged: (_) {}),
-                            ),
-                          ],
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          'All Suppliers',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF1A1C1E),
+                          ),
                         ),
-                        const SizedBox(height: 14),
-                        //  SupplierListCard(suppliers: kMockSuppliers),
-                      ],
-                    ),
+                      ),
+                      SizedBox(
+                        width: 340,
+                        child: SupplierTabBar(onChanged: controller.selectTab),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 24),
-                  Expanded(
-                    flex: 2,
-                    child: Obx(() {
-                      final payments = controller.duePayments.take(3).toList();
-
-                      if (payments.isEmpty) {
-                        return const SizedBox.shrink();
-                      }
-
-                      return DuePaymentsCard(
-                        payments: payments,
-                        onViewAll: () {},
-                        onTapPayment: (payment) {},
-                      );
-                    }),
-                  ),
+                  const SizedBox(height: 14),
+                  SupplierListCard(suppliers: controller.supplierListItems),
                 ],
-              ),]
+              ),
+            ),
+            const SizedBox(width: 24),
+            Expanded(
+              flex: 2,
+              child: Obx(() {
+                final payments = controller.duePayments.take(3).toList();
+
+                if (payments.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+
+                return DuePaymentsCard(
+                  payments: payments,
+                  onViewAll: () {},
+                  onTapPayment: (payment) =>
+                      showDuePaymentDetailDialog(context, payment: payment),
+                );
+              }),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

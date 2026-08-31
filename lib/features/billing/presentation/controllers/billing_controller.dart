@@ -68,6 +68,10 @@ class BillingController extends GetxController {
     loading.value = false;
   }
 
+  Future<void> refreshBilling() async {
+    await _initializeBilling();
+  }
+
   void selectCategory(String category) {
     selectedCategory.value = category;
   }
@@ -297,15 +301,15 @@ class BillingController extends GetxController {
   }
 
   String formatCompactValue(double value) {
-  if (value >= 1000000) {
-    return '${_trimZero(value / 1000000)}M';
-  } else if (value >= 1000) {
-    return '${_trimZero(value / 1000)}k';
+    if (value >= 1000000) {
+      return '${_trimZero(value / 1000000)}M';
+    } else if (value >= 1000) {
+      return '${_trimZero(value / 1000)}k';
+    }
+    return value.toStringAsFixed(0);
   }
-  return value.toStringAsFixed(0);
-}
 
-String _trimZero(double value) {
-  return value % 1 == 0 ? value.toStringAsFixed(0) : value.toStringAsFixed(1);
-}
+  String _trimZero(double value) {
+    return value % 1 == 0 ? value.toStringAsFixed(0) : value.toStringAsFixed(1);
+  }
 }

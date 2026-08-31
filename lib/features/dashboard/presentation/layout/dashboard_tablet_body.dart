@@ -1,8 +1,10 @@
+import 'package:billing_system/core/config/theme/app_colors.dart';
 import 'package:billing_system/core/enums/billing.dart';
 import 'package:billing_system/features/billing/domain/entities/bill_entity.dart';
 import 'package:billing_system/features/billing/presentation/controllers/billing_controller.dart';
 import 'package:billing_system/features/billing/presentation/controllers/cart_controller.dart';
 import 'package:billing_system/features/billing/presentation/widgets/scan/billing_scan_handler.dart';
+import 'package:billing_system/features/dashboard/presentation/controller/dashboard_shell_controller.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/category_pie_chart.dart';
 import 'package:billing_system/core/config/theme/app_radius.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/tablet_info_card.dart';
@@ -27,80 +29,91 @@ class TabletDashboardBody extends GetView<BillingController> {
       children: [
         Container(height: 230 + topInset, color: const Color(0xFF0F0F14)),
 
-        ListView(
-          padding: EdgeInsets.fromLTRB(20, 130 + topInset, 20, 12),
-          children: [
-            TabletSmartPosCard(onScan: () => BillingScanHandler.scanAndAddToCart(
-                  context: context,
-                  inventoryController: Get.find<InventoryController>(),
-                  cartController: Get.put(
-                    CartController(
-                      getAvailableStock: (productId) =>
-                          Get.find<InventoryController>()
-                              .stockQuantityFor(productId)
-                              .toInt(),
+        RefreshIndicator(
+           onRefresh: () async {
+            final dashboardController = Get.find<DashboardShellController>();
+            await dashboardController.refreshDashboard(
+              controller,
+              Get.find<InventoryController>(),
+            );
+          },
+          backgroundColor: Colors.white,
+          color: AppColors.primary,
+          child: ListView(
+            padding: EdgeInsets.fromLTRB(20, 130 + topInset, 20, 12),
+            children: [
+              TabletSmartPosCard(onScan: () => BillingScanHandler.scanAndAddToCart(
+                    context: context,
+                    inventoryController: Get.find<InventoryController>(),
+                    cartController: Get.put(
+                      CartController(
+                        getAvailableStock: (productId) =>
+                            Get.find<InventoryController>()
+                                .stockQuantityFor(productId)
+                                .toInt(),
+                      ),
                     ),
+                  ),),
+              const SizedBox(height: 20),
+              Obx(() {
+                final items = [
+                  DashboardStatItem(
+                    title: "Today's Sales",
+                    value:
+                        "₹${controller.formatCompactValue(controller.todaysSalesRevenue)}",
+                    growth: "${controller.todaysBills.length} orders today",
+                    icon: Icons.attach_money,
+                    color: Colors.green,
                   ),
-                ),),
-            const SizedBox(height: 20),
-            Obx(() {
-              final items = [
-                DashboardStatItem(
-                  title: "Today's Sales",
-                  value:
-                      "₹${controller.formatCompactValue(controller.todaysSalesRevenue)}",
-                  growth: "${controller.todaysBills.length} orders today",
-                  icon: Icons.attach_money,
-                  color: Colors.green,
-                ),
-                DashboardStatItem(
-                  title: "Total Orders",
-                  value: "${controller.todaysBills.length}",
-                  growth: "bills today",
-                  icon: Icons.shopping_cart_outlined,
-                  color: Colors.blue,
-                ),
-                DashboardStatItem(
-                  title: "Items Sold",
-                  value: "${controller.todaysItemsSold}",
-                  growth: "units today",
-                  icon: Icons.inventory_2_outlined,
-                  color: Colors.deepPurple,
-                ),
-                DashboardStatItem(
-                  title: "Pending Sync",
-                  value: "${controller.pending.length}",
-                  growth: "No pending bills",
-                  icon: Icons.pending_actions_outlined,
-                  color: Colors.orange,
-                ),
-              ];
-              return DashboardStatsPanel(items: items);
-            }),
-            const SizedBox(height: 12),
-            const SalesLineChart(height: 260),
-            const SizedBox(height: 12),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                if (constraints.maxWidth >= 480) {
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Expanded(child: CategoryPieChart(height: 300)),
-                      const SizedBox(width: 10),
-                      Expanded(child: _TabletTransactions()),
-                    ],
+                  DashboardStatItem(
+                    title: "Total Orders",
+                    value: "${controller.todaysBills.length}",
+                    growth: "bills today",
+                    icon: Icons.shopping_cart_outlined,
+                    color: Colors.blue,
+                  ),
+                  DashboardStatItem(
+                    title: "Items Sold",
+                    value: "${controller.todaysItemsSold}",
+                    growth: "units today",
+                    icon: Icons.inventory_2_outlined,
+                    color: Colors.deepPurple,
+                  ),
+                  DashboardStatItem(
+                    title: "Pending Sync",
+                    value: "${controller.pending.length}",
+                    growth: "No pending bills",
+                    icon: Icons.pending_actions_outlined,
+                    color: Colors.orange,
+                  ),
+                ];
+                return DashboardStatsPanel(items: items);
+              }),
+              const SizedBox(height: 12),
+              const SalesLineChart(height: 260),
+              const SizedBox(height: 12),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  if (constraints.maxWidth >= 480) {
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Expanded(child: CategoryPieChart(height: 300)),
+                        const SizedBox(width: 10),
+                        Expanded(child: _TabletTransactions()),
+                      ],
+                    );
+                  }
+                  return Column(
+                    children: [const SizedBox(height: 12), _TabletTransactions()],
                   );
-                }
-                return Column(
-                  children: [const SizedBox(height: 12), _TabletTransactions()],
-                );
-              },
-            ),
-            const SizedBox(height: 24),
-            const LowStockAlerts(),
-            const SizedBox(height: 12),
-          ],
+                },
+              ),
+              const SizedBox(height: 24),
+              const LowStockAlerts(),
+              const SizedBox(height: 12),
+            ],
+          ),
         ),
 
         Positioned(

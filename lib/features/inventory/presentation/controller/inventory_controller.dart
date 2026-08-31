@@ -358,6 +358,7 @@ class InventoryController extends GetxController {
 
   Future<void> refreshProducts() async {
     await loadProducts();
+    
   }
 
   void deleteProduct(String productId) async {

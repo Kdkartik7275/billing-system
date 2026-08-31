@@ -22,6 +22,7 @@ class BillingProductGridTile extends StatelessWidget {
     return RepaintBoundary(
       child: Obx(() {
         return BillingProductCard(
+          onQuantityChanged: (value) => cartController.setQuantity(product.id, value),
           imageUrl: product.primaryImageUrl ?? '',
           name: product.name,
           sku: product.sku,

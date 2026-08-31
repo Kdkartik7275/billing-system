@@ -1,7 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-class BillingProductCard extends StatelessWidget {
+class BillingProductCard extends StatefulWidget {
   final String imageUrl;
   final String name;
   final String sku;
@@ -11,6 +12,11 @@ class BillingProductCard extends StatelessWidget {
   final VoidCallback onAdd;
   final VoidCallback onIncrement;
   final VoidCallback onDecrement;
+
+  /// Called when the user types a new quantity directly into the field.
+  /// You're responsible for clamping/validating (e.g. against [stock])
+  /// and updating whatever state drives [quantity].
+  final ValueChanged<int> onQuantityChanged;
 
   const BillingProductCard({
     super.key,
@@ -23,7 +29,83 @@ class BillingProductCard extends StatelessWidget {
     required this.onAdd,
     required this.onIncrement,
     required this.onDecrement,
+    required this.onQuantityChanged,
   });
+
+  @override
+  State<BillingProductCard> createState() => _BillingProductCardState();
+}
+
+class _BillingProductCardState extends State<BillingProductCard> {
+  late final TextEditingController _qtyController;
+  late final FocusNode _qtyFocusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _qtyController = TextEditingController(text: widget.quantity.toString());
+    _qtyFocusNode = FocusNode();
+    _qtyFocusNode.addListener(_onFocusChange);
+  }
+
+  @override
+  void didUpdateWidget(covariant BillingProductCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (!_qtyFocusNode.hasFocus &&
+        widget.quantity.toString() != _qtyController.text) {
+      _qtyController.text = widget.quantity.toString();
+    }
+  }
+
+  void _onFocusChange() {
+    if (!_qtyFocusNode.hasFocus) {
+      _commitQuantity();
+    } else {
+      _qtyController.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: _qtyController.text.length,
+      );
+    }
+  }
+
+  void _handleLiveChange(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) return;
+
+    final parsed = int.tryParse(trimmed);
+    if (parsed == null) return;
+
+    if (parsed == 0) return;
+
+    final clamped = parsed.clamp(0, widget.stock);
+    if (clamped != widget.quantity) {
+      widget.onQuantityChanged(clamped);
+    }
+  }
+
+  void _commitQuantity() {
+    final raw = _qtyController.text.trim();
+
+    int parsed = raw.isEmpty ? 0 : (int.tryParse(raw) ?? widget.quantity);
+
+    if (parsed < 0) parsed = 0;
+    if (parsed > widget.stock) parsed = widget.stock;
+
+    _qtyController.text = parsed.toString();
+
+    if (parsed != widget.quantity) {
+      widget.onQuantityChanged(parsed);
+    }
+  }
+
+  @override
+  void dispose() {
+    _qtyFocusNode.removeListener(_onFocusChange);
+    _qtyFocusNode.dispose();
+    _qtyController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +136,7 @@ class BillingProductCard extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: CachedNetworkImage(
-                    imageUrl: imageUrl,
+                    imageUrl: widget.imageUrl,
                     width: double.infinity,
                     height: double.infinity,
                     fit: BoxFit.cover,
@@ -81,7 +163,7 @@ class BillingProductCard extends StatelessWidget {
 
             // ---------------- NAME / SKU ----------------
             Text(
-              name,
+              widget.name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: theme.titleSmall?.copyWith(
@@ -93,7 +175,7 @@ class BillingProductCard extends StatelessWidget {
             const SizedBox(height: 2),
 
             Text(
-              "SKU: $sku",
+              "SKU: ${widget.sku}",
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: theme.bodySmall?.copyWith(color: Colors.grey.shade500),
@@ -109,7 +191,7 @@ class BillingProductCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                "In Stock: $stock",
+                "In Stock: ${widget.stock}",
                 style: theme.bodySmall?.copyWith(
                   color: const Color(0xff2E7D32),
                   fontWeight: FontWeight.w600,
@@ -125,7 +207,7 @@ class BillingProductCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    "₹${price.toStringAsFixed(2)}",
+                    "₹${widget.price.toStringAsFixed(2)}",
                     overflow: TextOverflow.ellipsis,
                     style: theme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w600,
@@ -133,9 +215,9 @@ class BillingProductCard extends StatelessWidget {
                   ),
                 ),
 
-                quantity == 0
+                (widget.quantity == 0 && !_qtyFocusNode.hasFocus)
                     ? InkWell(
-                        onTap: onAdd,
+                        onTap: widget.onAdd,
                         borderRadius: BorderRadius.circular(12),
                         child: Container(
                           height: 32,
@@ -161,7 +243,7 @@ class BillingProductCard extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             InkWell(
-                              onTap: onDecrement,
+                              onTap: widget.onDecrement,
                               borderRadius: BorderRadius.circular(12),
                               child: const SizedBox(
                                 width: 28,
@@ -173,18 +255,34 @@ class BillingProductCard extends StatelessWidget {
                               ),
                             ),
                             SizedBox(
-                              width: 18,
-                              child: Text(
-                                "$quantity",
+                              width: 34,
+                              child: TextField(
+                                controller: _qtyController,
+                                focusNode: _qtyFocusNode,
                                 textAlign: TextAlign.center,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
                                 style: theme.bodySmall?.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w600,
                                 ),
+                                cursorColor: Colors.white,
+                                decoration: const InputDecoration(
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.zero,
+                                  border: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                ),
+                                onChanged: _handleLiveChange,
+                                onSubmitted: (_) => _commitQuantity(),
+                                onTapOutside: (_) => _qtyFocusNode.unfocus(),
                               ),
                             ),
                             InkWell(
-                              onTap: onIncrement,
+                              onTap: widget.onIncrement,
                               borderRadius: BorderRadius.circular(12),
                               child: const SizedBox(
                                 width: 28,

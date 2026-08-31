@@ -38,6 +38,9 @@ dependencies:
   intl: ^0.20.3
   barcode_widget: ^2.0.4
   local_auth: ^3.0.2
+  firebase_crashlytics: ^5.3.0
+  firebase_analytics: ^12.5.0
+  
 
 dev_dependencies:
   flutter_test:

@@ -16,6 +16,7 @@ class PurchaseStockUseCase
       supplierId: params.supplierId,
       quantity: params.quantity,
       price: params.price,
+      paidAmount: params.paidAmount,
       purchaseDate: params.purchaseDate,
       invoiceNumber: params.invoiceNumber,
       billDate: params.billDate,
@@ -36,6 +37,7 @@ class PurchaseStockParams {
   final String supplierId;
   final int quantity;
   final double price;
+  final double paidAmount;
   final DateTime purchaseDate;
   final String invoiceNumber;
   final DateTime billDate;
@@ -53,6 +55,7 @@ class PurchaseStockParams {
     required this.supplierId,
     required this.quantity,
     required this.price,
+    required this.paidAmount,
     required this.purchaseDate,
     required this.invoiceNumber,
     required this.billDate,

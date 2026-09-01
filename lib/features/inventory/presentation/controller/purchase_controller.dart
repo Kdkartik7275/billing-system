@@ -21,6 +21,8 @@ class AddPurchaseController extends GetxController {
   final purchasePriceController = TextEditingController();
   final discountController = TextEditingController(text: '0');
   final notesController = TextEditingController();
+  // In AddPurchaseController
+  final TextEditingController paidAmountController = TextEditingController();
 
   // ---------------- REACTIVE FIELDS ----------------
   final Rx<String?> warehouseId = Rx<String?>(null);
@@ -52,6 +54,8 @@ class AddPurchaseController extends GetxController {
     );
     purchasePrice.value = product.price.purchasePrice;
   }
+
+  void onPaidAmountChanged(String value) {}
 
   String _generateBatchNumber(bool isPurchase) {
     final now = DateTime.now();
@@ -95,7 +99,8 @@ class AddPurchaseController extends GetxController {
         productId: product.id,
         warehouseId: warehouseId.value!,
         supplierId: supplier,
-
+        paidAmount: double.tryParse(paidAmountController.text.trim()) ?? 0.0,
+        discount: discountAmount,
         notes: notesController.text.trim(),
 
         billDate: billDate.value,
@@ -125,6 +130,7 @@ class AddPurchaseController extends GetxController {
     purchasePriceController.dispose();
     discountController.dispose();
     notesController.dispose();
+    paidAmountController.dispose();
     super.onClose();
   }
 }

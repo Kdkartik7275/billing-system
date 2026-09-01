@@ -310,6 +310,10 @@ class SuppliersController extends GetxController {
   Future<void> refreshData() async {
     await loadData();
   }
+
+  void addSupplier(SupplierEntity supplier) {
+    suppliers.add(supplier);
+  }
 }
 
 class SupplierListItem {

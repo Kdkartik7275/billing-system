@@ -2,6 +2,7 @@ import 'package:billing_system/core/helper/functions.dart';
 import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/features/inventory/domain/entities/supplier_entity.dart';
 import 'package:billing_system/features/inventory/domain/usecases/supplier/add_supplier_usecase.dart';
+import 'package:billing_system/features/suppliers/presentation/controller/suppliers_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -110,6 +111,7 @@ class AddSupplierController extends GetxController {
         (r) {
           Get.back();
           AppSnackbar.success(message: 'Supplier added successfully.');
+          Get.find<SuppliersController>().addSupplier(r);
         },
       );
     } catch (e) {

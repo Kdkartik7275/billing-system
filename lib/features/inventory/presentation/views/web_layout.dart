@@ -100,7 +100,7 @@ class _MainTableArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (controller.isLoading.value) {
+      if (controller.isLoading) {
         return const LoadingWidget();
       }
 

@@ -30,7 +30,7 @@ class TabletDashboardBody extends GetView<BillingController> {
         Container(height: 230 + topInset, color: const Color(0xFF0F0F14)),
 
         RefreshIndicator(
-           onRefresh: () async {
+          onRefresh: () async {
             final dashboardController = Get.find<DashboardShellController>();
             await dashboardController.refreshDashboard(
               controller,
@@ -42,18 +42,13 @@ class TabletDashboardBody extends GetView<BillingController> {
           child: ListView(
             padding: EdgeInsets.fromLTRB(20, 130 + topInset, 20, 12),
             children: [
-              TabletSmartPosCard(onScan: () => BillingScanHandler.scanAndAddToCart(
-                    context: context,
-                    inventoryController: Get.find<InventoryController>(),
-                    cartController: Get.put(
-                      CartController(
-                        getAvailableStock: (productId) =>
-                            Get.find<InventoryController>()
-                                .stockQuantityFor(productId)
-                                .toInt(),
-                      ),
-                    ),
-                  ),),
+              TabletSmartPosCard(
+                onScan: () => BillingScanHandler.scanAndAddToCart(
+                  context: context,
+                  inventoryController: Get.find<InventoryController>(),
+                  cartController: Get.find<CartController>(),
+                ),
+              ),
               const SizedBox(height: 20),
               Obx(() {
                 final items = [
@@ -105,7 +100,10 @@ class TabletDashboardBody extends GetView<BillingController> {
                     );
                   }
                   return Column(
-                    children: [const SizedBox(height: 12), _TabletTransactions()],
+                    children: [
+                      const SizedBox(height: 12),
+                      _TabletTransactions(),
+                    ],
                   );
                 },
               ),

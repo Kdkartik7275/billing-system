@@ -51,6 +51,9 @@ class PurchaseModel extends HiveObject {
   @HiveField(14)
   final String? notes;
 
+  @HiveField(15)
+  final double? paidAmount;
+
   PurchaseModel({
     required this.id,
     required this.productId,
@@ -67,6 +70,7 @@ class PurchaseModel extends HiveObject {
     required this.dueDate,
     required this.batchNumber,
     this.notes,
+    this.paidAmount,
   });
 
   factory PurchaseModel.fromJson(Map<String, dynamic> json) {
@@ -86,6 +90,9 @@ class PurchaseModel extends HiveObject {
       dueDate: DateTime.parse(json['dueDate'] as String),
       batchNumber: json['batchNumber'] as String,
       notes: json['notes'] as String?,
+      paidAmount: json['paidAmount'] != null
+          ? (json['paidAmount'] as num).toDouble()
+          : null,
     );
   }
 
@@ -106,6 +113,7 @@ class PurchaseModel extends HiveObject {
       'dueDate': dueDate.toIso8601String(),
       'batchNumber': batchNumber,
       'notes': notes,
+      'paidAmount': paidAmount,
     };
   }
 
@@ -125,6 +133,7 @@ class PurchaseModel extends HiveObject {
       paymentMethod: entity.paymentMethod,
       dueDate: entity.dueDate,
       batchNumber: entity.batchNumber,
+      paidAmount: entity.paidAmount,
       notes: entity.notes,
     );
   }
@@ -146,6 +155,7 @@ class PurchaseModel extends HiveObject {
       dueDate: dueDate,
       batchNumber: batchNumber,
       notes: notes,
+      paidAmount: paidAmount,
     );
   }
 
@@ -165,6 +175,7 @@ class PurchaseModel extends HiveObject {
     DateTime? dueDate,
     String? batchNumber,
     String? notes,
+    double? paidAmount,
   }) {
     return PurchaseModel(
       id: id ?? this.id,
@@ -182,6 +193,7 @@ class PurchaseModel extends HiveObject {
       dueDate: dueDate ?? this.dueDate,
       batchNumber: batchNumber ?? this.batchNumber,
       notes: notes ?? this.notes,
+      paidAmount: paidAmount ?? this.paidAmount,
     );
   }
 

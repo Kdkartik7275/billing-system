@@ -8,6 +8,7 @@ import 'package:billing_system/features/inventory/presentation/widgets/purchase/
 import 'package:billing_system/features/inventory/presentation/widgets/purchase/labeled_dropdown.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/purchase/labeled_field_date.dart';
 import 'package:billing_system/features/inventory/presentation/widgets/purchase/labeled_textfield.dart';
+import 'package:billing_system/features/suppliers/presentation/widgets/add_new_supplier_dialog.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -154,7 +155,9 @@ class _AddPurchaseSheetState extends State<_AddPurchaseSheet> {
                       ),
                       const SizedBox(width: 10),
                       OutlinedButton.icon(
-                        onPressed: () {},
+                        onPressed: () {
+                          showAddSupplierDialog(context);
+                        },
                         icon: const Icon(Icons.add, size: 16),
                         label: const Text('New Supplier'),
                         style: OutlinedButton.styleFrom(
@@ -305,6 +308,21 @@ class _AddPurchaseSheetState extends State<_AddPurchaseSheet> {
                       ),
                       const SizedBox(width: 12),
                       Expanded(
+                        child: LabeledTextField(
+                          label: 'Paid Amount (₹)',
+                          controller: controller.paidAmountController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          onChanged: controller.onPaidAmountChanged,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Expanded(
                         child: Obx(
                           () => LabeledDateField(
                             label: 'Due Date',
@@ -315,6 +333,7 @@ class _AddPurchaseSheetState extends State<_AddPurchaseSheet> {
                       ),
                     ],
                   ),
+
                   const SizedBox(height: 16),
                   LabeledTextField(
                     label: 'Notes',

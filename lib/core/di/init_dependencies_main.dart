@@ -16,7 +16,7 @@ class DependencyInjection {
     _initBrands();
     _initProducts();
     _initBilling();
-   // registerBusinessAIDependencies(sl());
+    // registerBusinessAIDependencies(sl());
   }
 }
 
@@ -81,7 +81,10 @@ Future<void> _initHiveBoxes() async {
   sl.registerLazySingleton<Box<ShopModel>>(() => shopBox);
 
   final billingMetaBox = await Hive.openBox('billing_meta');
-  sl.registerLazySingleton<Box>(() => billingMetaBox);
+  sl.registerLazySingleton<Box>(
+    () => billingMetaBox,
+    instanceName: 'billingMeta',
+  );
 
   final inventoryMetaBox = await Hive.openBox('inventory_meta');
   sl.registerLazySingleton<Box>(
@@ -102,14 +105,14 @@ Future<void> _initHiveBoxes() async {
 
 // ----------------------- AUTH -----------------------
 void _initAuthentication() {
-  // DATASOURCE
+  // REPOSITORY
   sl.registerLazySingleton<AuthenticationRepository>(
     () => AuthenticationRepositoryImpl(
       remoteDataSource: sl<AuthenticationRemoteDataSource>(),
     ),
   );
 
-  // REPOSITORY
+  // DATASOURCE
   sl.registerLazySingleton<AuthenticationRemoteDataSource>(
     () =>
         AuthenticationRemoteDataSourceImpl(firestore: sl<FirebaseFirestore>()),
@@ -126,7 +129,7 @@ void _initAuthentication() {
 }
 
 void _initUser() {
-  // DATASOURCE
+  // REPOSITORY
   sl.registerLazySingleton<UserRepository>(
     () => UserRepositoryImpl(
       remoteDataSource: sl<UserRemoteDataSource>(),
@@ -134,7 +137,7 @@ void _initUser() {
     ),
   );
 
-  // REPOSITORY
+  // DATASOURCE
   sl.registerLazySingleton<UserRemoteDataSource>(
     () => UserRemoteDataSourceImpl(firestore: sl<FirebaseFirestore>()),
   );
@@ -149,7 +152,7 @@ void _initUser() {
 
 //----------------------- INVENTORY -----------------------
 void _initProducts() {
-  // DATASOURCE
+  // REPOSITORY
   sl.registerLazySingleton<ProductRepository>(
     () => ProductRepositoryImpl(
       remoteDataSource: sl<ProductRemoteDataSource>(),
@@ -158,7 +161,7 @@ void _initProducts() {
     ),
   );
 
-  // REPOSITORY
+  // DATASOURCE
   sl.registerLazySingleton<ProductRemoteDataSource>(
     () => ProductRemoteDataSourceImpl(
       firestore: sl<ShopFirebaseService>().firestore,
@@ -198,7 +201,7 @@ void _initProducts() {
 }
 
 void _initCategory() {
-  // DATASOURCE
+  // REPOSITORY
   sl.registerLazySingleton<CategoryRepository>(
     () => CategoryRepositoryImpl(
       remoteDataSource: sl<CategoryRemoteDataSource>(),
@@ -207,7 +210,7 @@ void _initCategory() {
     ),
   );
 
-  // REPOSITORY
+  // DATASOURCE
   sl.registerLazySingleton<CategoryRemoteDataSource>(
     () => CategoryRemoteDataSourceImpl(
       firestore: sl<ShopFirebaseService>().firestore,
@@ -225,7 +228,7 @@ void _initCategory() {
 }
 
 void _initSupplier() {
-  // DATASOURCE
+  // REPOSITORY
   sl.registerLazySingleton<SupplierRepository>(
     () => SupplierRepositoryImpl(
       remoteDataSource: sl<SupplierRemoteDataSource>(),
@@ -234,7 +237,7 @@ void _initSupplier() {
     ),
   );
 
-  // REPOSITORY
+  // DATASOURCE
   sl.registerLazySingleton<SupplierRemoteDataSource>(
     () => SupplierRemoteDataSourceImpl(
       firestore: sl<ShopFirebaseService>().firestore,
@@ -252,7 +255,7 @@ void _initSupplier() {
 }
 
 void _initUnit() {
-  // DATASOURCE
+  // REPOSITORY
   sl.registerLazySingleton<UnitRepository>(
     () => UnitRepositoryImpl(
       remoteDataSource: sl<UnitRemoteDataSource>(),
@@ -261,7 +264,7 @@ void _initUnit() {
     ),
   );
 
-  // REPOSITORY
+  // DATASOURCE
   sl.registerLazySingleton<UnitRemoteDataSource>(
     () => UnitRemoteDataSourceImpl(
       firestore: sl<ShopFirebaseService>().firestore,
@@ -279,7 +282,7 @@ void _initUnit() {
 }
 
 void _initBrands() {
-  // DATASOURCE
+  // REPOSITORY
   sl.registerLazySingleton<BrandRepository>(
     () => BrandRepositoryImpl(
       remoteDataSource: sl<BrandRemoteDataSource>(),
@@ -288,7 +291,7 @@ void _initBrands() {
     ),
   );
 
-  // REPOSITORY
+  // DATASOURCE
   sl.registerLazySingleton<BrandRemoteDataSource>(
     () => BrandRemoteDataSourceImpl(
       firestore: sl<ShopFirebaseService>().firestore,
@@ -307,7 +310,7 @@ void _initBrands() {
 }
 
 void _initStocks() {
-  // DATASOURCE
+  // REPOSITORY
   sl.registerLazySingleton<StockRepository>(
     () => StockRepositoryImpl(
       remoteDataSource: sl<StockRemoteDataSource>(),
@@ -316,7 +319,7 @@ void _initStocks() {
     ),
   );
 
-  // REPOSITORY
+  // DATASOURCE
   sl.registerLazySingleton<StockRemoteDataSource>(
     () => StockRemoteDataSourceImpl(
       firestore: sl<ShopFirebaseService>().firestore,
@@ -352,9 +355,11 @@ void _initStocks() {
 }
 
 void _initBilling() {
-  // ---------------- DATA SOURCES ----------------
   sl.registerLazySingleton<BillLocalDataSource>(
-    () => BillLocalDataSourceImpl(box: sl<Box<BillModel>>(), metaBox: sl()),
+    () => BillLocalDataSourceImpl(
+      box: sl<Box<BillModel>>(),
+      metaBox: sl<Box>(instanceName: 'billingMeta'),
+    ),
   );
   sl.registerLazySingleton<BillRemoteDataSource>(
     () => BillRemoteDataSourceImpl(
@@ -380,7 +385,7 @@ void _initBilling() {
     () => BillSyncScheduler(
       aggregateSoldQuantitiesUsecase: sl(),
       billRepository: sl(),
-      metaBox: sl(),
+      metaBox: sl<Box>(instanceName: 'billingMeta'),
       reduceStockForSoldProductsUsecase: sl(),
     ),
   );

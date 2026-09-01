@@ -12,6 +12,7 @@ class PurchaseEntity {
 
   final int quantity;
   final double price;
+  final double? paidAmount;
 
   final double discount;
   final double tax;
@@ -32,6 +33,7 @@ class PurchaseEntity {
     required this.billDate,
     required this.quantity,
     required this.price,
+     this.paidAmount,
     required this.discount,
     required this.tax,
     required this.paymentMethod,
@@ -56,6 +58,7 @@ class PurchaseEntity {
     DateTime? dueDate,
     String? batchNumber,
     String? notes,
+    double? paidAmount,
   }) {
     return PurchaseEntity(
       id: id ?? this.id,
@@ -73,6 +76,7 @@ class PurchaseEntity {
       dueDate: dueDate ?? this.dueDate,
       batchNumber: batchNumber ?? this.batchNumber,
       notes: notes ?? this.notes,
+      paidAmount: paidAmount ?? this.paidAmount,
     );
   }
 
@@ -82,7 +86,7 @@ class PurchaseEntity {
 
   double get totalAmount => taxableAmount + tax;
 
-  double get dueAmount => totalAmount;
+  double get dueAmount => totalAmount - (paidAmount ?? 0.0);
 
   @override
   String toString() {

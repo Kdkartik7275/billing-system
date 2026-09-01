@@ -39,7 +39,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 class Bootstrap {
   static Future<void> initialize() async {
-  
     await dotenv.load(fileName: '.env');
 
     await Hive.initFlutter();
@@ -117,19 +116,5 @@ class Bootstrap {
       ),
       permanent: true,
     );
-  }
-
-  static Future<void> recoverFromFailure() async {
-    try {
-      await Hive.close();
-    } catch (_) {
-      // ignore — boxes may not have been opened at all
-    }
-
-    try {
-      // Deletes every box's data from disk (registered adapters aren't required).
-      await Hive.deleteFromDisk();
-    } catch (e) {}
-    await initialize();
   }
 }

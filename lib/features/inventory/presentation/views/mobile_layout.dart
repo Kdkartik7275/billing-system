@@ -25,7 +25,7 @@ class InventoryMobileLayout extends StatelessWidget {
       return GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: LoadingOverlay(
-          isLoading: controller.isLoading.value || controller.deleting.value,
+          isLoading: controller.isLoading || controller.deleting.value,
           progressIndicator: circularProgress(context),
           color: Colors.black.withValues(alpha: .3),
           child: RefreshIndicator(
@@ -40,7 +40,8 @@ class InventoryMobileLayout extends StatelessWidget {
                   () => InventoryHeaderBar(
                     title: 'Inventory',
                     subtitle: '${controller.totalProductsCount} products',
-
+                    onExport: controller.exportProducts,
+                    isExporting: controller.exporting.value,
                     onAddProduct: () async {
                       final result = await Get.to<(ProductEntity, StockEntity)>(
                         () => AddProductPage(),

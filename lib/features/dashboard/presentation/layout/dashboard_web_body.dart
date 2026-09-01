@@ -34,14 +34,7 @@ class DashboardWebBody extends StatelessWidget {
                 onScan: () => BillingScanHandler.scanAndAddToCart(
                   context: context,
                   inventoryController: Get.find<InventoryController>(),
-                  cartController: Get.put(
-                    CartController(
-                      getAvailableStock: (productId) =>
-                          Get.find<InventoryController>()
-                              .stockQuantityFor(productId)
-                              .toInt(),
-                    ),
-                  ),
+                  cartController: Get.find<CartController>(),
                 ),
               ),
               const SizedBox(height: 24),

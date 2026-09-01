@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/core/sync/bill_sync_scheduler.dart';
 import 'package:billing_system/features/billing/domain/entities/bill_entity.dart';
@@ -9,6 +11,7 @@ import 'package:billing_system/features/billing/domain/usecases/sync_pending_bil
 import 'package:billing_system/features/inventory/domain/entities/product_entity.dart';
 import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -31,10 +34,10 @@ class BillingController extends GetxController {
 
   final InventoryController inventoryController = Get.find();
 
-  // Dashboard-scoped: last 7 days only.
+  StreamSubscription<List<StockReductionEvent>>? _stockReductionSub;
+
   final RxList<BillEntity> bills = RxList<BillEntity>([]);
 
-  // Sync-scoped: every unsynced bill regardless of age.
   final RxList<BillEntity> pending = RxList<BillEntity>([]);
 
   final RxBool syncing = RxBool(false);
@@ -52,7 +55,27 @@ class BillingController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
+    _stockReductionSub = billSyncScheduler.stockReductions.listen((events) {
+      try {
+        for (final e in events) {
+          inventoryController.updateStockQuantityLocally(
+            e.productId,
+            e.newQuantity,
+          );
+        }
+      } catch (e) {
+        debugPrint('BillingController: stock UI refresh failed: $e');
+      }
+    });
+
     _initializeBilling();
+  }
+
+  @override
+  void onClose() {
+    _stockReductionSub?.cancel();
+    super.onClose();
   }
 
   Future<void> _initializeBilling() async {
@@ -252,47 +275,26 @@ class BillingController extends GetxController {
     }
   }
 
-  // ---------------- SYNC + STOCK REDUCTION ----------------
+  // ---------------- SYNC ----------------
 
   Future<void> syncBills() async {
     try {
       syncing.value = true;
-      final result = await syncPendingBillsUsecase.call();
 
-      await result.fold((err) async => AppSnackbar.error(message: err.message), (
-        syncedBills,
-      ) async {
-        if (syncedBills.isEmpty) return;
+      final pendingCountBefore = pending.length;
 
-        await getPendingBills();
+      await billSyncScheduler.runNow();
 
-        final aggregateResult = await aggregateSoldQuantitiesUsecase(
-          syncedBills,
-        );
+      await getPendingBills();
+      await getBills();
 
-        await aggregateResult.fold((_) async {}, (aggregates) async {
-          if (aggregates.isEmpty) return;
-
-          final reductionResult = await reduceStockForSoldProductsUsecase(
-            aggregates,
-          );
-
-          reductionResult.fold((_) {}, (reductions) {
-            final inventoryController = Get.find<InventoryController>();
-            for (final r in reductions) {
-              inventoryController.updateStockQuantityLocally(
-                r.productId,
-                r.newQuantity,
-              );
-            }
-          });
-        });
-
+      final syncedCount = pendingCountBefore - pending.length;
+      if (syncedCount > 0) {
         AppSnackbar.success(
           message:
-              '${syncedBills.length} bill${syncedBills.length > 1 ? 's' : ''} synced successfully',
+              '$syncedCount bill${syncedCount > 1 ? 's' : ''} synced successfully',
         );
-      });
+      }
     } catch (e) {
       AppSnackbar.error(message: e.toString());
     } finally {

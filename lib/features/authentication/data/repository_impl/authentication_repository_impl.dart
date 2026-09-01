@@ -78,7 +78,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
         sl<Box<UserModel>>().clear(),
         sl<Box<ShopModel>>().clear(),
         sl<Box<UnitModel>>().clear(),
-        sl<Box>().clear(),
+        sl<Box>(instanceName: 'billingMeta').clear(),
         sl<Box>(instanceName: 'inventoryMeta').clear(),
         sl<Box<BillModel>>().clear(),
         sl<Box<BillingCartModel>>().clear(),

@@ -19,6 +19,8 @@ class LowStockAlerts extends StatelessWidget {
       child: Obx(() {
         final lowStockItems = controller.lowStockProducts;
         final hasLowStock = lowStockItems.isNotEmpty;
+        // Show a preview of up to 4 items inline; rest via "View All"
+        final previewItems = lowStockItems.take(4).toList();
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -27,7 +29,18 @@ class LowStockAlerts extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Low Stock Alerts', style: tt.titleMedium),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.error_outline_rounded,
+                      size: 18,
+                      color: hasLowStock ? Colors.red : Colors.amber.shade700,
+                    ),
+                    const SizedBox(width: 6),
+                    Text('Low Stock Alerts', style: tt.titleMedium),
+                  ],
+                ),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
@@ -43,7 +56,7 @@ class LowStockAlerts extends StatelessWidget {
                     '${lowStockItems.length} Item${lowStockItems.length == 1 ? '' : 's'}',
                     style: tt.bodySmall?.copyWith(
                       color: hasLowStock ? Colors.red : Colors.orange,
-                      fontWeight: FontWeight.normal,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -69,21 +82,134 @@ class LowStockAlerts extends StatelessWidget {
                   ),
                 ),
               )
-            else
+            else ...[
               ListView.separated(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 padding: EdgeInsets.zero,
-                itemCount: lowStockItems.length,
+                itemCount: previewItems.length,
                 separatorBuilder: (_, __) => const Divider(height: 1),
                 itemBuilder: (context, index) {
-                  final product = lowStockItems[index];
+                  final product = previewItems[index];
                   return _LowStockTile(product: product);
                 },
               ),
+              if (lowStockItems.length > previewItems.length) ...[
+                const SizedBox(height: 4),
+                Center(
+                  child: TextButton.icon(
+                    onPressed: () =>
+                        _showLowStockSheet(context, controller, lowStockItems),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      minimumSize: const Size(0, 36),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    icon: const Text('View All'),
+                    label: const Icon(Icons.arrow_forward_rounded, size: 16),
+                  ),
+                ),
+              ],
+            ],
           ],
         );
       }),
+    );
+  }
+
+  void _showLowStockSheet(
+    BuildContext context,
+    InventoryController controller,
+    List<ProductEntity> lowStockItems,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        final tt = Theme.of(sheetContext).textTheme;
+        return DraggableScrollableSheet(
+          initialChildSize: 0.7,
+          minChildSize: 0.4,
+          maxChildSize: 0.92,
+          expand: false,
+          builder: (context, scrollController) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Column(
+                children: [
+                  const SizedBox(height: 10),
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 14, 20, 8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.error_outline_rounded,
+                              size: 20,
+                              color: Colors.red,
+                            ),
+                            const SizedBox(width: 8),
+                            Text('Low Stock Items', style: tt.titleMedium),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            '${lowStockItems.length} Item${lowStockItems.length == 1 ? '' : 's'}',
+                            style: tt.bodySmall?.copyWith(
+                              color: Colors.red,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  Expanded(
+                    child: ListView.separated(
+                      controller: scrollController,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 4,
+                      ),
+                      itemCount: lowStockItems.length,
+                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final product = lowStockItems[index];
+                        return _LowStockTile(product: product);
+                      },
+                    ),
+                  ),
+                  SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
@@ -96,6 +222,9 @@ class _LowStockTile extends GetView<InventoryController> {
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
+    final isOutOfStock =
+        controller.stockStatusFor(product) == StockStatus.outOfStock;
+    final statusColor = isOutOfStock ? Colors.red : Colors.orange;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -105,10 +234,7 @@ class _LowStockTile extends GetView<InventoryController> {
             width: 8,
             height: 8,
             decoration: BoxDecoration(
-              color:
-                  controller.stockStatusFor(product) == StockStatus.outOfStock
-                  ? Colors.red
-                  : Colors.orange,
+              color: statusColor,
               shape: BoxShape.circle,
             ),
           ),
@@ -140,19 +266,13 @@ class _LowStockTile extends GetView<InventoryController> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color:
-                  controller.stockStatusFor(product) == StockStatus.outOfStock
-                  ? Colors.red.withValues(alpha: 0.08)
-                  : Colors.orange.withValues(alpha: .08),
+              color: statusColor.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
               '${controller.stockQuantityFor(product.id).toInt()} ${controller.unitName(product.unitId)}',
               style: tt.bodySmall?.copyWith(
-                color:
-                    controller.stockStatusFor(product) == StockStatus.outOfStock
-                    ? Colors.red
-                    : Colors.orange,
+                color: statusColor,
                 fontWeight: FontWeight.w600,
               ),
             ),

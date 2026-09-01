@@ -196,6 +196,12 @@ class BillRepositoryImpl implements BillRepository {
       await localDataSource.saveAllBills(syncedModels);
       await localDataSource.setHydrated();
 
+      for (var d = start; !d.isAfter(now); d = d.add(const Duration(days: 1))) {
+        await localDataSource.markDateHydrated(
+          DateTime(d.year, d.month, d.day),
+        );
+      }
+
       return const Right(null);
     } catch (e) {
       return left(FirebaseFailure(message: e.toString()));
@@ -231,6 +237,11 @@ class BillRepositoryImpl implements BillRepository {
         return right(localBills.map((bill) => bill.toEntity()).toList());
       }
 
+      final alreadyHydrated = await localDataSource.isDateHydrated(date);
+      if (alreadyHydrated) {
+        return const Right([]);
+      }
+
       if (!await connectionChecker.isConnected) {
         return const Right([]);
       }
@@ -244,6 +255,8 @@ class BillRepositoryImpl implements BillRepository {
 
         await localDataSource.saveAllBills(localModels);
       }
+
+      await localDataSource.markDateHydrated(date);
 
       return right(remoteBills.map((bill) => bill.toEntity()).toList());
     } catch (e) {

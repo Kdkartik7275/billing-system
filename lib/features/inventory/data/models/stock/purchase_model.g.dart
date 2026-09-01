@@ -32,13 +32,14 @@ class PurchaseModelAdapter extends TypeAdapter<PurchaseModel> {
       dueDate: fields[12] as DateTime,
       batchNumber: fields[13] as String,
       notes: fields[14] as String?,
+      paidAmount: fields[15] as double?,
     );
   }
 
   @override
   void write(BinaryWriter writer, PurchaseModel obj) {
     writer
-      ..writeByte(15)
+      ..writeByte(16)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -68,7 +69,9 @@ class PurchaseModelAdapter extends TypeAdapter<PurchaseModel> {
       ..writeByte(13)
       ..write(obj.batchNumber)
       ..writeByte(14)
-      ..write(obj.notes);
+      ..write(obj.notes)
+      ..writeByte(15)
+      ..write(obj.paidAmount);
   }
 
   @override

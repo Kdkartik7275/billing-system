@@ -1,24 +1,4 @@
-// final List<String> suppliers = const [
-//   'Samsung India Pvt Ltd',
-//   'Reliance Digital',
-//   'Local Distributor Co.',
-//   'Global Traders Inc.',
-// ];
-
-// final List<String> units = const [
-//   'Piece',
-//   'Box',
-//   'Kg',
-//   'Litre',
-//   'Pack',
-//   'Dozen',
-// ];
-
-final List<String> warehouses = const [
-  'Main Store',
-  'Warehouse A',
-  'Warehouse B',
-];
+final List<String> warehouses = const ['Main Store'];
 
 final List<String> gstRates = const ['0%', '5%', '12%', '18%', '28%'];
 

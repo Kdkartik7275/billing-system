@@ -38,6 +38,7 @@ abstract class StockRepository {
     required String supplierId,
     required int quantity,
     required double price,
+    required double paidAmount,
     required DateTime purchaseDate,
     required String invoiceNumber,
     required DateTime billDate,

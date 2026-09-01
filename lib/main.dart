@@ -45,19 +45,6 @@ Future<void> main() async {
         fatal: true,
       );
     }
-
-    try {
-      await Bootstrap.recoverFromFailure();
-    } catch (recoveryError, recoveryStackTrace) {
-      if (!kIsWeb) {
-        await CrashlyticsService.recordError(
-          recoveryError,
-          recoveryStackTrace,
-          reason: 'Bootstrap recovery failed',
-          fatal: true,
-        );
-      }
-    }
   }
 
   runApp(const MyApp());

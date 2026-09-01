@@ -66,6 +66,7 @@ abstract interface class StockRemoteDataSource {
     required String supplierId,
     required int quantity,
     required double price,
+    required double paidAmount,
     required DateTime purchaseDate,
     required String invoiceNumber,
     required DateTime billDate,
@@ -341,6 +342,7 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
     required double tax,
     required String paymentMethod,
     required DateTime dueDate,
+    required double paidAmount,
     String? notes,
   }) async {
     try {
@@ -424,6 +426,7 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
           dueDate: dueDate,
           batchNumber: batchNumber,
           notes: notes,
+          paidAmount: paidAmount,
         );
 
         transaction.set(purchaseRef, purchase.toJson());

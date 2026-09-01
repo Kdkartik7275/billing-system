@@ -1,9 +1,19 @@
+import 'dart:async';
+
 import 'package:billing_system/features/billing/domain/repositories/bill_repository.dart';
 import 'package:billing_system/features/billing/domain/usecases/aggregate_sold_quantities_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/reduce_stock_for_sold_products_usecase.dart';
-import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
-import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+
+class StockReductionEvent {
+  final String productId;
+  final double newQuantity;
+
+  const StockReductionEvent({
+    required this.productId,
+    required this.newQuantity,
+  });
+}
 
 class BillSyncScheduler {
   final BillRepository billRepository;
@@ -20,6 +30,16 @@ class BillSyncScheduler {
 
   static const _lastSyncKey = 'last_bill_sync_at';
   static const _syncInterval = Duration(hours: 24);
+
+  final _stockReductionsController =
+      StreamController<List<StockReductionEvent>>.broadcast();
+
+  Stream<List<StockReductionEvent>> get stockReductions =>
+      _stockReductionsController.stream;
+
+  void dispose() {
+    _stockReductionsController.close();
+  }
 
   Future<void> hydrateIfNeeded() async {
     await billRepository.hydrateFromRemote();
@@ -48,6 +68,11 @@ class BillSyncScheduler {
         // Offline or sync failed — retried on the next check.
       },
       (syncedBills) async {
+        // Remote state is now committed. Everything past this point
+        // is best-effort local bookkeeping and must never throw
+        // back out of runNow(), or callers may mistake a UI-side
+        // failure for a sync failure and retry a sync that already
+        // succeeded remotely.
         await metaBox.put(_lastSyncKey, DateTime.now().toIso8601String());
 
         if (syncedBills.isNotEmpty) {
@@ -58,17 +83,34 @@ class BillSyncScheduler {
           await aggregateResult.fold((_) async {}, (aggregates) async {
             if (aggregates.isEmpty) return;
 
-            final reductionResult = await reduceStockForSoldProductsUsecase(
+            final reductionResult = await reduceStockForSoldProductsUsecase.call(
               aggregates,
             );
 
             reductionResult.fold((_) {}, (reductions) {
-              final inventoryController = Get.find<InventoryController>();
-              for (final r in reductions) {
-                inventoryController.updateStockQuantityLocally(
-                  r.productId,
-                  r.newQuantity,
-                );
+              // Emit the event regardless of whether anyone is
+              // listening right now. Guard it too: a broadcast
+              // stream with a bad/disposed listener can still
+              // rethrow synchronously into the emitter in some
+              // edge cases (e.g. listener throwing in onData),
+              // and this call must never be allowed to abort
+              // pruneOldLocalBills() below.
+              try {
+                final events = reductions
+                    .map(
+                      (r) => StockReductionEvent(
+                        productId: r.productId,
+                        newQuantity: r.newQuantity,
+                      ),
+                    )
+                    .toList();
+                _stockReductionsController.add(events);
+              } catch (_) {
+                // UI notification failed — stock was already
+                // reduced in the persisted/local data source by
+                // reduceStockForSoldProductsUsecase. This is a
+                // display-sync issue, not a data issue, so it
+                // must not abort the run.
               }
             });
           });

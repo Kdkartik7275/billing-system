@@ -42,37 +42,6 @@ class UserController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxnString errorMessage = RxnString();
 
-  Future<void> fetchUser(String userId) async {
-    final result = await _getUserByIdUseCase.call(userId);
-    result.fold(
-      (failure) {
-        // Handle failure
-        debugPrint('Error fetching user: $failure');
-      },
-      (fetchedUser) {
-        // Handle success
-        user.value = fetchedUser;
-        debugPrint('Fetched user: ${fetchedUser.name}');
-      },
-    );
-  }
-
-  Future<void> fetchShop(String shopId) async {
-    final result = await _getShopByIdUseCase.call(shopId);
-    result.fold(
-      (failure) {
-        // Handle failure
-        debugPrint('Error fetching shop: $failure');
-      },
-      (fetchedShop) {
-        // Handle success
-        shop.value = fetchedShop;
-
-        debugPrint('Fetched shop: ${fetchedShop.shopName}');
-      },
-    );
-  }
-
   Future<bool> fetchAccountDetails({required String userId}) async {
     isLoading.value = true;
     errorMessage.value = null;
@@ -174,29 +143,6 @@ class UserController extends GetxController {
       return false;
     }
   }
-
-  // Future<String> checkSession() async {
-  //   final authUser = FirebaseAuth.instance.currentUser;
-
-  //   if (authUser == null) {
-  //     return AppRoutes.login;
-  //   }
-
-  //   final restored = await restoreSession();
-
-  //   if (restored) {
-  //     return AppRoutes.dashboard;
-  //   }
-
-  //   final loaded = await fetchAccountDetails(userId: authUser.uid);
-
-  //   if (loaded) {
-  //     return AppRoutes.dashboard;
-  //   }
-
-  //   await FirebaseAuth.instance.signOut();
-  //   return AppRoutes.login;
-  // }
 
   Future<bool> authenticateWithBiometric() async {
     try {

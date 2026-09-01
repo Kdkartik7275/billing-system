@@ -33,6 +33,10 @@ abstract interface class BillLocalDataSource {
   Future<bool> isHydrated();
 
   Future<void> setHydrated();
+
+  Future<bool> isDateHydrated(DateTime date);
+
+  Future<void> markDateHydrated(DateTime date);
 }
 
 class BillLocalDataSourceImpl implements BillLocalDataSource {
@@ -118,7 +122,7 @@ class BillLocalDataSourceImpl implements BillLocalDataSource {
     await box.clear();
   }
 
-  // ---------------- HYDRATION FLAG ----------------
+  // ---------------- HYDRATION FLAG (BULK 30-DAY PULL) ----------------
 
   @override
   Future<bool> isHydrated() async {
@@ -128,6 +132,33 @@ class BillLocalDataSourceImpl implements BillLocalDataSource {
   @override
   Future<void> setHydrated() async {
     await metaBox.put('bills_hydrated', true);
+  }
+
+  // ---------------- PER-DATE HYDRATION ----------------
+
+  static const _hydratedDatesKey = 'hydrated_bill_dates';
+
+  String _dateKey(DateTime date) =>
+      '${date.year.toString().padLeft(4, '0')}-'
+      '${date.month.toString().padLeft(2, '0')}-'
+      '${date.day.toString().padLeft(2, '0')}';
+
+  Set<String> _readHydratedDates() {
+    final raw = metaBox.get(_hydratedDatesKey) as List?;
+    if (raw == null) return <String>{};
+    return raw.map((e) => e.toString()).toSet();
+  }
+
+  @override
+  Future<bool> isDateHydrated(DateTime date) async {
+    return _readHydratedDates().contains(_dateKey(date));
+  }
+
+  @override
+  Future<void> markDateHydrated(DateTime date) async {
+    final hydratedDates = _readHydratedDates();
+    hydratedDates.add(_dateKey(date));
+    await metaBox.put(_hydratedDatesKey, hydratedDates.toList());
   }
 
   // ---------------- LOCAL BILL NUMBERING ----------------
@@ -165,6 +196,23 @@ class BillLocalDataSourceImpl implements BillLocalDataSource {
     if (staleBillIds.isEmpty) return 0;
 
     await box.deleteAll(staleBillIds);
+
+    final hydratedDates = _readHydratedDates();
+    final beforeCutoffOnly = DateTime(before.year, before.month, before.day);
+    final trimmed = hydratedDates.where((key) {
+      final parts = key.split('-');
+      if (parts.length != 3) return false;
+      final keyDate = DateTime(
+        int.parse(parts[0]),
+        int.parse(parts[1]),
+        int.parse(parts[2]),
+      );
+      return !keyDate.isBefore(beforeCutoffOnly);
+    }).toSet();
+
+    if (trimmed.length != hydratedDates.length) {
+      await metaBox.put(_hydratedDatesKey, trimmed.toList());
+    }
 
     return staleBillIds.length;
   }

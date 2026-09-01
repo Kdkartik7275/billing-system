@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:billing_system/core/helper/export_products_data.dart';
 import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/features/inventory/domain/usecases/brand/get_brands_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/category/get_categories_usecase.dart';
@@ -9,6 +12,7 @@ import 'package:billing_system/features/inventory/domain/usecases/unit/get_units
 import 'package:billing_system/features/inventory/presentation/views/product_details/product_detail_page.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
+import 'package:printing/printing.dart';
 
 import '../../domain/entities/brand_entity.dart';
 import '../../domain/entities/category_entity.dart';
@@ -48,10 +52,23 @@ class InventoryController extends GetxController {
 
   final RxString sortColumn = 'name'.obs;
   final RxBool sortAscending = true.obs;
+  final RxBool exporting = false.obs;
 
-  final RxBool isLoading = false.obs;
+  // ── Loading tracking ────────────────────────────────────────
+
+  final RxSet<String> _inFlightLoaders = <String>{}.obs;
+  bool get isLoading => _inFlightLoaders.isNotEmpty;
+
+  // ── Error tracking ──────────────────────────────────────────
+
+  final RxMap<String, String> _loadErrors = <String, String>{}.obs;
+  Map<String, String> get loadErrors => _loadErrors;
+  bool get hasLoadErrors => _loadErrors.isNotEmpty;
+
+  String? get errorMessage =>
+      _loadErrors.isEmpty ? null : _loadErrors.values.join('\n');
+
   final RxBool deleting = false.obs;
-  final RxnString errorMessage = RxnString();
 
   InventoryController({
     required this.getProductsUseCase,
@@ -76,6 +93,19 @@ class InventoryController extends GetxController {
     ]);
   }
 
+  void _beginLoad(String key) {
+    _loadErrors.remove(key); // clear only this loader's previous error
+    _inFlightLoaders.add(key);
+  }
+
+  void _endLoad(String key) {
+    _inFlightLoaders.remove(key);
+  }
+
+  void _recordError(String key, String message) {
+    _loadErrors[key] = message;
+  }
+
   List<ProductEntity> get lowStockProducts {
     return products
         .where((p) => stockStatusFor(p) == StockStatus.lowStock)
@@ -83,93 +113,129 @@ class InventoryController extends GetxController {
   }
 
   Future<void> loadProducts() async {
-    isLoading.value = true;
-    errorMessage.value = null;
+    const key = 'products';
+    _beginLoad(key);
     try {
       final result = await getProductsUseCase.call();
-      result.fold((err) => AppSnackbar.error(message: err.message), (prods) {
-        products.assignAll(prods);
-      });
+      result.fold(
+        (err) {
+          AppSnackbar.error(message: err.message);
+          _recordError(key, err.message);
+        },
+        (prods) {
+          products.assignAll(prods);
+        },
+      );
     } catch (e) {
-      errorMessage.value = 'Failed to load products: ${e.toString()}';
+      _recordError(key, 'Failed to load products: ${e.toString()}');
     } finally {
-      isLoading.value = false;
+      _endLoad(key);
     }
   }
 
   Future<void> loadCategories() async {
-    isLoading.value = true;
-    errorMessage.value = null;
+    const key = 'categories';
+    _beginLoad(key);
     try {
       final result = await getCategoriesUsecase.call();
-      result.fold((err) => AppSnackbar.error(message: err.message), (c) {
-        categories.assignAll(c);
-      });
+      result.fold(
+        (err) {
+          AppSnackbar.error(message: err.message);
+          _recordError(key, err.message);
+        },
+        (c) {
+          categories.assignAll(c);
+        },
+      );
     } catch (e) {
-      errorMessage.value = 'Failed to load products: ${e.toString()}';
+      _recordError(key, 'Failed to load categories: ${e.toString()}');
     } finally {
-      isLoading.value = false;
+      _endLoad(key);
     }
   }
 
   Future<void> loadUnits() async {
-    isLoading.value = true;
-    errorMessage.value = null;
+    const key = 'units';
+    _beginLoad(key);
     try {
       final result = await getUnitsUsecase.call();
-      result.fold((err) => AppSnackbar.error(message: err.message), (u) {
-        units.assignAll(u);
-      });
+      result.fold(
+        (err) {
+          AppSnackbar.error(message: err.message);
+          _recordError(key, err.message);
+        },
+        (u) {
+          units.assignAll(u);
+        },
+      );
     } catch (e) {
-      errorMessage.value = 'Failed to load units: ${e.toString()}';
+      _recordError(key, 'Failed to load units: ${e.toString()}');
     } finally {
-      isLoading.value = false;
+      _endLoad(key);
     }
   }
 
   Future<void> loadBrands() async {
-    isLoading.value = true;
-    errorMessage.value = null;
+    const key = 'brands';
+    _beginLoad(key);
     try {
       final result = await getBrandsUsecase.call();
-      result.fold((err) => AppSnackbar.error(message: err.message), (b) {
-        brands.assignAll(b);
-      });
+      result.fold(
+        (err) {
+          AppSnackbar.error(message: err.message);
+          _recordError(key, err.message);
+        },
+        (b) {
+          brands.assignAll(b);
+        },
+      );
     } catch (e) {
-      errorMessage.value = 'Failed to load products: ${e.toString()}';
+      _recordError(key, 'Failed to load brands: ${e.toString()}');
     } finally {
-      isLoading.value = false;
+      _endLoad(key);
     }
   }
 
   Future<void> loadStocks() async {
-    isLoading.value = true;
-    errorMessage.value = null;
+    const key = 'stocks';
+    _beginLoad(key);
     try {
       final result = await getStocksUsecase.call();
-      result.fold((err) => AppSnackbar.error(message: err.message), (c) {
-        stockRecords.assignAll(c);
-        debugPrint(c.length.toString());
-      });
+      result.fold(
+        (err) {
+          AppSnackbar.error(message: err.message);
+          _recordError(key, err.message);
+        },
+        (c) {
+          stockRecords.assignAll(c);
+          debugPrint(c.length.toString());
+        },
+      );
     } catch (e) {
-      errorMessage.value = 'Failed to load stocks: ${e.toString()}';
+      _recordError(key, 'Failed to load stocks: ${e.toString()}');
     } finally {
-      isLoading.value = false;
+      _endLoad(key);
     }
   }
 
   Future<void> loadSuppliers() async {
-    isLoading.value = true;
-    errorMessage.value = null;
+    const key = 'suppliers';
+    _beginLoad(key);
     try {
       final result = await getSuppliersUsecase.call();
-      result.fold((err) => AppSnackbar.error(message: err.message), (s) {
-        suppliers.assignAll(s);
-      });
+      result.fold(
+        (err) {
+          AppSnackbar.error(message: err.message);
+          _recordError(key, err.message);
+        },
+        (s) {
+          suppliers.assignAll(s);
+        },
+      );
     } catch (e) {
-      errorMessage.value = 'Failed to load units: ${e.toString()}';
+      _recordError(key, 'Failed to load suppliers: ${e.toString()}');
     } finally {
-      isLoading.value = false;
+      _endLoad(key);
     }
   }
 
@@ -358,7 +424,6 @@ class InventoryController extends GetxController {
 
   Future<void> refreshProducts() async {
     await loadProducts();
-    
   }
 
   void deleteProduct(String productId) async {
@@ -380,11 +445,61 @@ class InventoryController extends GetxController {
     }
   }
 
-  void exportProducts() {
-    Get.snackbar(
-      'Export started',
-      'Preparing ${filteredProducts.length} products for export…',
-      snackPosition: SnackPosition.BOTTOM,
-    );
+  Future<void> exportProducts() async {
+    if (exporting.value) return; 
+
+    exporting.value = true;
+    try {
+      final rowsToExport = filteredProducts; 
+
+      if (rowsToExport.isEmpty) {
+       AppSnackbar.info(message: 'No products to export.');
+        return;
+      }
+
+      
+      AppSnackbar.info(message:  'Preparing ${rowsToExport.length} products for export…');
+
+      final exportRows = rowsToExport
+          .map(
+            (p) => ProductExportRow(
+              name: p.name,
+              sku: p.sku,
+              barcode: p.barcode,
+              category: categoryName(p.categoryId),
+              brand: brandName(p.brandId),
+              unit: unitName(p.unitId),
+              purchasePrice: p.price.purchasePrice,
+              sellingPrice: p.price.sellingPrice,
+              stockQuantity: stockQuantityFor(p.id),
+              stockStatus: stockStatusFor(p),
+              isActive: p.settings.isActive,
+            ),
+          )
+          .toList();
+
+      final file = await const ProductPdfExporter().export(
+        rows: exportRows,
+        title: 'Product Inventory Report',
+      );
+
+      await _shareOrOpen(file);
+    } catch (e) {
+      AppSnackbar.error(message: 'Export failed: ${e.toString()}');
+      debugPrint('Export failed: ${e.toString()}');
+    } finally {
+      exporting.value = false;
+    }
+  }
+
+  Future<void> _shareOrOpen(File file) async {
+    try {
+      await Printing.sharePdf(
+        bytes: await file.readAsBytes(),
+        filename: file.path.split('/').last,
+      );
+    } catch (e) {
+      AppSnackbar.error(message: 'Could not open share sheet: ${e.toString()}');
+    }
   }
 }

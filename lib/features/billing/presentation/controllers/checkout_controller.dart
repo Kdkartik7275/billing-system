@@ -179,9 +179,6 @@ class CheckoutController extends GetxController {
   // ---------------- STEP NAVIGATION ----------------
 
   void goToReceivePayment() {
-    step.value = CheckoutStep.payment == step.value
-        ? CheckoutStep.receive
-        : step.value;
     step.value = CheckoutStep.receive;
   }
 
@@ -293,7 +290,7 @@ class CheckoutController extends GetxController {
           synced: false,
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
-          warehouseId: '',
+          warehouseId: 'Main Store',
         );
 
         return bill;

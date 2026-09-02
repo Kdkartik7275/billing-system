@@ -423,6 +423,7 @@ class InventoryController extends GetxController {
   }
 
   Future<void> refreshProducts() async {
+    debugPrint('Refreshing products...');
     await loadProducts();
   }
 
@@ -446,19 +447,20 @@ class InventoryController extends GetxController {
   }
 
   Future<void> exportProducts() async {
-    if (exporting.value) return; 
+    if (exporting.value) return;
 
     exporting.value = true;
     try {
-      final rowsToExport = filteredProducts; 
+      final rowsToExport = filteredProducts;
 
       if (rowsToExport.isEmpty) {
-       AppSnackbar.info(message: 'No products to export.');
+        AppSnackbar.info(message: 'No products to export.');
         return;
       }
 
-      
-      AppSnackbar.info(message:  'Preparing ${rowsToExport.length} products for export…');
+      AppSnackbar.info(
+        message: 'Preparing ${rowsToExport.length} products for export…',
+      );
 
       final exportRows = rowsToExport
           .map(
@@ -478,12 +480,12 @@ class InventoryController extends GetxController {
           )
           .toList();
 
-      final file = await const ProductPdfExporter().export(
+      final result = await const ProductPdfExporter().export(
         rows: exportRows,
         title: 'Product Inventory Report',
       );
 
-      await _shareOrOpen(file);
+      await _shareOrOpen(result);
     } catch (e) {
       AppSnackbar.error(message: 'Export failed: ${e.toString()}');
       debugPrint('Export failed: ${e.toString()}');
@@ -492,12 +494,9 @@ class InventoryController extends GetxController {
     }
   }
 
-  Future<void> _shareOrOpen(File file) async {
+  Future<void> _shareOrOpen(ProductExportResult result) async {
     try {
-      await Printing.sharePdf(
-        bytes: await file.readAsBytes(),
-        filename: file.path.split('/').last,
-      );
+      await Printing.sharePdf(bytes: result.bytes, filename: result.fileName);
     } catch (e) {
       AppSnackbar.error(message: 'Could not open share sheet: ${e.toString()}');
     }

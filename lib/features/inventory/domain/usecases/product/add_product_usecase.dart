@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:billing_system/core/config/constants/dropdown_values.dart';
 import 'package:billing_system/core/config/constants/typedefs.dart';
 import 'package:billing_system/core/errors/failure.dart';
 import 'package:billing_system/core/usecases/usecases.dart';
@@ -158,7 +159,7 @@ class AddProductUseCase
     final stock = StockEntity(
       id: const Uuid().v4(),
       productId: createdProduct.id,
-      warehouseId: 'default',
+      warehouseId: warehouses.first,
       quantity: params.openingStock,
       reservedQuantity: 0,
       lastUpdated: DateTime.now(),

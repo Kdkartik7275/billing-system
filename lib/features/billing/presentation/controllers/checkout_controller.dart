@@ -1,3 +1,4 @@
+import 'package:billing_system/core/config/constants/dropdown_values.dart';
 import 'package:billing_system/core/enums/billing.dart';
 import 'package:billing_system/features/billing/domain/entities/bill_entity.dart';
 import 'package:billing_system/features/billing/domain/entities/bill_item_entity.dart';
@@ -290,7 +291,7 @@ class CheckoutController extends GetxController {
           synced: false,
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
-          warehouseId: 'Main Store',
+          warehouseId: warehouses.first,
         );
 
         return bill;

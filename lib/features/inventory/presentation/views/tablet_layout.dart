@@ -39,6 +39,8 @@ class InventoryTabletLayout extends StatelessWidget {
                       () => InventoryHeaderBar(
                         title: 'Inventory',
                         subtitle: '${controller.totalProductsCount} products',
+                        onExport: controller.exportProducts,
+                        isExporting: controller.exporting.value,
                         onAddProduct: () async {
                           final result =
                               await Get.to<(ProductEntity, StockEntity)>(

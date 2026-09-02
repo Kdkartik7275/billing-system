@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:billing_system/features/inventory/domain/entities/stock_entity.dart';
 import 'package:intl/intl.dart';
@@ -36,13 +37,26 @@ class ProductExportRow {
   double get inventoryValue => purchasePrice * stockQuantity;
 }
 
+/// Result of building a product export PDF: the raw bytes plus a
+/// suggested filename. Callers decide how to persist/share it —
+/// this class stays platform-agnostic (no dart:io, no path_provider)
+/// so it works identically on mobile, desktop, and web.
+class ProductExportResult {
+  final Uint8List bytes;
+  final String fileName;
+
+  const ProductExportResult({required this.bytes, required this.fileName});
+}
+
 class ProductPdfExporter {
   const ProductPdfExporter();
 
   static const _currencyPrefix = 'Rs. ';
   static final _dateFormat = DateFormat('dd MMM yyyy, hh:mm a');
 
-  Future<File> export({
+  /// Builds the PDF and returns it as bytes. No filesystem access here —
+  /// safe to call on any platform including web.
+  Future<ProductExportResult> export({
     required List<ProductExportRow> rows,
     String title = 'Product Inventory Report',
     String? shopName,
@@ -83,12 +97,9 @@ class ProductPdfExporter {
     );
 
     final bytes = await doc.save();
-    final dir = await getTemporaryDirectory();
     final fileName =
         'product_export_${DateFormat('yyyyMMdd_HHmmss').format(generatedAt)}.pdf';
-    final file = File('${dir.path}/$fileName');
-    await file.writeAsBytes(bytes, flush: true);
-    return file;
+    return ProductExportResult(bytes: bytes, fileName: fileName);
   }
 
   // ---------------- HEADER / FOOTER ----------------

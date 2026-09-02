@@ -13,6 +13,7 @@ import 'package:billing_system/features/inventory/domain/entities/stock_movement
 import 'package:billing_system/features/inventory/domain/repositories/stock_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:uuid/uuid.dart';
 
 class StockRepositoryImpl implements StockRepository {
   final StockRemoteDataSource remoteDataSource;
@@ -27,6 +28,7 @@ class StockRepositoryImpl implements StockRepository {
 
   static const _refreshInterval = Duration(hours: 24);
   static const _historyWindow = Duration(days: 60);
+  static const _uuid = Uuid();
 
   // ==========================================================
   // Writes — remote first, then local cache
@@ -227,6 +229,108 @@ class StockRepositoryImpl implements StockRepository {
       }
 
       await localDataSource.createStockMovement(result.$3);
+
+      return right(null);
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  // ==========================================================
+  // Sale-time deduction — LOCAL ONLY, must work offline
+  // ==========================================================
+
+  @override
+  ResultFuture<List<AppliedStockReduction>> applySaleLocally({
+    required List<SaleStockLine> lines,
+    required String warehouseId,
+    required String billId,
+    String? performedByUserId,
+  }) async {
+    try {
+      // Collapse duplicate lines first: the same product can legitimately
+      // appear twice on one bill, and deducting per line would be correct
+      // but would also write two movements with inconsistent snapshots.
+      final quantityByProductId = <String, double>{};
+      for (final line in lines) {
+        if (line.quantity <= 0) continue;
+        quantityByProductId.update(
+          line.productId,
+          (existing) => existing + line.quantity,
+          ifAbsent: () => line.quantity,
+        );
+      }
+
+      final applied = <AppliedStockReduction>[];
+      final now = DateTime.now();
+
+      for (final entry in quantityByProductId.entries) {
+        final existing = await localDataSource.getStockForProduct(entry.key);
+
+        // No local stock record means this product was never stocked on
+        // this device. Skipping is safer than inventing a negative record.
+        if (existing == null) continue;
+
+        final reduced = existing.quantity - entry.value;
+        final newQuantity = reduced < 0 ? 0.0 : reduced;
+
+        await localDataSource.updateStock(
+          existing.copyWith(quantity: newQuantity, lastUpdated: now),
+        );
+
+        await localDataSource.createStockMovement(
+          StockMovementModel.fromEntity(
+            StockMovementEntity(
+              id: _uuid.v4(),
+              productId: entry.key,
+              warehouseId: existing.warehouseId.isNotEmpty
+                  ? existing.warehouseId
+                  : warehouseId,
+              type: StockMovementType.saleOut,
+              quantityChange: -entry.value,
+              resultingQuantity: newQuantity,
+              referenceId: billId,
+              performedByUserId: performedByUserId,
+              createdAt: now,
+            ),
+          ),
+        );
+
+        applied.add(
+          AppliedStockReduction(
+            productId: entry.key,
+            newQuantity: newQuantity,
+          ),
+        );
+      }
+
+      return right(applied);
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultFuture<void> pushLocalStockToRemote(List<String> productIds) async {
+    try {
+      if (productIds.isEmpty) return right(null);
+
+      if (!await connectionChecker.isConnected) {
+        return left(FirebaseFailure(message: 'No Internet Connection'));
+      }
+
+      for (final productId in productIds.toSet()) {
+        final local = await localDataSource.getStockForProduct(productId);
+        if (local == null) continue;
+
+        try {
+          await remoteDataSource.updateStock(local);
+        } catch (_) {
+          // One product failing must not abandon the rest; the next sync
+          // run pushes the same absolute quantity again, so retrying is
+          // always safe.
+        }
+      }
 
       return right(null);
     } catch (e) {

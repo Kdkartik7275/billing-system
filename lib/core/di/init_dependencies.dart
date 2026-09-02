@@ -21,6 +21,7 @@ import 'package:billing_system/features/billing/data/repository_impl/billing_car
 import 'package:billing_system/features/billing/domain/repositories/bill_repository.dart';
 import 'package:billing_system/features/billing/domain/repositories/billing_cart_repository.dart';
 import 'package:billing_system/features/billing/domain/usecases/aggregate_sold_quantities_usecase.dart';
+import 'package:billing_system/features/billing/domain/usecases/apply_bill_stock_reduction_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/clear_cart_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/create_bill_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/delete_bill_usecase.dart';

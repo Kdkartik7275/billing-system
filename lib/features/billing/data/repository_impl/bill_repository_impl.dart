@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:billing_system/core/config/constants/typedefs.dart';
 import 'package:billing_system/core/enums/billing.dart';
 import 'package:billing_system/core/errors/failure.dart';
@@ -20,7 +22,7 @@ class BillRepositoryImpl implements BillRepository {
     required this.connectionChecker,
   });
 
-  // ---------------- CREATE — LOCAL ONLY, NEVER TOUCHES NETWORK ----------------
+  // ---------------- CREATE — LOCAL FIRST, THEN BEST-EFFORT PUSH ----------------
 
   @override
   ResultFuture<BillEntity> createBill(BillEntity bill) async {
@@ -29,9 +31,25 @@ class BillRepositoryImpl implements BillRepository {
 
       final result = await localDataSource.addBill(model);
 
+      // The local write is what the sale depends on, so it stays the only
+      // awaited step — checkout must never wait on, or fail because of,
+      // the network. The push is fired off separately: previously the
+      // only path to the server was the once-daily scheduler, so a bill
+      // could live for up to 24 hours on a single device and was lost for
+      // good if the app was uninstalled before then.
+      unawaited(_pushInBackground(result.id));
+
       return right(result.toEntity());
     } catch (e) {
       return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  Future<void> _pushInBackground(String billId) async {
+    try {
+      await pushBillNow(billId);
+    } catch (_) {
+      // Still queued locally as unsynced; the scheduler retries it.
     }
   }
 
@@ -160,13 +178,21 @@ class BillRepositoryImpl implements BillRepository {
     }
   }
 
-  // ---------------- HYDRATE — ONE-TIME PULL-BACK AFTER REINSTALL ----------------
+  // ---------------- HYDRATE — PULL-BACK AFTER REINSTALL ----------------
 
   @override
   ResultFuture<void> hydrateFromRemote() async {
     try {
+      // The hydration flag lives in `billing_meta` while the bills live in
+      // the `bills` box, so the two can drift apart — an OS-level backup
+      // restore, a partial wipe, or the 30-day prune can each leave the
+      // flag set over an empty box. Treating the flag alone as proof of
+      // hydration turned that into a permanent empty dashboard, because
+      // nothing ever asked the server again. Re-check the actual data.
       final alreadyHydrated = await localDataSource.isHydrated();
-      if (alreadyHydrated) return const Right(null);
+      final localBillCount = await localDataSource.countBills();
+
+      if (alreadyHydrated && localBillCount > 0) return const Right(null);
 
       if (!await connectionChecker.isConnected) {
         return left(
@@ -194,13 +220,57 @@ class BillRepositoryImpl implements BillRepository {
           .toList();
 
       await localDataSource.saveAllBills(syncedModels);
-      await localDataSource.setHydrated();
 
-      for (var d = start; !d.isAfter(now); d = d.add(const Duration(days: 1))) {
-        await localDataSource.markDateHydrated(
-          DateTime(d.year, d.month, d.day),
-        );
+      // Only latch the flag once a read genuinely came back with data.
+      // An empty result is far more often "we asked too early / the wrong
+      // project / before the sale was ever pushed" than a shop with no
+      // sales in 30 days, and latching on empty is unrecoverable.
+      if (syncedModels.isNotEmpty) {
+        await localDataSource.setHydrated();
+
+        for (
+          var d = start;
+          !d.isAfter(now);
+          d = d.add(const Duration(days: 1))
+        ) {
+          await localDataSource.markDateHydrated(
+            DateTime(d.year, d.month, d.day),
+          );
+        }
       }
+
+      return const Right(null);
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultFuture<void> markStockApplied(String billId) async {
+    try {
+      await localDataSource.markStockApplied(billId);
+      return const Right(null);
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultFuture<void> pushBillNow(String billId) async {
+    try {
+      final bill = await localDataSource.getBillById(billId);
+      if (bill == null) {
+        return left(FirebaseFailure(message: 'Bill not found'));
+      }
+
+      if (bill.synced) return const Right(null);
+
+      if (!await connectionChecker.isConnected) {
+        return left(FirebaseFailure(message: 'No Internet Connection'));
+      }
+
+      await remoteDataSource.addBill(bill);
+      await localDataSource.markBillSynced(billId);
 
       return const Right(null);
     } catch (e) {

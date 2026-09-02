@@ -387,6 +387,7 @@ void _initBilling() {
       billRepository: sl(),
       metaBox: sl<Box>(instanceName: 'billingMeta'),
       reduceStockForSoldProductsUsecase: sl(),
+      stockRepository: sl(),
     ),
   );
 
@@ -411,5 +412,11 @@ void _initBilling() {
   );
   sl.registerLazySingleton(
     () => ReduceStockForSoldProductsUsecase(stockRepository: sl()),
+  );
+  sl.registerLazySingleton(
+    () => ApplyBillStockReductionUsecase(
+      stockRepository: sl(),
+      billRepository: sl(),
+    ),
   );
 }

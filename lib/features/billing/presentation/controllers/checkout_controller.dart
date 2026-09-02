@@ -1,14 +1,15 @@
-import 'package:billing_system/core/config/constants/dropdown_values.dart';
 import 'package:billing_system/core/enums/billing.dart';
 import 'package:billing_system/features/billing/domain/entities/bill_entity.dart';
 import 'package:billing_system/features/billing/domain/entities/bill_item_entity.dart';
 import 'package:billing_system/features/billing/domain/entities/payment_entity.dart';
 import 'package:billing_system/features/billing/domain/entities/payment_summary_entity.dart';
+import 'package:billing_system/features/billing/domain/usecases/apply_bill_stock_reduction_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/clear_cart_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/create_bill_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/get_next_bill_number_usecase.dart';
 import 'package:billing_system/features/billing/presentation/controllers/billing_controller.dart';
 import 'package:billing_system/features/billing/presentation/controllers/cart_controller.dart';
+import 'package:billing_system/features/inventory/presentation/controller/inventory_controller.dart';
 import 'package:billing_system/features/user/presentation/controller/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -101,12 +102,14 @@ class CheckoutController extends GetxController {
   final CreateBillUsecase createBillUsecase;
   final GetNextBillNumberUsecase getNextBillNumberUsecase;
   final ClearCartUsecase clearCartUsecase;
+  final ApplyBillStockReductionUsecase applyBillStockReductionUsecase;
 
   CheckoutController({
     required this.cartController,
     required this.createBillUsecase,
     required this.getNextBillNumberUsecase,
     required this.clearCartUsecase,
+    required this.applyBillStockReductionUsecase,
   });
 
   final Rx<CheckoutStep> step = CheckoutStep.payment.obs;
@@ -291,7 +294,7 @@ class CheckoutController extends GetxController {
           synced: false,
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
-          warehouseId: warehouses.first,
+          warehouseId: 'Main Store',
         );
 
         return bill;
@@ -305,16 +308,47 @@ class CheckoutController extends GetxController {
 
     final createResult = await createBillUsecase.call(result);
 
-    createResult.fold(
-      (failure) {
+    await createResult.fold(
+      (failure) async {
         errorMessage.value = failure.message;
       },
-      (createdBill) {
-        completedBill.value = createdBill;
+      (createdBill) async {
+        // Deduct stock before the cart is cleared and the receipt opens.
+        // This used to be left entirely to the once-daily sync, so the
+        // same unit stayed sellable for up to 24 hours after it was sold.
+        final stockResult = await applyBillStockReductionUsecase(createdBill);
+
+        stockResult.fold(
+          (_) {
+            // The sale itself is already persisted, so a failure here is
+            // never allowed to fail the payment. The bill stays unstamped
+            // and the sync reconciliation deducts it later.
+          },
+          (reductions) {
+            if (reductions.isEmpty) return;
+
+            // Push the new quantities into the inventory controller so the
+            // product grid and the cart's available-stock check reflect
+            // the sale without waiting for a reload.
+            if (Get.isRegistered<InventoryController>()) {
+              final inventoryController = Get.find<InventoryController>();
+              for (final reduction in reductions) {
+                inventoryController.updateStockQuantityLocally(
+                  reduction.productId,
+                  reduction.newQuantity,
+                );
+              }
+            }
+          },
+        );
+
+        completedBill.value = createdBill.copyWith(stockApplied: true);
         paymentSuccessful.value = true;
         cartController.clearCart();
         clearCartUsecase();
-        Get.find<BillingController>().addBillLocally(createdBill);
+        if (Get.isRegistered<BillingController>()) {
+          Get.find<BillingController>().addBillLocally(completedBill.value!);
+        }
       },
     );
 

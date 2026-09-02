@@ -55,6 +55,12 @@ class BillModel extends HiveObject {
   @HiveField(15)
   final bool synced;
 
+  /// See [BillEntity.stockApplied]. Occupies the previously unused
+  /// field index 2, so no Hive type id bump is needed and bills written
+  /// by older builds simply read back as `false`.
+  @HiveField(2)
+  final bool stockApplied;
+
   BillModel({
     required this.id,
     required this.billNumber,
@@ -71,6 +77,7 @@ class BillModel extends HiveObject {
     required this.createdAt,
     required this.updatedAt,
     this.synced = false,
+    this.stockApplied = false,
   });
 
   factory BillModel.fromEntity(BillEntity entity) {
@@ -92,6 +99,7 @@ class BillModel extends HiveObject {
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       synced: entity.synced,
+      stockApplied: entity.stockApplied,
     );
   }
 
@@ -112,6 +120,7 @@ class BillModel extends HiveObject {
       createdAt: createdAt,
       updatedAt: updatedAt,
       synced: synced,
+      stockApplied: stockApplied,
     );
   }
 
@@ -138,6 +147,7 @@ class BillModel extends HiveObject {
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       synced: json['synced'] as bool? ?? false,
+      stockApplied: json['stockApplied'] as bool? ?? false,
     );
   }
 
@@ -158,6 +168,7 @@ class BillModel extends HiveObject {
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
       'synced': synced,
+      'stockApplied': stockApplied,
     };
   }
 
@@ -177,6 +188,7 @@ class BillModel extends HiveObject {
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? synced,
+    bool? stockApplied,
   }) {
     return BillModel(
       id: id ?? this.id,
@@ -194,6 +206,7 @@ class BillModel extends HiveObject {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       synced: synced ?? this.synced,
+      stockApplied: stockApplied ?? this.stockApplied,
     );
   }
 }

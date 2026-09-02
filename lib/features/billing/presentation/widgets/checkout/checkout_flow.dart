@@ -1,4 +1,5 @@
 import 'package:billing_system/core/di/init_dependencies.dart';
+import 'package:billing_system/features/billing/domain/usecases/apply_bill_stock_reduction_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/clear_cart_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/create_bill_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/get_next_bill_number_usecase.dart';
@@ -50,6 +51,7 @@ Future<void> showCheckoutFlow(
       createBillUsecase: sl<CreateBillUsecase>(),
       getNextBillNumberUsecase: sl<GetNextBillNumberUsecase>(),
       clearCartUsecase: sl<ClearCartUsecase>(),
+      applyBillStockReductionUsecase: sl<ApplyBillStockReductionUsecase>(),
     ),
     tag: 'checkout',
   );

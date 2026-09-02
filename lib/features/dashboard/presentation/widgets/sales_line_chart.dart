@@ -36,14 +36,63 @@ class SalesLineChart extends GetView<BillingController> {
       final hasData = spots.isNotEmpty && spots.any((s) => s.y > 0);
 
       if (!hasData) {
+        // An empty window has two very different causes: the shop really
+        // made no sales, or the app could not restore its bill history
+        // (typically right after a reinstall). Saying "no sales data" for
+        // the second case hides a recoverable problem, so the restore
+        // failure gets its own message and a retry.
+        final restoreError = controller.historyRestoreError.value;
+
         return ChartCard(
           height: height,
           padding: const EdgeInsets.all(20),
           child: Center(
-            child: Text(
-              'No sales data for this period',
-              style: tt.bodyMedium?.copyWith(color: Colors.grey.shade500),
-            ),
+            child: restoreError == null
+                ? Text(
+                    'No sales data for this period',
+                    style: tt.bodyMedium?.copyWith(color: Colors.grey.shade500),
+                  )
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.cloud_off_rounded,
+                        size: 28,
+                        color: Colors.grey.shade400,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        "Couldn't restore your bill history",
+                        style: tt.titleSmall?.copyWith(
+                          color: Colors.grey.shade700,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 6),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Text(
+                          restoreError,
+                          style: tt.bodySmall?.copyWith(
+                            color: Colors.grey.shade500,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      TextButton.icon(
+                        onPressed: controller.restoringHistory.value
+                            ? null
+                            : controller.retryHistoryRestore,
+                        icon: const Icon(Icons.refresh_rounded, size: 18),
+                        label: Text(
+                          controller.restoringHistory.value
+                              ? 'Restoring...'
+                              : 'Try again',
+                        ),
+                      ),
+                    ],
+                  ),
           ),
         );
       }

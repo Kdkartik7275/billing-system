@@ -43,6 +43,14 @@ class BillingController extends GetxController {
   final RxBool syncing = RxBool(false);
   final RxBool loading = RxBool(false);
 
+  /// Non-null when the last attempt to restore bill history from the
+  /// server failed. The dashboard can show this instead of an empty chart
+  /// that looks like "no sales".
+  final RxnString historyRestoreError = RxnString();
+
+  /// True while bill history is still being pulled back after a reinstall.
+  final RxBool restoringHistory = RxBool(false);
+
   BillingController({
     required this.getBillsByDateRangeUsecase,
     required this.getUnsyncedBillsUsecase,
@@ -80,15 +88,52 @@ class BillingController extends GetxController {
 
   Future<void> _initializeBilling() async {
     loading.value = true;
-    await billSyncScheduler.hydrateIfNeeded();
+
+    await _restoreHistory();
 
     await getBills();
     await getPendingBills();
 
     await billSyncScheduler.runIfDue();
 
+    // A sync run can pull previously-unsynced bills into the window and,
+    // more importantly, may be the point at which hydration finally has
+    // something to find, so re-read the window rather than trusting the
+    // snapshot taken before it.
+    await getBills();
     await getPendingBills();
     loading.value = false;
+  }
+
+  /// Pulls bill history back from the server after a fresh install.
+  ///
+  /// The failure used to be discarded entirely, which is why a reinstall
+  /// with no connectivity (or a restore that came back empty) presented as
+  /// a blank 7-day chart with no explanation and no way to retry.
+  Future<void> _restoreHistory() async {
+    restoringHistory.value = true;
+    historyRestoreError.value = null;
+
+    final result = await billSyncScheduler.hydrateIfNeeded();
+
+    result.fold(
+      (failure) {
+        historyRestoreError.value = failure.message;
+        debugPrint('BillingController: bill history restore failed: '
+            '${failure.message}');
+      },
+      (_) {},
+    );
+
+    restoringHistory.value = false;
+  }
+
+  /// Retries only the history restore, for a "Try again" affordance next
+  /// to the chart. Cheap enough to call freely: [hydrateFromRemote] exits
+  /// early once local bills exist.
+  Future<void> retryHistoryRestore() async {
+    await _restoreHistory();
+    await getBills();
   }
 
   Future<void> refreshBilling() async {
@@ -239,7 +284,7 @@ class BillingController extends GetxController {
         now.month,
         now.day,
       ).subtract(const Duration(days: 6));
-      final end = DateTime(now.year, now.month, now.day, 23, 59, 59);
+      final end = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
 
       final result = await getBillsByDateRangeUsecase.call(
         DateRangeParams(start: start, end: end),

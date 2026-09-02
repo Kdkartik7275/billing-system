@@ -18,6 +18,12 @@ class AggregateSoldQuantitiesUsecase
     final Map<String, double> quantityByProductId = {};
 
     for (final bill in bills) {
+      // Stock is now deducted the moment a sale is confirmed. Counting an
+      // already-applied bill here would subtract the same units twice,
+      // since ReduceStockForSoldProductsUsecase writes an absolute
+      // quantity derived from the (already reduced) local record.
+      if (bill.stockApplied) continue;
+
       for (final item in bill.items) {
         quantityByProductId.update(
           item.productId,

@@ -24,6 +24,10 @@ abstract interface class BillLocalDataSource {
 
   Future<void> markBillSynced(String id);
 
+  Future<void> markStockApplied(String id);
+
+  Future<int> countBills();
+
   Future<void> deleteBill(String id);
 
   Future<void> clear();
@@ -77,10 +81,15 @@ class BillLocalDataSourceImpl implements BillLocalDataSource {
     DateTime start,
     DateTime end,
   ) async {
+    // Both bounds are inclusive. Callers pass calendar boundaries such as
+    // "midnight six days ago" to "23:59:59 today", and the previous strict
+    // isAfter/isBefore pair silently dropped a bill written exactly on
+    // either boundary — which for the dashboard's 7-day chart meant the
+    // oldest day could come up empty.
     return box.values
         .where(
           (bill) =>
-              bill.createdAt.isAfter(start) && bill.createdAt.isBefore(end),
+              !bill.createdAt.isBefore(start) && !bill.createdAt.isAfter(end),
         )
         .toList();
   }
@@ -115,6 +124,18 @@ class BillLocalDataSourceImpl implements BillLocalDataSource {
     final bill = box.get(id);
     if (bill == null) return;
     await box.put(id, bill.copyWith(synced: true));
+  }
+
+  @override
+  Future<void> markStockApplied(String id) async {
+    final bill = box.get(id);
+    if (bill == null) return;
+    await box.put(id, bill.copyWith(stockApplied: true));
+  }
+
+  @override
+  Future<int> countBills() async {
+    return box.length;
   }
 
   @override
@@ -225,6 +246,11 @@ class BillLocalDataSourceImpl implements BillLocalDataSource {
 
   @override
   Future<BillModel?> getBillByInvoiceNo(String invoiceNo) async {
-    return box.values.firstWhere((bill) => bill.billNumber == invoiceNo);
+    // firstWhere without orElse throws on a miss, which defeated the
+    // repository's remote fallback for invoices not held locally.
+    for (final bill in box.values) {
+      if (bill.billNumber == invoiceNo) return bill;
+    }
+    return null;
   }
 }

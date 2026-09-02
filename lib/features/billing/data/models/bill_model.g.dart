@@ -32,13 +32,14 @@ class BillModelAdapter extends TypeAdapter<BillModel> {
       createdAt: fields[13] as DateTime,
       updatedAt: fields[14] as DateTime,
       synced: fields[15] as bool,
+      stockApplied: fields[2] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, BillModel obj) {
     writer
-      ..writeByte(15)
+      ..writeByte(16)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -68,7 +69,9 @@ class BillModelAdapter extends TypeAdapter<BillModel> {
       ..writeByte(14)
       ..write(obj.updatedAt)
       ..writeByte(15)
-      ..write(obj.synced);
+      ..write(obj.synced)
+      ..writeByte(2)
+      ..write(obj.stockApplied);
   }
 
   @override

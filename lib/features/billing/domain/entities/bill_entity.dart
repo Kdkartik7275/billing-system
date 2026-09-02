@@ -25,6 +25,13 @@ class BillEntity {
 
   final bool synced;
 
+  /// True once this bill's quantities have been deducted from stock.
+  ///
+  /// Stock is deducted locally the moment the sale is confirmed, so this
+  /// flag is what makes the deduction idempotent: the once-daily sync
+  /// reconciliation must never subtract the same bill a second time.
+  final bool stockApplied;
+
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -42,6 +49,7 @@ class BillEntity {
     required this.payment,
     required this.status,
     this.synced = false,
+    this.stockApplied = false,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -60,6 +68,7 @@ class BillEntity {
     PaymentSummaryEntity? payment,
     BillStatus? status,
     bool? synced,
+    bool? stockApplied,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -77,6 +86,7 @@ class BillEntity {
       payment: payment ?? this.payment,
       status: status ?? this.status,
       synced: synced ?? this.synced,
+      stockApplied: stockApplied ?? this.stockApplied,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

@@ -32,10 +32,11 @@ import 'package:billing_system/features/user/data/models/shop_model.dart';
 import 'package:billing_system/features/user/data/models/user_model.dart';
 import 'package:billing_system/features/user/domain/entity/user_entity.dart';
 import 'package:billing_system/features/user/presentation/controller/user_controller.dart';
-
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Bootstrap {
   static Future<void> initialize() async {
@@ -44,6 +45,9 @@ class Bootstrap {
     await Hive.initFlutter();
 
     _registerHiveAdapters();
+
+    await _handleVersionUpgrade();
+
     await _openHiveBoxes();
 
     await DependencyInjection.init();
@@ -54,7 +58,7 @@ class Bootstrap {
   static void _registerHiveAdapters() {
     Hive
       ..registerAdapter(UserModelAdapter())
-      ..registerAdapter(UserRoleAdapter())
+      ..registerAdapter(UserRoleAdapter()) 
       ..registerAdapter(FirebaseConfigModelAdapter())
       ..registerAdapter(ShopModelAdapter())
       ..registerAdapter(ProductModelAdapter())
@@ -95,6 +99,52 @@ class Bootstrap {
       ..registerAdapter(BillModelAdapter())
       ..registerAdapter(BillingCartModelAdapter())
       ..registerAdapter(HeldCartModelAdapter());
+  }
+
+  // ---------------- VERSION-BASED MIGRATION ----------------
+  static Future<void> _handleVersionUpgrade() async {
+    final prefs = await SharedPreferences.getInstance();
+    final packageInfo = await PackageInfo.fromPlatform();
+    final currentVersion = packageInfo.version; // e.g. "1.0.3"
+
+    final storedVersion = prefs.getString('hive_schema_version') ?? '0.0.0';
+
+    if (currentVersion != storedVersion) {
+      // List of data boxes that can be safely cleared on breaking changes
+      final boxesToClear = <String>[
+        'products',
+        'categories',
+        'brands',
+        'stocks',
+        'stock_movement',
+        'stock_batch',
+        'bills',
+        'billing_cart',
+        'held_carts',
+        'current_user',
+        'current_shop',
+        'firebase_config',
+        'units',
+        'settings',
+        'billing_meta',
+        'inventory_meta',
+      ];
+
+      for (final name in boxesToClear) {
+        try {
+          if (Hive.isBoxOpen(name)) {
+            await Hive.box(name).clear();
+          } else if (await Hive.boxExists(name)) {
+            final box = await Hive.openBox(name);
+            await box.clear();
+          }
+        } catch (_) {
+          // Ignore individual box failures; app will re-sync from server
+        }
+      }
+
+      await prefs.setString('hive_schema_version', currentVersion);
+    }
   }
 
   // ---------------- HIVE BOXES ----------------

@@ -50,7 +50,6 @@ class HiveTypeIds {
   static const int securitySettingsModel = 31;
   static const int userPreferencesModel = 32;
 
-
   static const int supplierModel = 33;
   static const int purchaseModel = 34;
   static const int heldCartModel = 35;

@@ -6,22 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
-/// Which calendar grain a sales export covers.
-///
-/// The grain is not cosmetic: it decides how the per-period breakdown table
-/// is bucketed. A weekly report buckets by day, a monthly report buckets by
-/// ISO week, and a custom range buckets by day when it is short enough to
-/// stay readable and by week otherwise.
 enum SalesExportPeriod { weekly, monthly, custom }
 
-/// A resolved, inclusive date range plus the label that should appear on the
-/// report.
-///
-/// Both bounds are normalised here rather than at the call site so every
-/// entry point (preset menu, custom picker, a future scheduled export)
-/// produces the same day-inclusive window: `start` snaps to 00:00:00.000 and
-/// `end` snaps to 23:59:59.999. Passing a raw `DateTime.now()` as `end` would
-/// silently drop every bill created later in the same day.
 class SalesExportRange {
   final DateTime start;
   final DateTime end;
@@ -36,10 +22,6 @@ class SalesExportRange {
   }) : start = DateTime(start.year, start.month, start.day),
        end = DateTime(end.year, end.month, end.day, 23, 59, 59, 999);
 
-  /// Monday-to-Sunday week containing [reference].
-  ///
-  /// `DateTime.weekday` is 1 for Monday, so subtracting `weekday - 1` days
-  /// always lands on that week's Monday regardless of the reference day.
   factory SalesExportRange.week(DateTime reference, {int weeksAgo = 0}) {
     final anchor = DateTime(
       reference.year,
@@ -58,10 +40,6 @@ class SalesExportRange {
     );
   }
 
-  /// Calendar month containing [reference], offset backwards by [monthsAgo].
-  ///
-  /// Day 0 of month N+1 is the last day of month N, which avoids hardcoding
-  /// month lengths and handles leap years for free.
   factory SalesExportRange.month(DateTime reference, {int monthsAgo = 0}) {
     final firstOfTarget = DateTime(
       reference.year,
@@ -101,17 +79,9 @@ class SalesExportRange {
     return '${fmt.format(start)}_${fmt.format(end)}';
   }
 
-  /// True when [date] falls inside the range. Used instead of comparing raw
-  /// `DateTime`s at the call site so the inclusive-end rule lives in one place.
   bool contains(DateTime date) => !date.isBefore(start) && !date.isAfter(end);
 }
 
-/// Raw PDF bytes plus a suggested filename.
-///
-/// Deliberately holds bytes rather than a `File`: this class must stay free of
-/// `dart:io` and `path_provider` so the same export path works on Android,
-/// iOS, desktop, and web. The caller decides how to persist or share it
-/// (`Printing.sharePdf` handles all four).
 class SalesExportResult {
   final Uint8List bytes;
   final String fileName;
@@ -145,9 +115,6 @@ class SalesExportRow {
     required this.status,
   });
 
-  /// Only completed sales count towards revenue. Cancelled and refunded bills
-  /// are still listed — an auditor needs to see them — but they must never be
-  /// summed into totals, which is what `countsTowardsRevenue` guards.
   bool get countsTowardsRevenue => status == BillStatus.completed;
 
   factory SalesExportRow.fromBill(BillEntity bill) {

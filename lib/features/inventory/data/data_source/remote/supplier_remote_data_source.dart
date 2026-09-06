@@ -1,3 +1,5 @@
+import 'package:billing_system/core/exceptions/firebase_exception.dart';
+import 'package:billing_system/core/services/crash/crashlytics_service.dart';
 import 'package:billing_system/features/inventory/data/models/supplier/supplier_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -29,10 +31,20 @@ class SupplierRemoteDataSourceImpl implements SupplierRemoteDataSource {
           .set(supplier.toJson());
 
       return supplier;
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to add supplier: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to add supplier: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'SupplierRemoteDataSourceImpl.addSupplier',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'SupplierRemoteDataSourceImpl.addSupplier',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -40,10 +52,20 @@ class SupplierRemoteDataSourceImpl implements SupplierRemoteDataSource {
   Future<void> deleteSupplier(String id) async {
     try {
       await firestore.collection(_collection).doc(id).delete();
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to delete supplier: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to delete supplier: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'SupplierRemoteDataSourceImpl.deleteSupplier',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'SupplierRemoteDataSourceImpl.deleteSupplier',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -58,10 +80,20 @@ class SupplierRemoteDataSourceImpl implements SupplierRemoteDataSource {
       return snapshot.docs
           .map((doc) => SupplierModel.fromJson(doc.data()))
           .toList();
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to fetch suppliers: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch suppliers: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'SupplierRemoteDataSourceImpl.getAllSuppliers',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'SupplierRemoteDataSourceImpl.getAllSuppliers',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -75,10 +107,20 @@ class SupplierRemoteDataSourceImpl implements SupplierRemoteDataSource {
       }
 
       return SupplierModel.fromJson(doc.data()!);
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to fetch supplier: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch supplier: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'SupplierRemoteDataSourceImpl.getSupplierById',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'SupplierRemoteDataSourceImpl.getSupplierById',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -91,10 +133,20 @@ class SupplierRemoteDataSourceImpl implements SupplierRemoteDataSource {
           .update(supplier.toJson());
 
       return supplier;
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to update supplier: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to update supplier: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'SupplierRemoteDataSourceImpl.updateSupplier',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'SupplierRemoteDataSourceImpl.updateSupplier',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 }

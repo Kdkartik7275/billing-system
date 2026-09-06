@@ -31,8 +31,6 @@ const List<IconData> kProductDetailTabIcons = [
   Icons.tune_rounded,
 ];
 
-/// Builds the widget list for the currently selected product-detail tab.
-/// Used identically by every breakpoint layout.
 List<Widget> buildProductDetailTabContent({
   required int tabIndex,
   required ProductEntity current,

@@ -1,3 +1,5 @@
+import 'package:billing_system/core/exceptions/firebase_exception.dart';
+import 'package:billing_system/core/services/crash/crashlytics_service.dart';
 import 'package:billing_system/features/billing/data/models/bill_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -32,12 +34,21 @@ class BillRemoteDataSourceImpl implements BillRemoteDataSource {
   Future<BillModel> addBill(BillModel bill) async {
     try {
       await firestore.collection(_collection).doc(bill.id).set(bill.toJson());
-
       return bill;
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to add bill: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to add bill: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'BillRemoteDataSourceImpl.addBill',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'BillRemoteDataSourceImpl.addBill',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -45,10 +56,20 @@ class BillRemoteDataSourceImpl implements BillRemoteDataSource {
   Future<void> deleteBill(String id) async {
     try {
       await firestore.collection(_collection).doc(id).delete();
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to delete bill: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to delete bill: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'BillRemoteDataSourceImpl.deleteBill',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'BillRemoteDataSourceImpl.deleteBill',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -63,10 +84,20 @@ class BillRemoteDataSourceImpl implements BillRemoteDataSource {
       return snapshot.docs
           .map((doc) => BillModel.fromJson(doc.data()))
           .toList();
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to fetch bills: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch bills: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'BillRemoteDataSourceImpl.getAllBills',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'BillRemoteDataSourceImpl.getAllBills',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -78,10 +109,20 @@ class BillRemoteDataSourceImpl implements BillRemoteDataSource {
       if (!doc.exists) return null;
 
       return BillModel.fromJson(doc.data()!);
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to fetch bill: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch bill: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'BillRemoteDataSourceImpl.getBillById',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'BillRemoteDataSourceImpl.getBillById',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -101,10 +142,20 @@ class BillRemoteDataSourceImpl implements BillRemoteDataSource {
       return snapshot.docs
           .map((doc) => BillModel.fromJson(doc.data()))
           .toList();
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to fetch bills: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch bills: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'BillRemoteDataSourceImpl.getBillsByDateRange',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'BillRemoteDataSourceImpl.getBillsByDateRange',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -117,10 +168,20 @@ class BillRemoteDataSourceImpl implements BillRemoteDataSource {
           .update(bill.toJson());
 
       return bill;
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to update bill: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to update bill: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'BillRemoteDataSourceImpl.updateBill',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'BillRemoteDataSourceImpl.updateBill',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -128,7 +189,6 @@ class BillRemoteDataSourceImpl implements BillRemoteDataSource {
   Future<List<BillModel>> getBillsByDate(DateTime date) async {
     try {
       final start = DateTime(date.year, date.month, date.day);
-
       final end = start.add(const Duration(days: 1));
 
       final snapshot = await firestore
@@ -141,11 +201,20 @@ class BillRemoteDataSourceImpl implements BillRemoteDataSource {
       return snapshot.docs
           .map((doc) => BillModel.fromJson(doc.data()))
           .toList();
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to fetch bills by date: ${e.message}');
-    } catch (e) {
-      debugPrint(e.toString());
-      throw Exception('Failed to fetch bills by date: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'BillRemoteDataSourceImpl.getBillsByDate',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'BillRemoteDataSourceImpl.getBillsByDate',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -171,10 +240,20 @@ class BillRemoteDataSourceImpl implements BillRemoteDataSource {
       });
 
       return 'INV-${nextNumber.toString().padLeft(6, '0')}';
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to generate bill number: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to generate bill number: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'BillRemoteDataSourceImpl.getNextBillNumber',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'BillRemoteDataSourceImpl.getNextBillNumber',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -192,10 +271,20 @@ class BillRemoteDataSourceImpl implements BillRemoteDataSource {
       }
 
       return BillModel.fromJson(snapshot.docs.first.data());
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to fetch bill: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch bill: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'BillRemoteDataSourceImpl.getBillByInvoiceNo',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'BillRemoteDataSourceImpl.getBillByInvoiceNo',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 }

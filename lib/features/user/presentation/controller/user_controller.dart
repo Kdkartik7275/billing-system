@@ -3,6 +3,8 @@ import 'package:billing_system/core/config/routes/app_routes.dart';
 import 'package:billing_system/core/di/init_dependencies.dart';
 import 'package:billing_system/core/firebase/shop_firebase_service.dart';
 import 'package:billing_system/core/security/biometric_service.dart';
+import 'package:billing_system/core/services/analytics/analytics_service.dart';
+import 'package:billing_system/core/services/crash/crashlytics_service.dart';
 import 'package:billing_system/features/authentication/domain/usecases/logout_usecase.dart';
 import 'package:billing_system/features/user/data/models/shop_model.dart';
 import 'package:billing_system/features/user/data/models/user_model.dart';
@@ -42,6 +44,25 @@ class UserController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxnString errorMessage = RxnString();
 
+  /// Tags every subsequent crash report / analytics event with who this
+  /// session belongs to. Called once identity is actually known — after
+  /// a fresh fetch or a restored session — never before, so nothing gets
+  /// attributed to the wrong shop if this runs twice across logins.
+  Future<void> _tagSessionContext() async {
+    final currentUser = user.value;
+    final currentShop = shop.value;
+    if (currentUser == null || currentShop == null) return;
+
+    await CrashlyticsService.setUserId(currentUser.uid);
+    await CrashlyticsService.setCustomKey('shop_id', currentShop.id);
+    await CrashlyticsService.setCustomKey('shop_name', currentShop.shopName);
+    await CrashlyticsService.setCustomKey('user_role', currentUser.role.name);
+
+    await AnalyticsService.setUserId(currentUser.uid);
+    await AnalyticsService.setUserProperty('shop_id', currentShop.id);
+    await AnalyticsService.setUserProperty('user_role', currentUser.role.name);
+  }
+
   Future<bool> fetchAccountDetails({required String userId}) async {
     isLoading.value = true;
     errorMessage.value = null;
@@ -54,6 +75,11 @@ class UserController extends GetxController {
       (failure) {
         userOk = false;
         debugPrint('Error fetching user: $failure');
+        CrashlyticsService.recordError(
+          failure,
+          StackTrace.current,
+          reason: 'UserController.fetchAccountDetails - get user failed',
+        );
         errorMessage.value =
             'We couldn\'t load your account. Please try again.';
       },
@@ -75,6 +101,11 @@ class UserController extends GetxController {
       (failure) {
         shopOk = false;
         debugPrint('Error fetching shop: $failure');
+        CrashlyticsService.recordError(
+          failure,
+          StackTrace.current,
+          reason: 'UserController.fetchAccountDetails - get shop failed',
+        );
         errorMessage.value =
             'We couldn\'t load your shop details. Please try again.';
       },
@@ -95,7 +126,17 @@ class UserController extends GetxController {
     } catch (e, stackTrace) {
       debugPrint(e.toString());
       debugPrint(stackTrace.toString());
+      await CrashlyticsService.recordError(
+        e,
+        stackTrace,
+        reason: 'UserController.fetchAccountDetails - shop firebase init failed',
+      );
     }
+
+    await _tagSessionContext();
+    await AnalyticsService.logEvent('login_success', parameters: {
+      'method': 'fresh_fetch',
+    });
 
     statusMessage.value = 'All set!';
     isLoading.value = false;
@@ -131,12 +172,22 @@ class UserController extends GetxController {
 
       await _shopFirebaseService.initialize(shop.value!.firebaseConfig);
 
+      await _tagSessionContext();
+      await AnalyticsService.logEvent('login_success', parameters: {
+        'method': 'restored_session',
+      });
+
       statusMessage.value = 'Ready';
       isLoading.value = false;
       return true;
     } catch (e, stackTrace) {
       debugPrint(e.toString());
       debugPrint(stackTrace.toString());
+      await CrashlyticsService.recordError(
+        e,
+        stackTrace,
+        reason: 'UserController.restoreSession',
+      );
 
       errorMessage.value = e.toString();
       isLoading.value = false;
@@ -148,7 +199,6 @@ class UserController extends GetxController {
     try {
       if (!AppSettings.biometricEnabled) {
         debugPrint('[UserController] Biometric login is disabled');
-
         return true;
       }
 
@@ -156,7 +206,6 @@ class UserController extends GetxController {
 
       if (!available) {
         debugPrint('[UserController] Biometric authentication unavailable');
-
         return true;
       }
 
@@ -164,7 +213,6 @@ class UserController extends GetxController {
 
       if (biometrics.isEmpty) {
         debugPrint('[UserController] No enrolled biometrics');
-
         return true;
       }
 
@@ -176,11 +224,19 @@ class UserController extends GetxController {
 
       debugPrint('[UserController] Biometric result: $authenticated');
 
+      await AnalyticsService.logEvent('biometric_auth_attempt', parameters: {
+        'result': authenticated,
+      });
+
       return authenticated;
     } catch (e, stackTrace) {
       debugPrint('[UserController] Biometric authentication error: $e');
-
       debugPrint('[UserController] StackTrace: $stackTrace');
+      await CrashlyticsService.recordError(
+        e,
+        stackTrace,
+        reason: 'UserController.authenticateWithBiometric',
+      );
 
       return false;
     }
@@ -192,7 +248,6 @@ class UserController extends GetxController {
 
       if (authUser == null) {
         debugPrint('[UserController] No Firebase session found');
-
         return AppRoutes.login;
       }
 
@@ -207,7 +262,6 @@ class UserController extends GetxController {
 
         if (!authenticated) {
           debugPrint('[UserController] Biometric authentication failed');
-
           return AppRoutes.login;
         }
 
@@ -225,7 +279,6 @@ class UserController extends GetxController {
 
         if (!authenticated) {
           debugPrint('[UserController] Biometric authentication failed');
-
           return AppRoutes.login;
         }
 
@@ -239,8 +292,12 @@ class UserController extends GetxController {
       return AppRoutes.login;
     } catch (e, stackTrace) {
       debugPrint('[UserController] checkSession error: $e');
-
       debugPrint('[UserController] StackTrace: $stackTrace');
+      await CrashlyticsService.recordError(
+        e,
+        stackTrace,
+        reason: 'UserController.checkSession',
+      );
 
       return AppRoutes.login;
     }
@@ -252,10 +309,16 @@ class UserController extends GetxController {
     return result.fold(
       (failure) {
         debugPrint('Error logging out: ${failure.message}');
+        CrashlyticsService.recordError(
+          failure,
+          StackTrace.current,
+          reason: 'UserController.logout',
+        );
         errorMessage.value = failure.message;
         return false;
       },
       (_) {
+        AnalyticsService.logEvent('logout');
         user.value = null;
         shop.value = null;
         errorMessage.value = null;

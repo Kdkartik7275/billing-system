@@ -1,7 +1,6 @@
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
-
 class PdfFonts {
   static pw.ThemeData? _theme;
 

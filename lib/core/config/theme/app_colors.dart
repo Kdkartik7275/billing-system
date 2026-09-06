@@ -2,13 +2,9 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   static const secondary = Color(0xFF4F46E5);
-
   static const warning = Color(0xFFF59E0B);
-
   static const error = Color(0xFFEF4444);
-
   static const darkBackground = Color(0xFF0F172A);
-
   static const Color background = Colors.white;
   static const Color surface = Color(0xFFFFFFFF);
   static const Color border = Color(0xFFE4E7EC);

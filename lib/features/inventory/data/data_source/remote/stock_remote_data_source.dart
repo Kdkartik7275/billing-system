@@ -1,5 +1,7 @@
 import 'dart:core';
 
+import 'package:billing_system/core/exceptions/firebase_exception.dart';
+import 'package:billing_system/core/services/crash/crashlytics_service.dart';
 import 'package:billing_system/features/inventory/data/models/stock/purchase_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_batch_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_model.dart';
@@ -124,10 +126,20 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
           .set(stock.toJson());
 
       return stock;
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to create stock: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to create stock: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.createInitialStock',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.createInitialStock',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -137,10 +149,20 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
       final snapshot = await firestore.collection(_stockCollection).get();
 
       return snapshot.docs.map((e) => StockModel.fromJson(e.data())).toList();
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to fetch stock: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch stock: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.getAllStock',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.getAllStock',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -156,10 +178,20 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
       if (snapshot.docs.isEmpty) return null;
 
       return StockModel.fromJson(snapshot.docs.first.data());
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to fetch stock: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch stock: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.getStockForProduct',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.getStockForProduct',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -172,10 +204,20 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
           .update(stock.toJson());
 
       return stock;
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to update stock: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to update stock: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.updateStock',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.updateStock',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -194,10 +236,20 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
           .set(movement.toJson());
 
       return movement;
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to create stock movement: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to create stock movement: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.createStockMovement',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.createStockMovement',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -212,10 +264,20 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
       return snapshot.docs
           .map((e) => StockMovementModel.fromJson(e.data()))
           .toList();
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to fetch stock movements: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch stock movements: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.getAllStockMovements',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.getAllStockMovements',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -234,10 +296,20 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
       return snapshot.docs
           .map((e) => StockMovementModel.fromJson(e.data()))
           .toList();
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to fetch stock movements: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch stock movements: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.getStockMovementsForProductSince',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.getStockMovementsForProductSince',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -254,10 +326,20 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
           .set(batch.toJson());
 
       return batch;
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to create stock batch: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to create stock batch: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.createStockBatch',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.createStockBatch',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -270,10 +352,20 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
           .update(batch.toJson());
 
       return batch;
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to update stock batch: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to update stock batch: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.updateStockBatch',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.updateStockBatch',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -285,10 +377,20 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
       return snapshot.docs
           .map((e) => StockBatchModel.fromJson(e.data()))
           .toList();
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to fetch stock batches: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch stock batches: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.getAllStockBatches',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.getAllStockBatches',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -307,10 +409,20 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
       return snapshot.docs
           .map((e) => StockBatchModel.fromJson(e.data()))
           .toList();
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to fetch stock batches: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch stock batches: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.getStockBatchesForProductSince',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.getStockBatchesForProductSince',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -407,7 +519,6 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
 
         transaction.set(movementRef, movement.toJson());
 
-        // ---------------- PURCHASE RECORD (typed, not a raw map) ----------------
         final purchaseRef = firestore.collection(_purchaseCollection).doc();
 
         purchase = PurchaseModel(
@@ -438,10 +549,20 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
         movement: movement,
         purchase: purchase,
       );
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to purchase stock: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to purchase stock: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.purchaseStock',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.purchaseStock',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -453,10 +574,20 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
       return snapshot.docs
           .map((e) => PurchaseModel.fromJson(e.data()))
           .toList();
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to fetch purchases: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch purchases: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.getAllPurchases',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.getAllPurchases',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -478,10 +609,20 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
       return snapshot.docs
           .map((e) => PurchaseModel.fromJson(e.data()))
           .toList();
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to fetch purchases: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch purchases: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.getPurchasesForProductSince',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.getPurchasesForProductSince',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -610,10 +751,20 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
       });
 
       return (updatedStock, updatedBatches, movement);
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to sell stock: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to sell stock: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.sellStock',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.sellStock',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 }

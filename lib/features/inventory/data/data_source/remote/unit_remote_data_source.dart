@@ -1,3 +1,5 @@
+import 'package:billing_system/core/exceptions/firebase_exception.dart';
+import 'package:billing_system/core/services/crash/crashlytics_service.dart';
 import 'package:billing_system/features/inventory/data/models/unit/unit_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -26,10 +28,20 @@ class UnitRemoteDataSourceImpl implements UnitRemoteDataSource {
       await firestore.collection(_collection).doc(unit.id).set(unit.toMap());
 
       return unit;
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to add unit: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to add unit: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'UnitRemoteDataSourceImpl.addUnit',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'UnitRemoteDataSourceImpl.addUnit',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -37,10 +49,20 @@ class UnitRemoteDataSourceImpl implements UnitRemoteDataSource {
   Future<void> deleteUnit(String id) async {
     try {
       await firestore.collection(_collection).doc(id).delete();
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to delete unit: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to delete unit: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'UnitRemoteDataSourceImpl.deleteUnit',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'UnitRemoteDataSourceImpl.deleteUnit',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -53,10 +75,20 @@ class UnitRemoteDataSourceImpl implements UnitRemoteDataSource {
           .get();
 
       return snapshot.docs.map((doc) => UnitModel.fromMap(doc.data())).toList();
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to fetch units: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch units: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'UnitRemoteDataSourceImpl.getAllUnits',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'UnitRemoteDataSourceImpl.getAllUnits',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -70,10 +102,20 @@ class UnitRemoteDataSourceImpl implements UnitRemoteDataSource {
       }
 
       return UnitModel.fromMap(doc.data()!);
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to fetch unit: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch unit: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'UnitRemoteDataSourceImpl.getUnitById',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'UnitRemoteDataSourceImpl.getUnitById',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -83,10 +125,20 @@ class UnitRemoteDataSourceImpl implements UnitRemoteDataSource {
       await firestore.collection(_collection).doc(unit.id).update(unit.toMap());
 
       return unit;
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to update unit: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to update unit: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'UnitRemoteDataSourceImpl.updateUnit',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'UnitRemoteDataSourceImpl.updateUnit',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 }

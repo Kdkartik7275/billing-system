@@ -1,3 +1,6 @@
+import 'package:billing_system/core/exceptions/firebase_auth_exceptions.dart';
+import 'package:billing_system/core/exceptions/firebase_exception.dart';
+import 'package:billing_system/core/services/crash/crashlytics_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
@@ -28,6 +31,7 @@ class AuthenticationRemoteDataSourceImpl
   final FirebaseFirestore firestore;
 
   AuthenticationRemoteDataSourceImpl({required this.firestore});
+
   @override
   Future<void> requestShopRegistration({
     required String shopName,
@@ -37,22 +41,38 @@ class AuthenticationRemoteDataSourceImpl
     required String address,
     String? additionalInformation,
   }) async {
-    final shopData = {
-      "id": Uuid().v4(),
-      "shopName": shopName,
-      "ownerName": ownerName,
-      "email": email,
-      "phone": phoneNumber.toString(),
-      "address": address,
-      "message": additionalInformation ?? "",
-      "status": "pending",
-      "createdAt": Timestamp.now(),
-    };
+    try {
+      final shopData = {
+        "id": const Uuid().v4(),
+        "shopName": shopName,
+        "ownerName": ownerName,
+        "email": email,
+        "phone": phoneNumber.toString(),
+        "address": address,
+        "message": additionalInformation ?? "",
+        "status": "pending",
+        "createdAt": Timestamp.now(),
+      };
 
-    await firestore
-        .collection('registration_requests')
-        .doc(shopData["id"].toString())
-        .set(shopData);
+      await firestore
+          .collection('registration_requests')
+          .doc(shopData["id"].toString())
+          .set(shopData);
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'AuthenticationRemoteDataSourceImpl.requestShopRegistration',
+      );
+      throw Exception(TFirebaseException(e.code).message);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'AuthenticationRemoteDataSourceImpl.requestShopRegistration',
+      );
+      rethrow;
+    }
   }
 
   @override
@@ -66,36 +86,14 @@ class AuthenticationRemoteDataSourceImpl
 
       return userCredential.user;
     } on FirebaseAuthException catch (e) {
-      switch (e.code) {
-        case 'invalid-credential':
-          throw Exception('Invalid email or password.');
-
-        case 'wrong-password':
-          throw Exception('Incorrect password. Please try again.');
-
-        case 'user-not-found':
-          throw Exception('No account found with this email address.');
-
-        case 'invalid-email':
-          throw Exception('Please enter a valid email address.');
-
-        case 'user-disabled':
-          throw Exception(
-            'This account has been disabled. Please contact support.',
-          );
-
-        case 'too-many-requests':
-          throw Exception('Too many failed attempts. Please try again later.');
-
-        case 'network-request-failed':
-          throw Exception(
-            'Network error. Please check your internet connection.',
-          );
-
-        default:
-          throw Exception('Unable to sign in. Please try again.');
-      }
-    } catch (e) {
+      await CrashlyticsService.log('Login failed: ${e.code}');
+      throw Exception(TFirebaseAuthException(e.code).message);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'AuthenticationRemoteDataSourceImpl.loginWithEmailAndPassword',
+      );
       throw Exception('Unable to sign in. Please try again.');
     }
   }
@@ -104,7 +102,19 @@ class AuthenticationRemoteDataSourceImpl
   Future<void> logout() async {
     try {
       await FirebaseAuth.instance.signOut();
-    } catch (e) {
+    } on FirebaseAuthException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'AuthenticationRemoteDataSourceImpl.logout',
+      );
+      throw Exception(TFirebaseAuthException(e.code).message);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'AuthenticationRemoteDataSourceImpl.logout',
+      );
       throw Exception('Logout failed: ${e.toString()}');
     }
   }
@@ -113,8 +123,20 @@ class AuthenticationRemoteDataSourceImpl
   Future<void> forgotPassword(String email) async {
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-    } catch (e) {
-      throw e.toString();
+    } on FirebaseAuthException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'AuthenticationRemoteDataSourceImpl.forgotPassword',
+      );
+      throw Exception(TFirebaseAuthException(e.code).message);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'AuthenticationRemoteDataSourceImpl.forgotPassword',
+      );
+      throw Exception(e.toString());
     }
   }
 
@@ -148,15 +170,19 @@ class AuthenticationRemoteDataSourceImpl
       await user.reauthenticateWithCredential(cred);
 
       await user.updatePassword(newPassword);
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'invalid-credential') {
-        throw 'The password you entered is incorrect. Please try again.';
-      } else if (e.code == 'weak-password') {
-        throw 'Password must be at least 6 characters';
-      } else {
-        throw Exception(e.message ?? 'Auth error');
-      }
-    } catch (e) {
+    } on FirebaseAuthException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'AuthenticationRemoteDataSourceImpl.changeUserPassword',
+      );
+      throw Exception(TFirebaseAuthException(e.code).message);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'AuthenticationRemoteDataSourceImpl.changeUserPassword',
+      );
       throw Exception('Something went wrong');
     }
   }

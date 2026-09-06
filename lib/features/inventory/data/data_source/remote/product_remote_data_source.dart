@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:billing_system/core/exceptions/firebase_exception.dart';
+import 'package:billing_system/core/services/crash/crashlytics_service.dart';
 import 'package:billing_system/core/services/storage/storage_service.dart';
 import 'package:billing_system/features/inventory/data/models/product_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -40,10 +42,20 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
           .set(product.toJson());
 
       return product;
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to add product: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to add product: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'ProductRemoteDataSourceImpl.addProduct',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'ProductRemoteDataSourceImpl.addProduct',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -51,10 +63,20 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
   Future<void> deleteProduct(String id) async {
     try {
       await firestore.collection(_collection).doc(id).delete();
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to delete product: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to delete product: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'ProductRemoteDataSourceImpl.deleteProduct',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'ProductRemoteDataSourceImpl.deleteProduct',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -69,10 +91,20 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
       return snapshot.docs
           .map((doc) => ProductModel.fromJson(doc.data()))
           .toList();
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to fetch products: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch products: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'ProductRemoteDataSourceImpl.getAllProducts',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'ProductRemoteDataSourceImpl.getAllProducts',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -84,10 +116,20 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
       if (!doc.exists) return null;
 
       return ProductModel.fromJson(doc.data()!);
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to fetch product: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch product: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'ProductRemoteDataSourceImpl.getProductById',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'ProductRemoteDataSourceImpl.getProductById',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -103,10 +145,20 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
       if (snapshot.docs.isEmpty) return null;
 
       return ProductModel.fromJson(snapshot.docs.first.data());
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to fetch product: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch product: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'ProductRemoteDataSourceImpl.getProductByBarcode',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'ProductRemoteDataSourceImpl.getProductByBarcode',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -122,10 +174,20 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
       if (snapshot.docs.isEmpty) return null;
 
       return ProductModel.fromJson(snapshot.docs.first.data());
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to fetch product: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch product: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'ProductRemoteDataSourceImpl.getProductBySku',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'ProductRemoteDataSourceImpl.getProductBySku',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -146,10 +208,20 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
       return snapshot.docs
           .map((doc) => ProductModel.fromJson(doc.data()))
           .toList();
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to search products: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to search products: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'ProductRemoteDataSourceImpl.searchProducts',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'ProductRemoteDataSourceImpl.searchProducts',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -162,10 +234,20 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
           .update(product.toJson());
 
       return product;
-    } on FirebaseException catch (e) {
-      throw Exception('Failed to update product: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to update product: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'ProductRemoteDataSourceImpl.updateProduct',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'ProductRemoteDataSourceImpl.updateProduct',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 
@@ -173,20 +255,32 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
   Future<List<String>> uploadProductImages(List<File> images) async {
     try {
       final storageService = StorageService();
-      List<String> uploadedImageUrls = [];
+      final List<String> uploadedImageUrls = [];
 
-      for (File image in images) {
+      for (final image in images) {
         final imageUrl = await storageService.uploadFileData(image);
         if (imageUrl != null) {
           uploadedImageUrls.add(imageUrl);
         } else {
-          throw Exception('Failed to upload image: ${image.path}');
+          throw TFirebaseException('unknown');
         }
       }
 
       return uploadedImageUrls;
-    } catch (e) {
-      throw Exception('Failed to upload product images: $e');
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'ProductRemoteDataSourceImpl.uploadProductImages',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'ProductRemoteDataSourceImpl.uploadProductImages',
+      );
+      throw TFirebaseException('unknown');
     }
   }
 }

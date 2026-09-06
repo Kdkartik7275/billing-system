@@ -1,4 +1,5 @@
 import 'package:billing_system/core/config/theme/app_radius.dart';
+import 'package:billing_system/core/sync/widgets/sync_status_pill.dart';
 import 'package:billing_system/features/billing/presentation/controllers/billing_controller.dart';
 import 'package:billing_system/features/user/presentation/controller/user_controller.dart';
 import 'package:flutter/material.dart';
@@ -122,7 +123,7 @@ class TabletSmartPosCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 if (billsController.pending.isNotEmpty) ...[
-                  _SyncButton(billsController: billsController),
+                  SyncStatusPill(),
                   const SizedBox(width: 12),
                 ],
                 _ScanButton(onScan: onScan),

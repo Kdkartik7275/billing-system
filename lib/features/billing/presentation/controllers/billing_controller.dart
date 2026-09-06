@@ -51,6 +51,9 @@ class BillingController extends GetxController {
   /// True while bill history is still being pulled back after a reinstall.
   final RxBool restoringHistory = RxBool(false);
 
+  // add as a field
+  final Rx<DateTime?> lastSyncedAt = Rx<DateTime?>(null);
+
   BillingController({
     required this.getBillsByDateRangeUsecase,
     required this.getUnsyncedBillsUsecase,
@@ -95,6 +98,7 @@ class BillingController extends GetxController {
     await getPendingBills();
 
     await billSyncScheduler.runIfDue();
+    lastSyncedAt.value = billSyncScheduler.lastSyncedAt;
 
     // A sync run can pull previously-unsynced bills into the window and,
     // more importantly, may be the point at which hydration finally has
@@ -116,14 +120,13 @@ class BillingController extends GetxController {
 
     final result = await billSyncScheduler.hydrateIfNeeded();
 
-    result.fold(
-      (failure) {
-        historyRestoreError.value = failure.message;
-        debugPrint('BillingController: bill history restore failed: '
-            '${failure.message}');
-      },
-      (_) {},
-    );
+    result.fold((failure) {
+      historyRestoreError.value = failure.message;
+      debugPrint(
+        'BillingController: bill history restore failed: '
+        '${failure.message}',
+      );
+    }, (_) {});
 
     restoringHistory.value = false;
   }
@@ -344,6 +347,7 @@ class BillingController extends GetxController {
       AppSnackbar.error(message: e.toString());
     } finally {
       syncing.value = false;
+      lastSyncedAt.value = billSyncScheduler.lastSyncedAt;
     }
   }
 

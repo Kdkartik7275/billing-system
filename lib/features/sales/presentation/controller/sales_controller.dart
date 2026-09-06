@@ -1,13 +1,16 @@
 import 'package:billing_system/core/enums/billing.dart';
+import 'package:billing_system/core/helper/export_sales_data.dart';
 import 'package:billing_system/core/helper/print_bill.dart';
 import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/features/billing/domain/entities/bill_entity.dart';
 import 'package:billing_system/features/billing/domain/usecases/get_bill_by_invoice_usecase.dart';
+import 'package:billing_system/features/billing/domain/usecases/get_bills_by_date_range_usecase.dart';
 import 'package:billing_system/features/billing/domain/usecases/get_bills_by_date_usecase.dart';
 import 'package:billing_system/features/sales/presentation/widgets/bill_details_dialog.dart';
 import 'package:billing_system/features/user/presentation/controller/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:printing/printing.dart';
 
 enum SalesFilter { all, cash, upi, card, credit }
 
@@ -46,10 +49,12 @@ extension SalesFilterX on SalesFilter {
 class SalesController extends GetxController {
   final GetBillsByDateUsecase getBillsByDateUsecase;
   final GetBillByInvoiceUsecase getBillByInvoiceUsecase;
+  final GetBillsByDateRangeUsecase getBillsByDateRangeUsecase;
 
   SalesController({
     required this.getBillsByDateUsecase,
     required this.getBillByInvoiceUsecase,
+    required this.getBillsByDateRangeUsecase,
   });
 
   final Rx<DateTime> selectedDate = DateTime.now().obs;
@@ -61,6 +66,10 @@ class SalesController extends GetxController {
   final RxBool isLoading = false.obs;
 
   final RxString errorMessage = ''.obs;
+
+  /// Guards the export button. A PDF build for a full month can take a
+  /// second or two, and a double-tap would otherwise open two share sheets.
+  final RxBool isExporting = false.obs;
 
   @override
   void onInit() {
@@ -134,6 +143,98 @@ class SalesController extends GetxController {
             (itemSum, item) => itemSum + item.quantity.toInt(),
           );
     });
+  }
+
+  // --------------------------------------------------------------------
+  // EXPORT
+  // --------------------------------------------------------------------
+
+  /// Builds a sales report PDF for [range] and hands it to the platform
+  /// share sheet.
+  ///
+  /// Reads through [GetBillsByDateRangeUsecase] rather than reusing the
+  /// already-loaded [bills] list, because that list only ever holds a single
+  /// day. The repository read is local-first, so this works offline.
+  ///
+  /// The currently selected payment filter is applied to the export so the
+  /// report matches what the user is looking at, and the filter is printed on
+  /// the report header so an exported file is never ambiguous.
+  Future<void> exportSales(SalesExportRange range) async {
+    if (isExporting.value) return;
+
+    isExporting.value = true;
+
+    try {
+      final result = await getBillsByDateRangeUsecase(
+        DateRangeParams(start: range.start, end: range.end),
+      );
+
+      // `fold` is the only Either accessor used elsewhere in this codebase,
+      // so the failure message and the payload are pulled out in one pass
+      // rather than folding twice.
+      String? failureMessage;
+      List<BillEntity> allBills = const <BillEntity>[];
+
+      result.fold<void>(
+        (failure) {
+          failureMessage = failure.message.isNotEmpty
+              ? failure.message
+              : 'Could not load sales for this period.';
+        },
+        (loadedBills) {
+          allBills = loadedBills;
+        },
+      );
+
+      if (failureMessage != null) {
+        AppSnackbar.error(message: failureMessage!);
+        return;
+      }
+
+      final method = selectedFilter.value.toPaymentMethod;
+      final scopedBills = method == null
+          ? allBills
+          : allBills
+                .where(
+                  (bill) => bill.payment.payments.any(
+                    (payment) => payment.method == method,
+                  ),
+                )
+                .toList();
+
+      if (scopedBills.isEmpty) {
+        AppSnackbar.info(
+          message: 'No sales found for ${range.label}.',
+          title: 'Nothing to export',
+        );
+        return;
+      }
+
+      final rows = scopedBills.map(SalesExportRow.fromBill).toList();
+
+      // The shop may not be loaded yet on a cold start, so read it
+      // defensively instead of force-unwrapping — a missing shop name should
+      // degrade the report header, not throw.
+      final shopName = Get.isRegistered<UserController>()
+          ? Get.find<UserController>().shop.value?.shopName
+          : null;
+
+      final export = await const SalesPdfExporter().export(
+        rows: rows,
+        range: range,
+        shopName: shopName,
+        paymentFilterLabel: selectedFilter.value == SalesFilter.all
+            ? null
+            : selectedFilter.value.label,
+      );
+
+      await Printing.sharePdf(bytes: export.bytes, filename: export.fileName);
+    } catch (e) {
+      AppSnackbar.error(message: 'Export failed: $e');
+      debugPrint('Sales export failed: $e');
+    } finally {
+      isExporting.value = false;
+    }
   }
 
   Future<void> handleScannedBill(String invoiceNo) async {

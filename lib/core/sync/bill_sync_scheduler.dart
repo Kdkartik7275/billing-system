@@ -45,6 +45,13 @@ class BillSyncScheduler {
     _stockReductionsController.close();
   }
 
+  // add anywhere inside BillSyncScheduler
+  DateTime? get lastSyncedAt {
+    final raw = metaBox.get(_lastSyncKey) as String?;
+    if (raw == null) return null;
+    return DateTime.tryParse(raw);
+  }
+
   /// Returns the hydration outcome instead of swallowing it, so a caller
   /// can tell "there are genuinely no bills" apart from "we could not ask".
   /// Discarding this was why a failed restore after a reinstall showed up
@@ -116,9 +123,8 @@ class BillSyncScheduler {
           await aggregateResult.fold((_) async {}, (aggregates) async {
             if (aggregates.isEmpty) return;
 
-            final reductionResult = await reduceStockForSoldProductsUsecase.call(
-              aggregates,
-            );
+            final reductionResult = await reduceStockForSoldProductsUsecase
+                .call(aggregates);
 
             reductionResult.fold((_) {}, (reductions) {
               // Emit the event regardless of whether anyone is

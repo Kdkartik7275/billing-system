@@ -12,7 +12,17 @@ class SalesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(SalesController(getBillsByDateUsecase: sl(), getBillByInvoiceUsecase: sl()));
+
+    if (!Get.isRegistered<SalesController>()) {
+      Get.put(
+        SalesController(
+          getBillsByDateUsecase: sl(),
+          getBillByInvoiceUsecase: sl(),
+          getBillsByDateRangeUsecase: sl(),
+        ),
+      );
+    }
+
     return AdaptiveLayout(
       mobile: SalesMobileLayout(),
       tablet: SalesTabletLayout(),

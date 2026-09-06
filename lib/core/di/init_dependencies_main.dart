@@ -391,6 +391,15 @@ void _initBilling() {
     ),
   );
 
+  sl.registerLazySingleton<SyncStatusService>(
+    () => SyncStatusService(
+      getUnsyncedBillsUsecase: sl(),
+      syncPendingBillsUsecase: sl(),
+      connectionChecker: sl(),
+      metaBox: sl<Box>(instanceName: 'billingMeta'),
+    ),
+  );
+
   // ---------------- USE CASES ----------------
   sl.registerLazySingleton(() => CreateBillUsecase(repository: sl()));
   sl.registerLazySingleton(() => GetBillByIdUsecase(repository: sl()));

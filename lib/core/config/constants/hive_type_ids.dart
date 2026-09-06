@@ -53,10 +53,11 @@ class HiveTypeIds {
 
   static const int supplierModel = 33;
   static const int purchaseModel = 34;
+  static const int heldCartModel = 35;
 
   // ==========================================================
   // NEXT AVAILABLE TYPE ID
   // ==========================================================
 
-  static const int nextAvailable = 35;
+  static const int nextAvailable = 36;
 }

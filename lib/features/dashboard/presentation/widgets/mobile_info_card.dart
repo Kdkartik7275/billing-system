@@ -1,5 +1,5 @@
+import 'package:billing_system/core/sync/widgets/sync_status_pill.dart';
 import 'package:billing_system/features/billing/presentation/controllers/billing_controller.dart';
-import 'package:billing_system/features/dashboard/presentation/widgets/sync_button.dart';
 import 'package:billing_system/features/user/presentation/controller/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -125,7 +125,8 @@ class SmartPosInfoCard extends StatelessWidget {
                 if (billsController.pending.isNotEmpty)
                   SizedBox(
                     width: double.infinity,
-                    child: SyncButton(billsController: billsController),
+                    child:
+                        SyncStatusPill(), // was: SyncButton(billsController: billsController)
                   ),
               ],
             ),

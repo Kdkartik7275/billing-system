@@ -37,7 +37,7 @@ class BillRepositoryImpl implements BillRepository {
       // only path to the server was the once-daily scheduler, so a bill
       // could live for up to 24 hours on a single device and was lost for
       // good if the app was uninstalled before then.
-      unawaited(_pushInBackground(result.id));
+    //  unawaited(_pushInBackground(result.id));
 
       return right(result.toEntity());
     } catch (e) {
@@ -45,13 +45,13 @@ class BillRepositoryImpl implements BillRepository {
     }
   }
 
-  Future<void> _pushInBackground(String billId) async {
-    try {
-      await pushBillNow(billId);
-    } catch (_) {
-      // Still queued locally as unsynced; the scheduler retries it.
-    }
-  }
+  // Future<void> _pushInBackground(String billId) async {
+  //   try {
+  //     await pushBillNow(billId);
+  //   } catch (_) {
+  //     // Still queued locally as unsynced; the scheduler retries it.
+  //   }
+  // }
 
   // ---------------- READS — LOCAL ONLY ----------------
 

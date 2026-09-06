@@ -12,6 +12,10 @@ class CartItem {
 class CartController extends GetxController {
   final RxMap<String, CartItem> cartItems = <String, CartItem>{}.obs;
 
+  final RxnString selectedProductId = RxnString();
+
+  List<CartItem> get _orderedItems => cartItems.values.toList();
+
   final int Function(String productId) getAvailableStock;
 
   CartController({required this.getAvailableStock});
@@ -129,6 +133,66 @@ class CartController extends GetxController {
     }
 
     existing.quantity = quantity;
+    cartItems.refresh();
+  }
+
+  void selectNext() {
+    final items = _orderedItems;
+    if (items.isEmpty) return;
+    final currentIndex = items.indexWhere(
+      (i) => i.product.id == selectedProductId.value,
+    );
+    final nextIndex = currentIndex == -1
+        ? 0
+        : (currentIndex + 1).clamp(0, items.length - 1);
+    selectedProductId.value = items[nextIndex].product.id;
+  }
+
+  void selectPrevious() {
+    final items = _orderedItems;
+    if (items.isEmpty) return;
+    final currentIndex = items.indexWhere(
+      (i) => i.product.id == selectedProductId.value,
+    );
+    final prevIndex = currentIndex <= 0 ? 0 : currentIndex - 1;
+    selectedProductId.value = items[prevIndex].product.id;
+  }
+
+  void incrementSelected() {
+    final id = selectedProductId.value;
+    if (id != null) incrementQuantity(id);
+  }
+
+  void decrementSelected() {
+    final id = selectedProductId.value;
+    if (id != null) decrementQuantity(id);
+  }
+
+  void removeSelected() {
+    final id = selectedProductId.value;
+    if (id == null) return;
+    removeFromCart(id);
+    selectedProductId.value = null;
+  }
+
+  Map<String, int> exportQuantities() {
+    return {
+      for (final item in cartItems.values) item.product.id: item.quantity,
+    };
+  }
+
+  void loadFromQuantities(
+    Map<String, int> quantities,
+    List<ProductEntity> availableProducts,
+  ) {
+    cartItems.clear();
+    for (final entry in quantities.entries) {
+      final product = availableProducts.firstWhereOrNull(
+        (p) => p.id == entry.key,
+      );
+      if (product == null) continue;
+      cartItems[entry.key] = CartItem(product: product, quantity: entry.value);
+    }
     cartItems.refresh();
   }
 

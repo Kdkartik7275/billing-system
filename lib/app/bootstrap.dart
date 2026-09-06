@@ -5,6 +5,7 @@ import 'package:billing_system/features/billing/data/models/bill_model.dart';
 import 'package:billing_system/features/billing/data/models/billing_cart_model.dart';
 import 'package:billing_system/features/billing/data/models/coupon_model.dart';
 import 'package:billing_system/features/billing/data/models/customer_model.dart';
+import 'package:billing_system/features/billing/data/models/held_cart_model.dart';
 import 'package:billing_system/features/billing/data/models/payment_model.dart';
 import 'package:billing_system/features/billing/data/models/payment_summary_model.dart';
 import 'package:billing_system/features/inventory/data/models/brand/brand_model.dart';
@@ -78,7 +79,8 @@ class Bootstrap {
       ..registerAdapter(SecuritySettingsModelAdapter())
       ..registerAdapter(UserPreferencesModelAdapter())
       ..registerAdapter(SupplierModelAdapter())
-      ..registerAdapter(PurchaseModelAdapter());
+      ..registerAdapter(PurchaseModelAdapter())
+      ..registerAdapter(HeldCartModelAdapter());
 
     await Hive.openBox<ProductModel>('products');
     await Hive.openBox<CategoryModel>('categories');
@@ -97,7 +99,7 @@ class Bootstrap {
     await Hive.openBox('billing_meta');
     await Hive.openBox('inventory_meta');
     await Hive.openBox<UnitModel>('units');
-
+    await Hive.openBox<HeldCartModel>('held_carts');
     await Hive.openBox('settings');
 
     // Customer and coupon features are deactivated for MVP.

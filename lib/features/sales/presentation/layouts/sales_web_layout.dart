@@ -2,6 +2,7 @@ import 'package:billing_system/core/helper/print_bill.dart';
 import 'package:billing_system/features/sales/presentation/controller/sales_controller.dart';
 import 'package:billing_system/features/sales/presentation/widgets/bill_details_dialog.dart';
 import 'package:billing_system/features/sales/presentation/widgets/sales_date_picker.dart';
+import 'package:billing_system/features/sales/presentation/widgets/sales_export_button.dart';
 import 'package:billing_system/features/sales/presentation/widgets/sales_filter_chips.dart';
 import 'package:billing_system/features/sales/presentation/widgets/sales_row.dart';
 import 'package:billing_system/features/sales/presentation/widgets/sales_scan_button.dart';
@@ -35,8 +36,12 @@ class SalesWebLayout extends GetView<SalesController> {
 
               const SizedBox(width: 16),
 
+              SalesExportButton(controller: controller, compact: false),
+
+              const SizedBox(width: 12),
+
               SizedBox(
-                width: 320,
+                width: 260,
                 child: SalesScanButton(
                   onPressed: () async {
                     final result = await Get.to<String>(

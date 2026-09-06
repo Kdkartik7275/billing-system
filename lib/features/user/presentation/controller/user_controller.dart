@@ -44,10 +44,6 @@ class UserController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxnString errorMessage = RxnString();
 
-  /// Tags every subsequent crash report / analytics event with who this
-  /// session belongs to. Called once identity is actually known — after
-  /// a fresh fetch or a restored session — never before, so nothing gets
-  /// attributed to the wrong shop if this runs twice across logins.
   Future<void> _tagSessionContext() async {
     final currentUser = user.value;
     final currentShop = shop.value;
@@ -129,14 +125,16 @@ class UserController extends GetxController {
       await CrashlyticsService.recordError(
         e,
         stackTrace,
-        reason: 'UserController.fetchAccountDetails - shop firebase init failed',
+        reason:
+            'UserController.fetchAccountDetails - shop firebase init failed',
       );
     }
 
     await _tagSessionContext();
-    await AnalyticsService.logEvent('login_success', parameters: {
-      'method': 'fresh_fetch',
-    });
+    await AnalyticsService.logEvent(
+      'login_success',
+      parameters: {'method': 'fresh_fetch'},
+    );
 
     statusMessage.value = 'All set!';
     isLoading.value = false;
@@ -173,9 +171,10 @@ class UserController extends GetxController {
       await _shopFirebaseService.initialize(shop.value!.firebaseConfig);
 
       await _tagSessionContext();
-      await AnalyticsService.logEvent('login_success', parameters: {
-        'method': 'restored_session',
-      });
+      await AnalyticsService.logEvent(
+        'login_success',
+        parameters: {'method': 'restored_session'},
+      );
 
       statusMessage.value = 'Ready';
       isLoading.value = false;
@@ -224,9 +223,10 @@ class UserController extends GetxController {
 
       debugPrint('[UserController] Biometric result: $authenticated');
 
-      await AnalyticsService.logEvent('biometric_auth_attempt', parameters: {
-        'result': authenticated,
-      });
+      await AnalyticsService.logEvent(
+        'biometric_auth_attempt',
+        parameters: {'result': authenticated},
+      );
 
       return authenticated;
     } catch (e, stackTrace) {

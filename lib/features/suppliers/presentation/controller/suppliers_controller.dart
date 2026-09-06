@@ -1,3 +1,5 @@
+import 'package:billing_system/core/services/analytics/analytics_service.dart';
+import 'package:billing_system/core/services/crash/crashlytics_service.dart';
 import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/features/inventory/domain/entities/purchase_entity.dart';
 import 'package:billing_system/features/inventory/domain/entities/supplier_entity.dart';
@@ -28,6 +30,7 @@ class SuppliersController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    AnalyticsService.logScreenView('Suppliers');
     loadData();
   }
 
@@ -146,8 +149,6 @@ class SuppliersController extends GetxController {
       );
     }
 
-    // Overdue / earliest due first — sorts directly on each payment's
-    // own dueDate now, instead of the previous broken stub.
     payments.sort((a, b) => a.dueDate.compareTo(b.dueDate));
 
     return payments;
@@ -246,6 +247,13 @@ class SuppliersController extends GetxController {
     } catch (e, stackTrace) {
       debugPrint('[SuppliersController] loadData error: $e');
       debugPrint('$stackTrace');
+
+      await CrashlyticsService.recordError(
+        e,
+        stackTrace,
+        reason: 'SuppliersController.loadData',
+        fatal: false,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -272,6 +280,13 @@ class SuppliersController extends GetxController {
     } catch (e, stackTrace) {
       debugPrint('[SuppliersController] loadSuppliers error: $e');
       debugPrint('$stackTrace');
+
+      await CrashlyticsService.recordError(
+        e,
+        stackTrace,
+        reason: 'SuppliersController.loadSuppliers',
+        fatal: false,
+      );
 
       AppSnackbar.error(
         message: 'Something went wrong while loading suppliers.',
@@ -300,6 +315,13 @@ class SuppliersController extends GetxController {
     } catch (e, stackTrace) {
       debugPrint('[SuppliersController] loadPurchases error: $e');
       debugPrint('$stackTrace');
+
+      await CrashlyticsService.recordError(
+        e,
+        stackTrace,
+        reason: 'SuppliersController.loadPurchases',
+        fatal: false,
+      );
 
       AppSnackbar.error(
         message: 'Something went wrong while loading purchases.',

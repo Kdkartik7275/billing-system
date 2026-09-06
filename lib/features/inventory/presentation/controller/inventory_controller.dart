@@ -1,3 +1,4 @@
+import 'package:billing_system/core/services/analytics/analytics_service.dart';
 import 'package:billing_system/core/helper/export_products_data.dart';
 import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/features/inventory/domain/usecases/brand/get_brands_usecase.dart';
@@ -81,6 +82,8 @@ class InventoryController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    AnalyticsService.logScreenView('Inventory');
+
     Future.wait([
       loadProducts(),
       loadCategories(),
@@ -423,17 +426,37 @@ class InventoryController extends GetxController {
   Future<void> refreshProducts() async {
     debugPrint('Refreshing products...');
     await loadProducts();
+
+    AnalyticsService.logEvent(
+      'inventory_refresh',
+      parameters: {'status': 'success'},
+    );
   }
 
   void deleteProduct(String productId) async {
     deleting.value = true;
     final result = await deleteProductUseCase.call(productId);
 
-    result.fold((err) => AppSnackbar.error(message: err.message), (r) {
-      products.removeWhere((p) => p.id == productId);
-      stockRecords.removeWhere((s) => s.productId == productId);
-      stockBatches.removeWhere((b) => b.productId == productId);
-    });
+    result.fold(
+      (err) {
+        AppSnackbar.error(message: err.message);
+
+        AnalyticsService.logEvent(
+          'product_delete_failed',
+          parameters: {'product_id': productId, 'error': err.message},
+        );
+      },
+      (r) {
+        products.removeWhere((p) => p.id == productId);
+        stockRecords.removeWhere((s) => s.productId == productId);
+        stockBatches.removeWhere((b) => b.productId == productId);
+
+        AnalyticsService.logEvent(
+          'product_deleted',
+          parameters: {'product_id': productId},
+        );
+      },
+    );
     deleting.value = false;
   }
 
@@ -453,6 +476,10 @@ class InventoryController extends GetxController {
 
       if (rowsToExport.isEmpty) {
         AppSnackbar.info(message: 'No products to export.');
+        AnalyticsService.logEvent(
+          'inventory_export',
+          parameters: {'status': 'empty'},
+        );
         return;
       }
 
@@ -484,9 +511,19 @@ class InventoryController extends GetxController {
       );
 
       await _shareOrOpen(result);
+
+      AnalyticsService.logEvent(
+        'inventory_export',
+        parameters: {'status': 'success', 'count': rowsToExport.length},
+      );
     } catch (e) {
       AppSnackbar.error(message: 'Export failed: ${e.toString()}');
       debugPrint('Export failed: ${e.toString()}');
+
+      AnalyticsService.logEvent(
+        'inventory_export',
+        parameters: {'status': 'error', 'error': e.toString()},
+      );
     } finally {
       exporting.value = false;
     }

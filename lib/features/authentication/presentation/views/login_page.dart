@@ -1,5 +1,6 @@
 import 'package:billing_system/core/config/responsive/adaptive_layout.dart';
 import 'package:billing_system/core/di/init_dependencies.dart';
+import 'package:billing_system/core/services/analytics/analytics_service.dart';
 import 'package:billing_system/features/authentication/presentation/views/mobile_layout.dart';
 import 'package:billing_system/features/authentication/presentation/views/tablet_layout.dart';
 import 'package:billing_system/features/authentication/presentation/views/web_layout.dart';
@@ -14,6 +15,8 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Get.put<LoginController>(LoginController(loginUserUseCase: sl()));
+
+    AnalyticsService.logScreenView('Login');
 
     return AdaptiveLayout(
       mobile: const LoginMobileLayout(),

@@ -1,3 +1,4 @@
+import 'package:billing_system/core/services/analytics/analytics_service.dart';
 import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/features/inventory/domain/entities/product_entity.dart';
 import 'package:get/get.dart';
@@ -20,8 +21,6 @@ class CartController extends GetxController {
 
   CartController({required this.getAvailableStock});
 
-  // ---------------- QUANTITY GETTERS ----------------
-
   int quantityFor(String productId) {
     return cartItems[productId]?.quantity ?? 0;
   }
@@ -29,8 +28,6 @@ class CartController extends GetxController {
   int get totalItems {
     return cartItems.values.fold(0, (sum, item) => sum + item.quantity);
   }
-
-  // ---------------- PRICE / TAX GETTERS ----------------
 
   double get subtotal {
     return cartItems.values.fold(
@@ -51,8 +48,6 @@ class CartController extends GetxController {
 
   double get totalAmount => subtotal + totalTax;
 
-  // ---------------- CART ACTIONS (STOCK-AWARE INTERNALLY) ----------------
-
   void addToCart(ProductEntity product) {
     final availableStock = getAvailableStock(product.id);
 
@@ -71,8 +66,21 @@ class CartController extends GetxController {
         return;
       }
       existing.quantity++;
+
+      AnalyticsService.logEvent(
+        'cart_item_quantity_increased',
+        parameters: {
+          'product_id': product.id,
+          'new_quantity': existing.quantity,
+        },
+      );
     } else {
       cartItems[product.id] = CartItem(product: product, quantity: 1);
+
+      AnalyticsService.logEvent(
+        'cart_item_added',
+        parameters: {'product_id': product.id, 'quantity': 1},
+      );
     }
 
     cartItems.refresh();
@@ -93,16 +101,32 @@ class CartController extends GetxController {
 
     item.quantity++;
     cartItems.refresh();
+
+    AnalyticsService.logEvent(
+      'cart_item_quantity_increased',
+      parameters: {'product_id': productId, 'new_quantity': item.quantity},
+    );
   }
 
   void decrementQuantity(String productId) {
     final item = cartItems[productId];
     if (item == null) return;
+
     if (item.quantity <= 1) {
       cartItems.remove(productId);
+
+      AnalyticsService.logEvent(
+        'cart_item_removed',
+        parameters: {'product_id': productId},
+      );
     } else {
       item.quantity--;
       cartItems.refresh();
+
+      AnalyticsService.logEvent(
+        'cart_item_quantity_decreased',
+        parameters: {'product_id': productId, 'new_quantity': item.quantity},
+      );
     }
   }
 
@@ -112,7 +136,15 @@ class CartController extends GetxController {
     final availableStock = getAvailableStock(productId);
 
     if (quantity == 0) {
+      final wasInCart = cartItems.containsKey(productId);
       cartItems.remove(productId);
+
+      if (wasInCart) {
+        AnalyticsService.logEvent(
+          'cart_item_removed',
+          parameters: {'product_id': productId},
+        );
+      }
       return;
     }
 
@@ -129,11 +161,24 @@ class CartController extends GetxController {
       );
       existing.quantity = availableStock;
       cartItems.refresh();
+
+      AnalyticsService.logEvent(
+        'cart_item_quantity_set',
+        parameters: {
+          'product_id': productId,
+          'new_quantity': existing.quantity,
+        },
+      );
       return;
     }
 
     existing.quantity = quantity;
     cartItems.refresh();
+
+    AnalyticsService.logEvent(
+      'cart_item_quantity_set',
+      parameters: {'product_id': productId, 'new_quantity': quantity},
+    );
   }
 
   void selectNext() {
@@ -198,9 +243,22 @@ class CartController extends GetxController {
 
   void removeFromCart(String productId) {
     cartItems.remove(productId);
+
+    AnalyticsService.logEvent(
+      'cart_item_removed',
+      parameters: {'product_id': productId},
+    );
   }
 
   void clearCart() {
+    final count = cartItems.length;
     cartItems.clear();
+
+    if (count > 0) {
+      AnalyticsService.logEvent(
+        'cart_cleared',
+        parameters: {'items_count': count},
+      );
+    }
   }
 }

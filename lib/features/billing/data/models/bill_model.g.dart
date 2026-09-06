@@ -32,7 +32,7 @@ class BillModelAdapter extends TypeAdapter<BillModel> {
       createdAt: fields[13] as DateTime,
       updatedAt: fields[14] as DateTime,
       synced: fields[15] as bool,
-      stockApplied: fields[2] as bool,
+      stockApplied: fields[2] as bool?,
     );
   }
 

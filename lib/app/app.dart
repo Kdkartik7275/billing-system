@@ -1,5 +1,6 @@
 import 'package:billing_system/core/config/theme/app_colors.dart';
 import 'package:billing_system/core/config/theme/app_theme.dart';
+import 'package:billing_system/core/services/analytics/analytics_service.dart';
 import 'package:billing_system/features/user/presentation/controller/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -62,11 +63,18 @@ class _SplashPageState extends State<SplashPage> {
     _userController = Get.find<UserController>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await AnalyticsService.logEvent('splash_view');
+
       await Future.delayed(const Duration(milliseconds: 500));
 
       final route = await _userController.checkSession();
 
       if (!mounted) return;
+
+      await AnalyticsService.logEvent(
+        'session_check_complete',
+        parameters: {'next_route': route},
+      );
 
       Get.offAllNamed(route);
     });

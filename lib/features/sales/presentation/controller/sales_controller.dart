@@ -1,6 +1,7 @@
 import 'package:billing_system/core/enums/billing.dart';
 import 'package:billing_system/core/helper/export_sales_data.dart';
 import 'package:billing_system/core/helper/print_bill.dart';
+import 'package:billing_system/core/services/analytics/analytics_service.dart';
 import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/features/billing/domain/entities/bill_entity.dart';
 import 'package:billing_system/features/billing/domain/usecases/get_bill_by_invoice_usecase.dart';
@@ -74,6 +75,7 @@ class SalesController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    AnalyticsService.logScreenView('Sales');
 
     loadBills();
   }
@@ -151,14 +153,6 @@ class SalesController extends GetxController {
 
   /// Builds a sales report PDF for [range] and hands it to the platform
   /// share sheet.
-  ///
-  /// Reads through [GetBillsByDateRangeUsecase] rather than reusing the
-  /// already-loaded [bills] list, because that list only ever holds a single
-  /// day. The repository read is local-first, so this works offline.
-  ///
-  /// The currently selected payment filter is applied to the export so the
-  /// report matches what the user is looking at, and the filter is printed on
-  /// the report header so an exported file is never ambiguous.
   Future<void> exportSales(SalesExportRange range) async {
     if (isExporting.value) return;
 
@@ -169,9 +163,6 @@ class SalesController extends GetxController {
         DateRangeParams(start: range.start, end: range.end),
       );
 
-      // `fold` is the only Either accessor used elsewhere in this codebase,
-      // so the failure message and the payload are pulled out in one pass
-      // rather than folding twice.
       String? failureMessage;
       List<BillEntity> allBills = const <BillEntity>[];
 
@@ -188,6 +179,16 @@ class SalesController extends GetxController {
 
       if (failureMessage != null) {
         AppSnackbar.error(message: failureMessage!);
+
+        await AnalyticsService.logEvent(
+          'sales_export_failed',
+          parameters: {
+            'range': range.label,
+            'error': failureMessage!,
+            'filter': selectedFilter.value.label,
+          },
+        );
+
         return;
       }
 
@@ -207,14 +208,22 @@ class SalesController extends GetxController {
           message: 'No sales found for ${range.label}.',
           title: 'Nothing to export',
         );
+
+        await AnalyticsService.logEvent(
+          'sales_export',
+          parameters: {
+            'range': range.label,
+            'filter': selectedFilter.value.label,
+            'status': 'empty',
+            'bills_count': 0,
+          },
+        );
+
         return;
       }
 
       final rows = scopedBills.map(SalesExportRow.fromBill).toList();
 
-      // The shop may not be loaded yet on a cold start, so read it
-      // defensively instead of force-unwrapping — a missing shop name should
-      // degrade the report header, not throw.
       final shopName = Get.isRegistered<UserController>()
           ? Get.find<UserController>().shop.value?.shopName
           : null;
@@ -229,9 +238,32 @@ class SalesController extends GetxController {
       );
 
       await Printing.sharePdf(bytes: export.bytes, filename: export.fileName);
+
+      await AnalyticsService.logEvent(
+        'sales_export',
+        parameters: {
+          'range': range.label,
+          'filter': selectedFilter.value.label,
+          'status': 'success',
+          'bills_count': scopedBills.length,
+          'total_amount': scopedBills.fold<double>(
+            0.0,
+            (sum, bill) => sum + bill.grandTotal,
+          ),
+        },
+      );
     } catch (e) {
       AppSnackbar.error(message: 'Export failed: $e');
       debugPrint('Sales export failed: $e');
+
+      await AnalyticsService.logEvent(
+        'sales_export_failed',
+        parameters: {
+          'range': range.label,
+          'filter': selectedFilter.value.label,
+          'error': e.toString(),
+        },
+      );
     } finally {
       isExporting.value = false;
     }

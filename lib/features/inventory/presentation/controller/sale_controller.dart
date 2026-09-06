@@ -1,4 +1,5 @@
 import 'package:billing_system/core/config/constants/dropdown_values.dart';
+import 'package:billing_system/core/services/analytics/analytics_service.dart';
 import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/features/inventory/domain/entities/product_entity.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/sell_stock_usecase.dart';
@@ -34,6 +35,8 @@ class AddSaleController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    AnalyticsService.logScreenView('AddSale');
+
     warehouseId.value = warehouses.first;
     taxPercent.value = product.tax.gstPercent;
     sellingPriceController.text = product.price.sellingPrice.toStringAsFixed(2);
@@ -70,27 +73,57 @@ class AddSaleController extends GetxController {
 
     isSaving.value = true;
 
-    final result = await sellStockUsecase.call(
-      SellStockParams(
-        productId: product.id,
-        warehouseId: warehouseId.value!,
-        quantity: quantity.value.toInt(),
-        price: sellingPrice.value,
-        saleDate: date.value,
-        discount: discountPercent.value,
-        tax: taxPercent.value,
-        paymentMethod: paymentMethod.value ?? 'Cash',
-        reason: reasonController.text.trim(),
-        notes: notesController.text.trim(),
-      ),
-    );
+    try {
+      final result = await sellStockUsecase.call(
+        SellStockParams(
+          productId: product.id,
+          warehouseId: warehouseId.value!,
+          quantity: quantity.value.toInt(),
+          price: sellingPrice.value,
+          saleDate: date.value,
+          discount: discountPercent.value,
+          tax: taxPercent.value,
+          paymentMethod: paymentMethod.value ?? 'Cash',
+          reason: reasonController.text.trim(),
+          notes: notesController.text.trim(),
+        ),
+      );
 
-    isSaving.value = false;
+      result.fold(
+        (failure) {
+          AppSnackbar.error(message: failure.message);
 
-    result.fold((failure) => AppSnackbar.error(message: failure.message), (_) {
-      AppSnackbar.success(message: 'Sale recorded successfully');
-      Get.back(result: true);
-    });
+          AnalyticsService.logEvent(
+            'sale_save_failed',
+            parameters: {'product_id': product.id, 'error': failure.message},
+          );
+        },
+        (_) {
+          AppSnackbar.success(message: 'Sale recorded successfully');
+
+          AnalyticsService.logEvent(
+            'sale_save_success',
+            parameters: {
+              'product_id': product.id,
+              'quantity': quantity.value,
+              'total_amount': totalAmount,
+              'payment_method': paymentMethod.value ?? 'Cash',
+            },
+          );
+
+          Get.back(result: true);
+        },
+      );
+    } catch (e) {
+      AppSnackbar.error(message: 'Something went wrong. Please try again.');
+
+      AnalyticsService.logEvent(
+        'sale_save_failed',
+        parameters: {'product_id': product.id, 'error': e.toString()},
+      );
+    } finally {
+      isSaving.value = false;
+    }
   }
 
   @override

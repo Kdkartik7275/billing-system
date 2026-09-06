@@ -1,4 +1,4 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:billing_system/core/services/analytics/analytics_service.dart';
 import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -22,6 +22,12 @@ class ChangePasswordController extends GetxController {
   final isLoading = false.obs;
   final isDone = false.obs;
   final errorMessage = Rxn<String>();
+
+  @override
+  void onInit() {
+    super.onInit();
+    AnalyticsService.logScreenView('ChangePassword');
+  }
 
   @override
   void onClose() {
@@ -87,6 +93,12 @@ class ChangePasswordController extends GetxController {
       AppSnackbar.error(
         message: 'New password must be different from your current password.',
       );
+
+      await AnalyticsService.logEvent(
+        'change_password_failed',
+        parameters: {'reason': 'same_as_current'},
+      );
+
       return;
     }
 
@@ -103,17 +115,29 @@ class ChangePasswordController extends GetxController {
           AppSnackbar.error(
             message: 'Unable to change password. Please try again.',
           );
+
+          AnalyticsService.logEvent(
+            'change_password_failed',
+            parameters: {'reason': failure.message},
+          );
         },
         (_) {
           AppSnackbar.success(message: 'Password changed successfully.');
 
           currentPasswordController.clear();
           newPasswordController.clear();
+
+          AnalyticsService.logEvent('change_password_success');
         },
       );
     } catch (e) {
       AppSnackbar.error(
         message: 'Something went wrong while changing your password.',
+      );
+
+      AnalyticsService.logEvent(
+        'change_password_failed',
+        parameters: {'reason': 'unknown_error', 'error': e.toString()},
       );
     }
   }

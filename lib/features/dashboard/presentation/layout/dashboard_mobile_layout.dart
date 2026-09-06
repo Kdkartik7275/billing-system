@@ -1,6 +1,5 @@
 import 'package:billing_system/core/config/constants/dashboard_pages.dart';
 import 'package:billing_system/core/config/theme/app_colors.dart';
-import 'package:billing_system/core/sync/widgets/sync_status_pill.dart';
 import 'package:billing_system/features/billing/presentation/controllers/billing_controller.dart';
 import 'package:billing_system/features/dashboard/presentation/controller/dashboard_shell_controller.dart';
 import 'package:billing_system/features/dashboard/presentation/widgets/dashboard_drawer_navigation.dart';
@@ -77,7 +76,6 @@ class _DashboardMobileLayoutState extends State<DashboardMobileLayout> {
             ],
           ),
         ),
-        
       ),
       drawer: const Drawer(elevation: 0, child: AppNavigationDrawer()),
       body: Obx(

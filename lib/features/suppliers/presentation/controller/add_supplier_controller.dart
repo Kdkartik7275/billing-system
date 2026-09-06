@@ -1,4 +1,5 @@
 import 'package:billing_system/core/helper/functions.dart';
+import 'package:billing_system/core/services/analytics/analytics_service.dart';
 import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/features/inventory/domain/entities/supplier_entity.dart';
 import 'package:billing_system/features/inventory/domain/usecases/supplier/add_supplier_usecase.dart';
@@ -29,6 +30,12 @@ class AddSupplierController extends GetxController {
   static final _gstRegex = RegExp(
     r'^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$',
   );
+
+  @override
+  void onInit() {
+    super.onInit();
+    AnalyticsService.logScreenView('AddSupplier');
+  }
 
   @override
   void onClose() {
@@ -104,19 +111,32 @@ class AddSupplierController extends GetxController {
           createdAt: DateTime.now(),
         ),
       );
+
       result.fold(
         (err) {
           errorMessage.value = "Unable to add supplier. Please try again.";
+
+          AnalyticsService.logEvent(
+            'supplier_add_failed',
+            parameters: {'error': err.message},
+          );
         },
         (r) {
           Get.back();
           AppSnackbar.success(message: 'Supplier added successfully.');
           Get.find<SuppliersController>().addSupplier(r);
+
+          AnalyticsService.logEvent('supplier_add_success');
         },
       );
     } catch (e) {
       errorMessage.value = e.toString().replaceFirst('Exception: ', '');
       debugPrint(e.toString());
+
+      AnalyticsService.logEvent(
+        'supplier_add_failed',
+        parameters: {'error': e.toString()},
+      );
     } finally {
       isLoading.value = false;
     }

@@ -1,4 +1,5 @@
 import 'package:billing_system/core/helper/functions.dart' as scanner;
+import 'package:billing_system/core/services/analytics/analytics_service.dart';
 import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/features/inventory/domain/entities/product_entity.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_entity.dart';
@@ -97,6 +98,9 @@ class AddProductController extends GetxController {
       draftProduct = _buildEmptyDraft().obs;
     }
     _bindTextControllers();
+
+    // Optional: log screen view
+    AnalyticsService.logScreenView(isEditMode ? 'EditProduct' : 'AddProduct');
   }
 
   @override
@@ -257,6 +261,8 @@ class AddProductController extends GetxController {
     final result = await scanner.scanBarcode(title: 'Scan Product Barcode');
     if (result == null) return;
     barcodeCtrl.text = result;
+
+    await AnalyticsService.logEvent('product_barcode_scanned');
   }
 
   // ---------------- SELECTORS ----------------
@@ -475,6 +481,11 @@ class AddProductController extends GetxController {
 
     variantNameCtrl.clear();
     variantValuesCtrl.clear();
+
+    AnalyticsService.logEvent(
+      'product_variant_added',
+      parameters: {'variant_count': draftProduct.value.variants.length},
+    );
   }
 
   void removeVariant(String variantId) {
@@ -482,6 +493,11 @@ class AddProductController extends GetxController {
         .where((v) => v.id != variantId)
         .toList();
     draftProduct.value = draftProduct.value.copyWith(variants: updatedVariants);
+
+    AnalyticsService.logEvent(
+      'product_variant_removed',
+      parameters: {'variant_count': updatedVariants.length},
+    );
   }
 
   // ---------------- IMAGES ----------------
@@ -544,20 +560,33 @@ class AddProductController extends GetxController {
           openingStock: double.tryParse(openingStockCtrl.text) ?? 0,
         ),
       );
+
       result.fold(
         (err) {
           AppSnackbar.error(message: err.message);
           debugPrint(err.message);
+
+          AnalyticsService.logEvent(
+            'product_add_failed',
+            parameters: {'error': err.message},
+          );
         },
         (pr) {
           Get.back(result: pr);
           AppSnackbar.success(message: 'Product added successfully');
+
+          AnalyticsService.logEvent('product_add_success');
         },
       );
     } catch (e) {
       errorMessage.value = 'Failed to save product: ${e.toString()}';
       debugPrint(e.toString());
       Get.snackbar('Error', errorMessage.value!);
+
+      AnalyticsService.logEvent(
+        'product_add_failed',
+        parameters: {'error': e.toString()},
+      );
     } finally {
       isSaving.value = false;
     }
@@ -601,16 +630,28 @@ class AddProductController extends GetxController {
         (err) {
           AppSnackbar.error(message: err.message);
           debugPrint(err.message);
+
+          AnalyticsService.logEvent(
+            'product_update_failed',
+            parameters: {'error': err.message},
+          );
         },
         (pr) {
           Get.back(result: pr);
           AppSnackbar.success(message: 'Product updated successfully');
+
+          AnalyticsService.logEvent('product_update_success');
         },
       );
     } catch (e) {
       errorMessage.value = 'Failed to update product: ${e.toString()}';
       debugPrint(e.toString());
       Get.snackbar('Error', errorMessage.value!);
+
+      AnalyticsService.logEvent(
+        'product_update_failed',
+        parameters: {'error': e.toString()},
+      );
     } finally {
       isSaving.value = false;
     }
@@ -620,6 +661,8 @@ class AddProductController extends GetxController {
     if (!isEditMode) return;
     Get.find<InventoryController>().deleteProduct(draftProduct.value.id);
     Get.back();
+
+    AnalyticsService.logEvent('product_deleted');
   }
 
   Future<void> saveDraft() async {}

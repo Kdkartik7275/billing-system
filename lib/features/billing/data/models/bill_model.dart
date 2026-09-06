@@ -59,7 +59,7 @@ class BillModel extends HiveObject {
   /// field index 2, so no Hive type id bump is needed and bills written
   /// by older builds simply read back as `false`.
   @HiveField(2)
-  final bool stockApplied;
+  final bool? stockApplied;
 
   BillModel({
     required this.id,
@@ -120,7 +120,7 @@ class BillModel extends HiveObject {
       createdAt: createdAt,
       updatedAt: updatedAt,
       synced: synced,
-      stockApplied: stockApplied,
+      stockApplied: stockApplied ?? false,
     );
   }
 

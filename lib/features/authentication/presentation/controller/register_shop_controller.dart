@@ -1,4 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:billing_system/core/services/analytics/analytics_service.dart';
+import 'package:billing_system/core/services/crash/crashlytics_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -7,6 +9,7 @@ import 'package:billing_system/features/authentication/domain/usecases/request_s
 class RegisterShopController extends GetxController {
   final RequestShopRegistrationUseCase requestShopRegistrationUseCase;
   RegisterShopController({required this.requestShopRegistrationUseCase});
+
   final formKey = GlobalKey<FormState>();
 
   final shopNameController = TextEditingController();
@@ -19,6 +22,12 @@ class RegisterShopController extends GetxController {
   final RxBool isSubmitting = false.obs;
   final RxBool submitted = false.obs;
   final RxnString errorMessage = RxnString();
+
+  @override
+  void onInit() {
+    super.onInit();
+    AnalyticsService.logScreenView('RegisterShop');
+  }
 
   String? validateRequired(String? value, {String label = 'This field'}) {
     if (value == null || value.trim().isEmpty) return '$label is required';
@@ -48,8 +57,24 @@ class RegisterShopController extends GetxController {
     try {
       await _submitRequest();
       submitted.value = true;
-    } catch (e) {
+
+      AnalyticsService.logEvent('shop_registration_submitted');
+    } catch (e, stackTrace) {
       errorMessage.value = 'Something went wrong. Please try again.';
+
+      // Log to Crashlytics
+      await CrashlyticsService.recordError(
+        e,
+        stackTrace,
+        reason: 'RegisterShopController.submit',
+        fatal: false,
+      );
+
+      // Log to Analytics (optional, for funnel tracking)
+      AnalyticsService.logEvent(
+        'shop_registration_failed',
+        parameters: {'error': e.toString()},
+      );
     } finally {
       isSubmitting.value = false;
     }

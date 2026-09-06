@@ -1,3 +1,4 @@
+import 'package:billing_system/core/services/analytics/analytics_service.dart';
 import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/features/inventory/domain/entities/product_entity.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_movement_entity.dart';
@@ -35,6 +36,12 @@ class AdjustStockController extends GetxController {
     StockMovementType.expired: 'Expired',
   };
 
+  @override
+  void onInit() {
+    super.onInit();
+    AnalyticsService.logScreenView('AdjustStock');
+  }
+
   void onQuantityChanged(String value) =>
       quantity.value = double.tryParse(value) ?? 0;
 
@@ -62,29 +69,53 @@ class AdjustStockController extends GetxController {
         ),
       );
 
-      result.fold((failure) => AppSnackbar.error(message: failure.message), (
-        _,
-      ) {
-        final inventoryController = Get.find<InventoryController>();
-        final currentQuantity = inventoryController.stockQuantityFor(
-          product.id,
-        );
-        final delta = direction.value == AdjustmentDirection.increase
-            ? quantity.value
-            : -quantity.value;
-        final newQuantity = currentQuantity + delta;
+      result.fold(
+        (failure) {
+          AppSnackbar.error(message: failure.message);
 
-        inventoryController.updateStockQuantityLocally(
-          product.id,
-          newQuantity < 0 ? 0 : newQuantity,
-        );
-        Get.back(result: true);
-        AppSnackbar.success(message: 'Stock adjusted successfully');
-      });
+          AnalyticsService.logEvent(
+            'stock_adjustment_failed',
+            parameters: {'product_id': product.id, 'reason': failure.message},
+          );
+        },
+        (_) {
+          final inventoryController = Get.find<InventoryController>();
+          final currentQuantity = inventoryController.stockQuantityFor(
+            product.id,
+          );
+          final delta = direction.value == AdjustmentDirection.increase
+              ? quantity.value
+              : -quantity.value;
+          final newQuantity = currentQuantity + delta;
+
+          inventoryController.updateStockQuantityLocally(
+            product.id,
+            newQuantity < 0 ? 0 : newQuantity,
+          );
+
+          Get.back(result: true);
+          AppSnackbar.success(message: 'Stock adjusted successfully');
+
+          AnalyticsService.logEvent(
+            'stock_adjustment_success',
+            parameters: {
+              'product_id': product.id,
+              'direction': direction.value.name,
+              'quantity': quantity.value,
+              'reason_type': reasonType.value.name,
+            },
+          );
+        },
+      );
     } catch (e, stackTrace) {
       debugPrint('Adjust stock failed: $e');
       debugPrint(stackTrace.toString());
       AppSnackbar.error(message: 'Something went wrong. Please try again.');
+
+      AnalyticsService.logEvent(
+        'stock_adjustment_failed',
+        parameters: {'product_id': product.id, 'error': e.toString()},
+      );
     } finally {
       isSaving.value = false;
     }

@@ -1,5 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:billing_system/core/config/routes/app_routes.dart';
+import 'package:billing_system/core/services/analytics/analytics_service.dart';
 import 'package:billing_system/features/user/presentation/views/fetching_details_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,6 +11,7 @@ import 'package:billing_system/features/authentication/domain/usecases/login_use
 class LoginController extends GetxController {
   final LoginUser loginUserUseCase;
   LoginController({required this.loginUserUseCase});
+
   final formKey = GlobalKey<FormState>();
 
   final emailController = TextEditingController();
@@ -18,6 +20,12 @@ class LoginController extends GetxController {
   final RxBool obscurePassword = true.obs;
   final RxBool isLoading = false.obs;
   final RxnString errorMessage = RxnString();
+
+  @override
+  void onInit() {
+    super.onInit();
+    AnalyticsService.logScreenView('Login');
+  }
 
   void toggleObscurePassword() =>
       obscurePassword.value = !obscurePassword.value;
@@ -50,13 +58,19 @@ class LoginController extends GetxController {
       result.fold(
         (failure) {
           errorMessage.value = failure.message.split(':')[1];
+
+          AnalyticsService.logEvent(
+            'login_failed',
+            parameters: {'reason': failure.message},
+          );
         },
         (user) {
           if (user != null) {
+            AnalyticsService.logEvent('login_success');
+
             Get.to(
               () => FetchingDetailsPage(
                 userId: user.uid,
-
                 onDone: () {
                   debugPrint(
                     "✅ User and Shop details fetched successfully. Proceeding to the next step.",
@@ -67,11 +81,21 @@ class LoginController extends GetxController {
             );
           } else {
             errorMessage.value = 'Login failed. Please try again.';
+
+            AnalyticsService.logEvent(
+              'login_failed',
+              parameters: {'reason': 'user_null'},
+            );
           }
         },
       );
     } catch (e) {
       errorMessage.value = 'Invalid email or password. Please try again.';
+
+      AnalyticsService.logEvent(
+        'login_failed',
+        parameters: {'reason': 'unknown_error', 'error': e.toString()},
+      );
     } finally {
       isLoading.value = false;
     }

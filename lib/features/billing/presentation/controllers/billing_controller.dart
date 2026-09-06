@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:billing_system/core/services/analytics/analytics_service.dart';
 import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/core/sync/bill_sync_scheduler.dart';
 import 'package:billing_system/features/billing/domain/entities/bill_entity.dart';
@@ -29,6 +30,7 @@ class BillingController extends GetxController {
   final AggregateSoldQuantitiesUsecase aggregateSoldQuantitiesUsecase;
   final ReduceStockForSoldProductsUsecase reduceStockForSoldProductsUsecase;
   final BillSyncScheduler billSyncScheduler;
+
   final RxString selectedCategory = 'All'.obs;
   final RxString searchQuery = ''.obs;
 
@@ -37,21 +39,14 @@ class BillingController extends GetxController {
   StreamSubscription<List<StockReductionEvent>>? _stockReductionSub;
 
   final RxList<BillEntity> bills = RxList<BillEntity>([]);
-
   final RxList<BillEntity> pending = RxList<BillEntity>([]);
 
   final RxBool syncing = RxBool(false);
   final RxBool loading = RxBool(false);
 
-  /// Non-null when the last attempt to restore bill history from the
-  /// server failed. The dashboard can show this instead of an empty chart
-  /// that looks like "no sales".
   final RxnString historyRestoreError = RxnString();
-
-  /// True while bill history is still being pulled back after a reinstall.
   final RxBool restoringHistory = RxBool(false);
 
-  // add as a field
   final Rx<DateTime?> lastSyncedAt = Rx<DateTime?>(null);
 
   BillingController({
@@ -66,6 +61,8 @@ class BillingController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
+    AnalyticsService.logScreenView('Dashboard');
 
     _stockReductionSub = billSyncScheduler.stockReductions.listen((events) {
       try {
@@ -100,20 +97,11 @@ class BillingController extends GetxController {
     await billSyncScheduler.runIfDue();
     lastSyncedAt.value = billSyncScheduler.lastSyncedAt;
 
-    // A sync run can pull previously-unsynced bills into the window and,
-    // more importantly, may be the point at which hydration finally has
-    // something to find, so re-read the window rather than trusting the
-    // snapshot taken before it.
     await getBills();
     await getPendingBills();
     loading.value = false;
   }
 
-  /// Pulls bill history back from the server after a fresh install.
-  ///
-  /// The failure used to be discarded entirely, which is why a reinstall
-  /// with no connectivity (or a restore that came back empty) presented as
-  /// a blank 7-day chart with no explanation and no way to retry.
   Future<void> _restoreHistory() async {
     restoringHistory.value = true;
     historyRestoreError.value = null;
@@ -131,9 +119,6 @@ class BillingController extends GetxController {
     restoringHistory.value = false;
   }
 
-  /// Retries only the history restore, for a "Try again" affordance next
-  /// to the chart. Cheap enough to call freely: [hydrateFromRemote] exits
-  /// early once local bills exist.
   Future<void> retryHistoryRestore() async {
     await _restoreHistory();
     await getBills();
@@ -141,6 +126,11 @@ class BillingController extends GetxController {
 
   Future<void> refreshBilling() async {
     await _initializeBilling();
+
+    AnalyticsService.logEvent(
+      'dashboard_refresh',
+      parameters: {'status': 'success'},
+    );
   }
 
   void selectCategory(String category) {
@@ -195,8 +185,6 @@ class BillingController extends GetxController {
     }).toList();
   }
 
-  // ---------------- WEEKLY SALES (LINE CHART) ----------------
-
   List<DateTime> get _last7Days {
     final now = DateTime.now();
     return List.generate(7, (i) {
@@ -242,8 +230,6 @@ class BillingController extends GetxController {
     return maxValue * 1.2;
   }
 
-  // ---------------- SALES BY CATEGORY (PIE CHART) ----------------
-
   List<CategorySales> get salesByCategory {
     final Map<String, double> totals = {};
 
@@ -277,8 +263,6 @@ class BillingController extends GetxController {
     return salesByCategory.fold(0.0, (sum, c) => sum + c.amount);
   }
 
-  // ---------------- BILLS (DASHBOARD WINDOW: LAST 7 DAYS) ----------------
-
   Future<void> getBills() async {
     try {
       final now = DateTime.now();
@@ -301,8 +285,6 @@ class BillingController extends GetxController {
     }
   }
 
-  // ---------------- PENDING (UNSYNCED, ANY DATE) ----------------
-
   Future<void> getPendingBills() async {
     try {
       final result = await getUnsyncedBillsUsecase.call();
@@ -323,8 +305,6 @@ class BillingController extends GetxController {
     }
   }
 
-  // ---------------- SYNC ----------------
-
   Future<void> syncBills() async {
     try {
       syncing.value = true;
@@ -342,9 +322,19 @@ class BillingController extends GetxController {
           message:
               '$syncedCount bill${syncedCount > 1 ? 's' : ''} synced successfully',
         );
+
+        AnalyticsService.logEvent(
+          'dashboard_sync_bills',
+          parameters: {'status': 'success', 'synced_count': syncedCount},
+        );
       }
     } catch (e) {
       AppSnackbar.error(message: e.toString());
+
+      AnalyticsService.logEvent(
+        'dashboard_sync_bills',
+        parameters: {'status': 'error', 'error': e.toString()},
+      );
     } finally {
       syncing.value = false;
       lastSyncedAt.value = billSyncScheduler.lastSyncedAt;

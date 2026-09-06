@@ -1,3 +1,4 @@
+import 'package:billing_system/core/services/analytics/analytics_service.dart';
 import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/features/inventory/domain/entities/product_entity.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/purchase_stock_usecase.dart';
@@ -47,6 +48,8 @@ class AddPurchaseController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    AnalyticsService.logScreenView('AddPurchase');
+
     batchLotController.text = _generateBatchNumber(true);
     taxPercent.value = product.tax.gstPercent;
     purchasePriceController.text = product.price.purchasePrice.toStringAsFixed(
@@ -94,32 +97,62 @@ class AddPurchaseController extends GetxController {
     String supplier = _inventoryController.suppliers
         .firstWhere((s) => s.name == supplierId.value)
         .id;
-    final result = await purchaseStockUseCase.call(
-      PurchaseStockParams(
-        productId: product.id,
-        warehouseId: warehouseId.value!,
-        supplierId: supplier,
-        paidAmount: double.tryParse(paidAmountController.text.trim()) ?? 0.0,
-        discount: discountAmount,
-        notes: notesController.text.trim(),
 
-        billDate: billDate.value,
-        expiryDate: expiryDate.value,
-        quantity: quantity.value.toInt(),
-        price: purchasePrice.value,
-        purchaseDate: DateTime.now(),
-        invoiceNumber: billInvoiceNoController.text.trim(),
-        batchNumber: batchLotController.text.trim(),
-        tax: taxPercent.value,
-        paymentMethod: paymentMethod.value ?? 'Cash',
-        dueDate: dueDate.value ?? DateTime.now(),
-      ),
-    );
+    try {
+      final result = await purchaseStockUseCase.call(
+        PurchaseStockParams(
+          productId: product.id,
+          warehouseId: warehouseId.value!,
+          supplierId: supplier,
+          paidAmount: double.tryParse(paidAmountController.text.trim()) ?? 0.0,
+          discount: discountAmount,
+          notes: notesController.text.trim(),
 
-    result.fold((failure) => Get.snackbar('Error', failure.message), (success) {
-      Get.back(result: true);
-      AppSnackbar.success(message: 'Purchase recorded successfully.');
-    });
+          billDate: billDate.value,
+          expiryDate: expiryDate.value,
+          quantity: quantity.value.toInt(),
+          price: purchasePrice.value,
+          purchaseDate: DateTime.now(),
+          invoiceNumber: billInvoiceNoController.text.trim(),
+          batchNumber: batchLotController.text.trim(),
+          tax: taxPercent.value,
+          paymentMethod: paymentMethod.value ?? 'Cash',
+          dueDate: dueDate.value ?? DateTime.now(),
+        ),
+      );
+
+      result.fold(
+        (failure) {
+          Get.snackbar('Error', failure.message);
+
+          AnalyticsService.logEvent(
+            'purchase_save_failed',
+            parameters: {'product_id': product.id, 'error': failure.message},
+          );
+        },
+        (success) {
+          Get.back(result: true);
+          AppSnackbar.success(message: 'Purchase recorded successfully.');
+
+          AnalyticsService.logEvent(
+            'purchase_save_success',
+            parameters: {
+              'product_id': product.id,
+              'quantity': quantity.value,
+              'total_amount': totalAmount,
+              'payment_method': paymentMethod.value ?? 'Cash',
+            },
+          );
+        },
+      );
+    } catch (e) {
+      AppSnackbar.error(message: 'Something went wrong. Please try again.');
+
+      AnalyticsService.logEvent(
+        'purchase_save_failed',
+        parameters: {'product_id': product.id, 'error': e.toString()},
+      );
+    }
   }
 
   @override

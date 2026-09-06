@@ -1,4 +1,5 @@
 import 'package:billing_system/app/app_settings.dart';
+import 'package:billing_system/core/services/analytics/analytics_service.dart';
 import 'package:billing_system/core/security/biometric_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -9,9 +10,12 @@ class BiometricController extends GetxController {
   final RxBool isEnabled = false.obs;
   final RxBool isLoading = false.obs;
   final RxBool isAvailable = false.obs;
+
   @override
   void onInit() {
     super.onInit();
+
+    AnalyticsService.logScreenView('BiometricSettings');
 
     loadBiometricStatus();
     checkBiometricAvailability();
@@ -225,6 +229,12 @@ class BiometricController extends GetxController {
 
       if (!authenticated) {
         debugPrint('[Biometric] Authentication failed/cancelled');
+
+        await AnalyticsService.logEvent(
+          'biometric_enable_failed',
+          parameters: {'reason': 'auth_failed_or_cancelled'},
+        );
+
         return false;
       }
 
@@ -244,6 +254,8 @@ class BiometricController extends GetxController {
         duration: const Duration(seconds: 2),
       );
 
+      await AnalyticsService.logEvent('biometric_enabled');
+
       return true;
     } catch (e, stackTrace) {
       debugPrint('[Biometric] enableBiometric error: $e');
@@ -254,6 +266,11 @@ class BiometricController extends GetxController {
         'Unable to enable biometric authentication.',
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 3),
+      );
+
+      await AnalyticsService.logEvent(
+        'biometric_enable_failed',
+        parameters: {'reason': 'error', 'error': e.toString()},
       );
 
       return false;
@@ -281,6 +298,8 @@ class BiometricController extends GetxController {
         duration: const Duration(seconds: 2),
       );
 
+      await AnalyticsService.logEvent('biometric_disabled');
+
       return true;
     } catch (e, stackTrace) {
       debugPrint('[Biometric] disableBiometric error: $e');
@@ -291,6 +310,11 @@ class BiometricController extends GetxController {
         'Unable to disable biometric authentication.',
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 3),
+      );
+
+      await AnalyticsService.logEvent(
+        'biometric_disable_failed',
+        parameters: {'error': e.toString()},
       );
 
       return false;
@@ -318,6 +342,8 @@ class BiometricController extends GetxController {
   Future<void> skipBiometricSetup() async {
     try {
       await AppSettings.setBiometricSetupAsked(true);
+
+      await AnalyticsService.logEvent('biometric_setup_skipped');
 
       if (Get.isDialogOpen == true) {
         Get.back();

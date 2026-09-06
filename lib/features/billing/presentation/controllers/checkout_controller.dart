@@ -1,4 +1,5 @@
 import 'package:billing_system/core/enums/billing.dart';
+import 'package:billing_system/core/services/analytics/analytics_service.dart';
 import 'package:billing_system/features/billing/domain/entities/bill_entity.dart';
 import 'package:billing_system/features/billing/domain/entities/bill_item_entity.dart';
 import 'package:billing_system/features/billing/domain/entities/payment_entity.dart';
@@ -80,7 +81,6 @@ extension PaymentMethodTypeX on PaymentMethodType {
     }
   }
 
-  // ---------------- MAP TO DOMAIN ENUM ----------------
   PaymentMethod get toDomain {
     switch (this) {
       case PaymentMethodType.cash:
@@ -122,13 +122,10 @@ class CheckoutController extends GetxController {
   final RxString errorMessage = ''.obs;
   final Rx<BillEntity?> completedBill = Rx<BillEntity?>(null);
 
-  // ---------------- TOTALS ----------------
-
   double get subtotal => cartController.subtotal;
   double get tax => cartController.totalTax;
   bool get requiresAmountEntry =>
       selectedMethod.value == PaymentMethodType.cash;
-
   bool get requiresQrDisplay => selectedMethod.value == PaymentMethodType.upi;
 
   double get grandTotal {
@@ -156,19 +153,13 @@ class CheckoutController extends GetxController {
     return options.take(4).toList();
   }
 
-  // ---------------- DISCOUNT ----------------
-
   void setDiscount(double value) {
     discount.value = value < 0 ? 0 : value;
   }
 
-  // ---------------- CUSTOMER ----------------
-
   void setCustomerName(String name) {
     customerName.value = name.isEmpty ? 'Walk-in Customer' : name;
   }
-
-  // ---------------- PAYMENT METHOD ----------------
 
   void selectPaymentMethod(PaymentMethodType type) {
     selectedMethod.value = type;
@@ -178,19 +169,28 @@ class CheckoutController extends GetxController {
     } else {
       amountReceived.value = '';
     }
-  }
 
-  // ---------------- STEP NAVIGATION ----------------
+    AnalyticsService.logEvent(
+      'checkout_payment_method_selected',
+      parameters: {'method': type.label},
+    );
+  }
 
   void goToReceivePayment() {
     step.value = CheckoutStep.receive;
+
+    AnalyticsService.logEvent(
+      'checkout_started',
+      parameters: {
+        'items_count': cartController.totalItems,
+        'total_amount': grandTotal,
+      },
+    );
   }
 
   void backToPaymentMethod() {
     step.value = CheckoutStep.payment;
   }
-
-  // ---------------- AMOUNT INPUT ----------------
 
   void selectQuickAmount(double amount) {
     amountReceived.value = amount.toStringAsFixed(
@@ -218,8 +218,6 @@ class CheckoutController extends GetxController {
   void clearAmount() {
     amountReceived.value = '';
   }
-
-  // ---------------- CONFIRM / PERSIST BILL ----------------
 
   Future<void> confirmPayment() async {
     if (isProcessing.value) return;
@@ -260,7 +258,6 @@ class CheckoutController extends GetxController {
             discount: 0,
             taxPercent: product.tax.gstPercent,
             tax: taxAmount,
-
             total: lineTotal,
           );
         }).toList();
@@ -303,6 +300,15 @@ class CheckoutController extends GetxController {
 
     if (result == null) {
       isProcessing.value = false;
+
+      AnalyticsService.logEvent(
+        'checkout_failed',
+        parameters: {
+          'reason': 'bill_number_error',
+          'error': errorMessage.value,
+        },
+      );
+
       return;
     }
 
@@ -311,36 +317,29 @@ class CheckoutController extends GetxController {
     await createResult.fold(
       (failure) async {
         errorMessage.value = failure.message;
+        isProcessing.value = false;
+
+        AnalyticsService.logEvent(
+          'checkout_failed',
+          parameters: {'reason': 'create_bill_error', 'error': failure.message},
+        );
       },
       (createdBill) async {
-        // Deduct stock before the cart is cleared and the receipt opens.
-        // This used to be left entirely to the once-daily sync, so the
-        // same unit stayed sellable for up to 24 hours after it was sold.
         final stockResult = await applyBillStockReductionUsecase(createdBill);
 
-        stockResult.fold(
-          (_) {
-            // The sale itself is already persisted, so a failure here is
-            // never allowed to fail the payment. The bill stays unstamped
-            // and the sync reconciliation deducts it later.
-          },
-          (reductions) {
-            if (reductions.isEmpty) return;
+        stockResult.fold((_) {}, (reductions) {
+          if (reductions.isEmpty) return;
 
-            // Push the new quantities into the inventory controller so the
-            // product grid and the cart's available-stock check reflect
-            // the sale without waiting for a reload.
-            if (Get.isRegistered<InventoryController>()) {
-              final inventoryController = Get.find<InventoryController>();
-              for (final reduction in reductions) {
-                inventoryController.updateStockQuantityLocally(
-                  reduction.productId,
-                  reduction.newQuantity,
-                );
-              }
+          if (Get.isRegistered<InventoryController>()) {
+            final inventoryController = Get.find<InventoryController>();
+            for (final reduction in reductions) {
+              inventoryController.updateStockQuantityLocally(
+                reduction.productId,
+                reduction.newQuantity,
+              );
             }
-          },
-        );
+          }
+        });
 
         completedBill.value = createdBill.copyWith(stockApplied: true);
         paymentSuccessful.value = true;
@@ -349,10 +348,20 @@ class CheckoutController extends GetxController {
         if (Get.isRegistered<BillingController>()) {
           Get.find<BillingController>().addBillLocally(completedBill.value!);
         }
+
+        AnalyticsService.logEvent(
+          'checkout_completed',
+          parameters: {
+            'items_count': createdBill.items.length,
+            'total_amount': createdBill.grandTotal,
+            'payment_method': selectedMethod.value.label,
+            'discount': discount.value,
+          },
+        );
+
+        isProcessing.value = false;
       },
     );
-
-    isProcessing.value = false;
   }
 
   void resetCheckout() {

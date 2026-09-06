@@ -1,3 +1,4 @@
+import 'package:billing_system/core/services/analytics/analytics_service.dart';
 import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:billing_system/features/authentication/domain/usecases/forgot_password_usecase.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,12 @@ class ForgotPasswordController extends GetxController {
   final isLoading = false.obs;
   final isSent = false.obs;
   final errorMessage = Rxn<String>();
+
+  @override
+  void onInit() {
+    super.onInit();
+    AnalyticsService.logScreenView('ForgotPassword');
+  }
 
   @override
   void onClose() {
@@ -38,8 +45,15 @@ class ForgotPasswordController extends GetxController {
     try {
       await _forgotPassword(email: emailController.text.trim());
       isSent.value = true;
+
+      AnalyticsService.logEvent('forgot_password_sent');
     } catch (e) {
       errorMessage.value = e.toString().replaceFirst('Exception: ', '');
+
+      AnalyticsService.logEvent(
+        'forgot_password_failed',
+        parameters: {'error': e.toString()},
+      );
     } finally {
       isLoading.value = false;
     }

@@ -31,13 +31,7 @@ class BillRepositoryImpl implements BillRepository {
 
       final result = await localDataSource.addBill(model);
 
-      // The local write is what the sale depends on, so it stays the only
-      // awaited step — checkout must never wait on, or fail because of,
-      // the network. The push is fired off separately: previously the
-      // only path to the server was the once-daily scheduler, so a bill
-      // could live for up to 24 hours on a single device and was lost for
-      // good if the app was uninstalled before then.
-    //  unawaited(_pushInBackground(result.id));
+      unawaited(_pushInBackground(result.id));
 
       return right(result.toEntity());
     } catch (e) {
@@ -45,13 +39,13 @@ class BillRepositoryImpl implements BillRepository {
     }
   }
 
-  // Future<void> _pushInBackground(String billId) async {
-  //   try {
-  //     await pushBillNow(billId);
-  //   } catch (_) {
-  //     // Still queued locally as unsynced; the scheduler retries it.
-  //   }
-  // }
+  Future<void> _pushInBackground(String billId) async {
+    try {
+      await pushBillNow(billId);
+    } catch (_) {
+      // Still queued locally as unsynced; the scheduler retries it.
+    }
+  }
 
   // ---------------- READS — LOCAL ONLY ----------------
 

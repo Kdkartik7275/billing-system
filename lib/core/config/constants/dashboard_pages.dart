@@ -4,6 +4,7 @@ import 'package:billing_system/features/dashboard/presentation/layout/dashboard_
 import 'package:billing_system/features/dashboard/presentation/layout/dashboard_web_body.dart';
 import 'package:billing_system/features/dashboard/presentation/models/dashboard_menu.dart';
 import 'package:billing_system/features/inventory/presentation/views/inventory_page.dart';
+import 'package:billing_system/features/reports/presentation/page/reports_page.dart';
 import 'package:billing_system/features/sales/presentation/view/sales_page.dart';
 import 'package:billing_system/features/settings/presentations/view/setting_page.dart';
 import 'package:billing_system/features/suppliers/presentation/view/supplier_page.dart';
@@ -19,6 +20,6 @@ Map<DashboardMenu, Widget> pages(int index) => {
   DashboardMenu.inventory: InventoryPage(),
   DashboardMenu.sales: SalesPage(),
   DashboardMenu.suppliers: SupplierPage(),
-  DashboardMenu.reports: Center(child: Text('Reports')),
+  DashboardMenu.reports: ReportsPage(),
   DashboardMenu.settings: SettingPage(),
 };

@@ -6,6 +6,7 @@ import 'package:billing_system/core/scanner/barcode_scanner_page.dart';
 import 'package:billing_system/core/snackbars/snackbars.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -112,4 +113,15 @@ String generateId() {
       .padLeft(3, '0');
 
   return '$timestamp$random';
+}
+
+
+String formatReportCurrency(double value) {
+  final formatter = NumberFormat.currency(
+    locale: 'en_IN',
+    symbol: '₹ ',
+    decimalDigits: 0,
+  );
+
+  return formatter.format(value);
 }

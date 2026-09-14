@@ -55,11 +55,7 @@ class SuppliersController extends GetxController {
       purchases.fold<double>(0, (sum, purchase) => sum + purchase.subtotal);
 
   double get totalDueAmount => purchases
-      .where(
-        (purchase) =>
-            purchase.paymentMethod == 'Credit (Pay Later)' &&
-            purchase.dueAmount > 0,
-      )
+      .where((purchase) => purchase.dueAmount > 0)
       .fold<double>(0, (sum, purchase) => sum + purchase.dueAmount);
 
   int get suppliersWithDueCount {
@@ -117,10 +113,6 @@ class SuppliersController extends GetxController {
     final Map<String, List<PurchaseEntity>> grouped = {};
 
     for (final purchase in purchases) {
-      if (purchase.paymentMethod != 'Credit (Pay Later)') {
-        continue;
-      }
-
       if (purchase.dueAmount <= 0) {
         continue;
       }

@@ -18,4 +18,5 @@ class AppColors {
   static const Color successBorder = Color(0xFFC9F0D6);
   static const Color danger = Color(0xFFDC2626);
   static const Color chipBg = Color(0xFFEEF0FF);
+  static const Color green = Color(0xff12B76A);
 }

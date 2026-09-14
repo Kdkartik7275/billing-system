@@ -8,3 +8,7 @@ abstract class Failure {
 class FirebaseFailure extends Failure {
   FirebaseFailure({required super.message, super.statusCode = 400});
 }
+
+class ServerFailure extends Failure {
+  ServerFailure({required super.message, super.statusCode = 500});
+}

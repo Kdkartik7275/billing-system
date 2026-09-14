@@ -13,15 +13,39 @@ Future<void> showDuePaymentDetailDialog(
   );
 }
 
-class _DuePaymentDetailDialog extends StatelessWidget {
+class _DuePaymentDetailDialog extends StatefulWidget {
   final DuePayment payment;
 
   const _DuePaymentDetailDialog({required this.payment});
 
   @override
+  State<_DuePaymentDetailDialog> createState() =>
+      _DuePaymentDetailDialogState();
+}
+
+class _DuePaymentDetailDialogState extends State<_DuePaymentDetailDialog> {
+  final TextEditingController _amountPaidController = TextEditingController();
+  final TextEditingController _notesController = TextEditingController();
+
+  DuePayment get payment => widget.payment;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _amountPaidController.dispose();
+    _notesController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final dateFmt = DateFormat('dd MMM yyyy');
     final theme = Theme.of(context).textTheme;
+    final hintStyle = theme.bodyMedium!.copyWith(color: Colors.grey.shade400);
     final screenWidth = MediaQuery.of(context).size.width;
     final dialogWidth = screenWidth < 480 ? screenWidth * 0.92 : 440.0;
 
@@ -130,6 +154,60 @@ class _DuePaymentDetailDialog extends StatelessWidget {
 
               const SizedBox(height: 16),
 
+              Text(
+                'Amount to Pay',
+                style: theme.bodySmall!.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _amountPaidController,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                style: theme.bodyMedium!.copyWith(fontWeight: FontWeight.w600),
+                decoration: InputDecoration(
+                  hintText: 'Enter amount to pay',
+                  hintStyle: hintStyle,
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(left: 14, right: 4),
+                    child: Text(
+                      '₹',
+                      style: theme.bodyMedium!.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                  prefixIconConstraints: const BoxConstraints(
+                    minWidth: 0,
+                    minHeight: 0,
+                  ),
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey.shade50,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade200),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                      color: Color(0xFF1B8A4C),
+                      width: 1.4,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 14,
@@ -169,13 +247,12 @@ class _DuePaymentDetailDialog extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               TextField(
+                controller: _notesController,
                 maxLines: 2,
                 style: theme.bodyMedium,
                 decoration: InputDecoration(
                   hintText: 'e.g. Paid via bank transfer, ref #1234',
-                  hintStyle: theme.bodyMedium!.copyWith(
-                    color: Colors.grey.shade400,
-                  ),
+                  hintStyle: hintStyle,
                   isDense: true,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 14,
@@ -224,7 +301,9 @@ class _DuePaymentDetailDialog extends StatelessWidget {
                   Expanded(
                     flex: 2,
                     child: FilledButton(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () {
+                        // TODO: Implement payment recording logic here.
+                      },
                       style: FilledButton.styleFrom(
                         backgroundColor: const Color(0xFF1B8A4C),
                         padding: const EdgeInsets.symmetric(vertical: 14),
@@ -234,7 +313,7 @@ class _DuePaymentDetailDialog extends StatelessWidget {
                         elevation: 0,
                       ),
                       child: Text(
-                        'Mark as Paid',
+                        'Record Payment',
                         style: theme.titleSmall!.copyWith(
                           fontWeight: FontWeight.w700,
                           color: Colors.white,

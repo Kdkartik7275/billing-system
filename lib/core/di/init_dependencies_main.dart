@@ -16,6 +16,7 @@ class DependencyInjection {
     _initBrands();
     _initProducts();
     _initBilling();
+    _initReports();
     // registerBusinessAIDependencies(sl());
   }
 }
@@ -38,69 +39,106 @@ void _initFirebase() {
 // ----------------------- CORE -----------------------
 Future<void> _initHiveBoxes() async {
   // ==========================================================
-  // Product Module
+  // Product / Inventory
   // ==========================================================
 
-  final productsBox = await Hive.openBox<ProductModel>('products');
+  final productsBox = Hive.box<ProductModel>('products');
+
   sl.registerLazySingleton<Box<ProductModel>>(() => productsBox);
 
-  final categoriesBox = await Hive.openBox<CategoryModel>('categories');
+  final categoriesBox = Hive.box<CategoryModel>('categories');
+
   sl.registerLazySingleton<Box<CategoryModel>>(() => categoriesBox);
 
-  final unitBox = await Hive.openBox<UnitModel>('units');
+  final unitBox = Hive.box<UnitModel>('units');
+
   sl.registerLazySingleton<Box<UnitModel>>(() => unitBox);
 
-  final brandsBox = await Hive.openBox<BrandModel>('brands');
+  final brandsBox = Hive.box<BrandModel>('brands');
+
   sl.registerLazySingleton<Box<BrandModel>>(() => brandsBox);
 
-  final stocksBox = await Hive.openBox<StockModel>('stocks');
+  final stocksBox = Hive.box<StockModel>('stocks');
+
   sl.registerLazySingleton<Box<StockModel>>(() => stocksBox);
 
-  final stockBatches = await Hive.openBox<StockBatchModel>('stock_batch');
-  sl.registerLazySingleton<Box<StockBatchModel>>(() => stockBatches);
+  final stockBatchesBox = Hive.box<StockBatchModel>('stock_batch');
 
-  final stockMovements = await Hive.openBox<StockMovementModel>(
-    'stock_movement',
-  );
-  sl.registerLazySingleton<Box<StockMovementModel>>(() => stockMovements);
+  sl.registerLazySingleton<Box<StockBatchModel>>(() => stockBatchesBox);
 
-  final suppliers = await Hive.openBox<SupplierModel>('suppliers');
-  sl.registerLazySingleton<Box<SupplierModel>>(() => suppliers);
+  final stockMovementsBox = Hive.box<StockMovementModel>('stock_movement');
 
-  final purchasesBox = await Hive.openBox<PurchaseModel>('purchases');
+  sl.registerLazySingleton<Box<StockMovementModel>>(() => stockMovementsBox);
+
+  final suppliersBox = Hive.box<SupplierModel>('suppliers');
+
+  sl.registerLazySingleton<Box<SupplierModel>>(() => suppliersBox);
+
+  final purchasesBox = Hive.box<PurchaseModel>('purchases');
+
   sl.registerLazySingleton<Box<PurchaseModel>>(() => purchasesBox);
 
   // ==========================================================
-  // User Module
+  // User
   // ==========================================================
 
-  final userBox = await Hive.openBox<UserModel>('current_user');
+  final userBox = Hive.box<UserModel>('current_user');
+
   sl.registerLazySingleton<Box<UserModel>>(() => userBox);
 
-  final shopBox = await Hive.openBox<ShopModel>('current_shop');
+  final shopBox = Hive.box<ShopModel>('current_shop');
+
   sl.registerLazySingleton<Box<ShopModel>>(() => shopBox);
 
-  final billingMetaBox = await Hive.openBox('billing_meta');
+  final firebaseConfigBox = Hive.box<FirebaseConfigModel>('firebase_config');
+
+  sl.registerLazySingleton<Box<FirebaseConfigModel>>(() => firebaseConfigBox);
+
+  // ==========================================================
+  // Billing
+  // ==========================================================
+
+  final billsBox = Hive.box<BillModel>('bills');
+
+  sl.registerLazySingleton<Box<BillModel>>(() => billsBox);
+
+  final billingCartBox = Hive.box<BillingCartModel>('billing_cart');
+
+  sl.registerLazySingleton<Box<BillingCartModel>>(() => billingCartBox);
+
+  final heldCartsBox = Hive.box<HeldCartModel>('held_carts');
+
+  sl.registerLazySingleton<Box<HeldCartModel>>(() => heldCartsBox);
+
+  final billingMetaBox = Hive.box('billing_meta');
+
   sl.registerLazySingleton<Box>(
     () => billingMetaBox,
     instanceName: 'billingMeta',
   );
 
-  final inventoryMetaBox = await Hive.openBox('inventory_meta');
+  final inventoryMetaBox = Hive.box('inventory_meta');
+
   sl.registerLazySingleton<Box>(
     () => inventoryMetaBox,
     instanceName: 'inventoryMeta',
   );
 
   // ==========================================================
-  // Billing Module
+  // Backup
   // ==========================================================
 
-  final billsBox = await Hive.openBox<BillModel>('bills');
-  sl.registerLazySingleton<Box<BillModel>>(() => billsBox);
+  final backupMetadataBox = Hive.box<BackupInfoModel>('backup_metadata');
 
-  final billingCartBox = await Hive.openBox<BillingCartModel>('billing_cart');
-  sl.registerLazySingleton<Box<BillingCartModel>>(() => billingCartBox);
+  sl.registerLazySingleton<Box<BackupInfoModel>>(() => backupMetadataBox);
+
+  // ==========================================================
+  // Reports
+  // ==========================================================
+
+  final reportsBox = Hive.box<ReportModel>('reports');
+
+  sl.registerLazySingleton<Box<ReportModel>>(() => reportsBox);
 }
 
 // ----------------------- AUTH -----------------------
@@ -428,4 +466,29 @@ void _initBilling() {
       billRepository: sl(),
     ),
   );
+}
+
+void _initReports() {
+  // REPOSITORY
+  sl.registerLazySingleton<ReportsRepository>(
+    () => ReportsRepositoryImpl(
+      remoteDataSource: sl<ReportRemoteDataSource>(),
+      localDataSource: sl<ReportLocalDataSource>(),
+      connectionChecker: sl<ConnectionChecker>(),
+    ),
+  );
+
+  // DATASOURCE
+  sl.registerLazySingleton<ReportRemoteDataSource>(
+    () => ReportRemoteDataSourceImpl(
+      firestore: sl<ShopFirebaseService>().firestore,
+    ),
+  );
+  sl.registerLazySingleton<ReportLocalDataSource>(
+    () => ReportLocalDataSourceImpl(box: sl()),
+  );
+
+  // USECASES
+  sl.registerLazySingleton(() => GenerateReportUsecase(repository: sl()));
+  sl.registerLazySingleton(() => GetReportByIdUsecase(repository: sl()));
 }

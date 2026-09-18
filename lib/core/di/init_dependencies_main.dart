@@ -78,6 +78,14 @@ Future<void> _initHiveBoxes() async {
 
   sl.registerLazySingleton<Box<PurchaseModel>>(() => purchasesBox);
 
+  final purchasePaymentsBox = Hive.box<PurchasePaymentModel>(
+    'purchase_payments',
+  );
+
+  sl.registerLazySingleton<Box<PurchasePaymentModel>>(
+    () => purchasePaymentsBox,
+  );
+
   // ==========================================================
   // User
   // ==========================================================
@@ -369,6 +377,7 @@ void _initStocks() {
       movementBox: sl(),
       stockBox: sl(),
       purchaseBox: sl(),
+      purchasePaymentBox: sl(),
       metaBox: sl<Box>(instanceName: 'inventoryMeta'),
     ),
   );
@@ -390,6 +399,11 @@ void _initStocks() {
   sl.registerLazySingleton(() => SellStockUsecase(repository: sl()));
   sl.registerLazySingleton(() => AdjustStockUsecase(repository: sl()));
   sl.registerLazySingleton(() => GetPurchasesUsecase(repository: sl()));
+  sl.registerLazySingleton(() => MakePurchasePaymentUseCase(repository: sl()));
+  sl.registerLazySingleton(() => GetSupplierPurchasesUsecase(repository: sl()));
+  sl.registerLazySingleton(
+    () => GetPurchasePaymentsBySupplierUsecase(repository: sl()),
+  );
 }
 
 void _initBilling() {

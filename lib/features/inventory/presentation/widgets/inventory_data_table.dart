@@ -256,6 +256,14 @@ class _ProductListCard extends StatelessWidget {
                         height: 28,
                         child: PopupMenuButton<String>(
                           padding: EdgeInsets.zero,
+                          popUpAnimationStyle: AnimationStyle(
+                            curve: Curves.easeOutCubic,
+                            duration: const Duration(milliseconds: 180),
+                          ),
+                          color: Colors.white,
+                          surfaceTintColor: Colors.transparent,
+                          shadowColor: Colors.black26,
+                          elevation: 8,
                           splashRadius: 15,
                           icon: Icon(
                             Icons.more_vert_rounded,
@@ -267,6 +275,7 @@ class _ProductListCard extends StatelessWidget {
                               case 'view':
                                 controller.selectProduct(product);
                                 break;
+
                               case 'edit':
                                 final result = await Get.to<ProductEntity>(
                                   () => EditProductPage(product: product),
@@ -276,17 +285,82 @@ class _ProductListCard extends StatelessWidget {
                                   controller.updateProduct(result);
                                 }
                                 break;
+
                               case 'delete':
                                 onDelete(product);
                                 break;
                             }
                           },
-                          itemBuilder: (context) => const [
-                            PopupMenuItem(value: 'view', child: Text('View')),
-                            PopupMenuItem(value: 'edit', child: Text('Edit')),
-                            PopupMenuItem(
+                          itemBuilder: (context) => [
+                            const PopupMenuItem(
+                              value: 'view',
+                              height: 44,
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.visibility_outlined,
+                                    size: 19,
+                                    color: Colors.black54,
+                                  ),
+                                  SizedBox(width: 12),
+                                  Text(
+                                    'View details',
+                                    style: TextStyle(
+                                      color: Colors.black87,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const PopupMenuItem(
+                              value: 'edit',
+                              height: 44,
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.edit_outlined,
+                                    size: 19,
+                                    color: Colors.black54,
+                                  ),
+                                  SizedBox(width: 12),
+                                  Text(
+                                    'Edit product',
+                                    style: TextStyle(
+                                      color: Colors.black87,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const PopupMenuDivider(height: 1),
+
+                            const PopupMenuItem(
                               value: 'delete',
-                              child: Text('Delete'),
+                              height: 44,
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.delete_outline_rounded,
+                                    size: 19,
+                                    color: Colors.redAccent,
+                                  ),
+                                  SizedBox(width: 12),
+                                  Text(
+                                    'Delete product',
+                                    style: TextStyle(
+                                      color: Colors.redAccent,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),

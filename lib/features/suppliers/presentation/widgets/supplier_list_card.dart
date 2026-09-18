@@ -60,8 +60,10 @@ class _SupplierTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
+
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 14),
         child: Row(
@@ -89,7 +91,10 @@ class _SupplierTile extends StatelessWidget {
                     supplier.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.titleMedium!.copyWith(fontSize: 15.5),
+                    style: theme.titleMedium!.copyWith(
+                      fontSize: 15.5,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
 
                   const SizedBox(height: 6),
@@ -103,7 +108,6 @@ class _SupplierTile extends StatelessWidget {
                         color: Color(0xFF8B909A),
                       ),
                       const SizedBox(width: 6),
-
                       Expanded(
                         child: Text(
                           supplier.phone,
@@ -111,7 +115,7 @@ class _SupplierTile extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: theme.titleSmall!.copyWith(
                             fontSize: 13,
-                            color: Color(0xFF6B7076),
+                            color: const Color(0xFF6B7076),
                           ),
                         ),
                       ),
@@ -130,7 +134,6 @@ class _SupplierTile extends StatelessWidget {
                         color: Color(0xFF8B909A),
                       ),
                       const SizedBox(width: 6),
-
                       Expanded(
                         child: Text(
                           supplier.location,
@@ -138,7 +141,7 @@ class _SupplierTile extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: theme.bodySmall!.copyWith(
                             fontSize: 13,
-                            color: Color(0xFF6B7076),
+                            color: const Color(0xFF6B7076),
                           ),
                         ),
                       ),
@@ -153,6 +156,7 @@ class _SupplierTile extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
+                // STATUS
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
@@ -176,14 +180,73 @@ class _SupplierTile extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 14),
+                const SizedBox(height: 10),
 
-                InkWell(
-                  onTap: onTapMore,
-                  child: const Icon(
+                // MORE MENU
+                PopupMenuButton<String>(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 180),
+                  color: Colors.white,
+                  surfaceTintColor: Colors.transparent,
+                  shadowColor: Colors.black26,
+                  elevation: 8,
+                  icon: const Icon(
                     Icons.more_vert_rounded,
+                    size: 20,
                     color: Color(0xFF8B909A),
                   ),
+                  onSelected: (action) {
+                    onTapMore?.call();
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'edit',
+                      height: 44,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.edit_outlined,
+                            size: 19,
+                            color: Colors.black54,
+                          ),
+                          SizedBox(width: 12),
+                          Text(
+                            'Edit supplier',
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const PopupMenuDivider(height: 1),
+
+                    const PopupMenuItem(
+                      value: 'delete',
+                      height: 44,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.delete_outline_rounded,
+                            size: 19,
+                            color: Colors.redAccent,
+                          ),
+                          SizedBox(width: 12),
+                          Text(
+                            'Delete supplier',
+                            style: TextStyle(
+                              color: Colors.redAccent,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

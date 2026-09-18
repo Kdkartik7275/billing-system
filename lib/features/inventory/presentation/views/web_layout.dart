@@ -27,8 +27,8 @@ class InventoryWebLayout extends StatelessWidget {
     return Obx(
       () => LoadingOverlay(
         isLoading: controller.isLoading,
-         progressIndicator: circularProgress(context),
-            color: Colors.black.withValues(alpha: 0.3),
+        progressIndicator: circularProgress(context),
+        color: Colors.black.withValues(alpha: 0.3),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: SizedBox(
@@ -44,11 +44,10 @@ class InventoryWebLayout extends StatelessWidget {
                     onExport: controller.exportProducts,
                     isExporting: controller.exporting.value,
                     onAddProduct: () async {
-                      final result =
-                          await Get.to<(ProductEntity, StockEntity)>(
+                      final result = await Get.to<(ProductEntity, StockEntity)>(
                         () => AddProductPage(),
                       );
-    
+
                       if (result != null) {
                         final product = result.$1;
                         final stock = result.$2;
@@ -81,10 +80,10 @@ class InventoryWebLayout extends StatelessWidget {
                         color: Colors.orange.shade700,
                       ),
                       InventoryStatItem(
-                        title: 'Categories',
-                        value: '${controller.categories.length}',
-                        icon: Icons.category_outlined,
-                        color: Colors.purple.shade600,
+                        title: 'Out of Stock',
+                        value: '${controller.outOfStockCount}',
+                        icon: Icons.remove_shopping_cart_outlined,
+                        color: Colors.red,
                       ),
                     ],
                   ),

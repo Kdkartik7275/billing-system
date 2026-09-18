@@ -20,7 +20,7 @@ class SalesTabletLayout extends GetView<SalesController> {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // ---------------- LEFT: FILTERS + STATS ----------------
           SizedBox(

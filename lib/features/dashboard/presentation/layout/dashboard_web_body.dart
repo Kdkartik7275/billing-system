@@ -20,7 +20,6 @@ class DashboardWebBody extends StatelessWidget {
     final topInset = MediaQuery.of(context).padding.top;
     const double headerHeight = 96;
     final user = Get.find<UserController>().user;
-
     return Stack(
       children: [
         // Dark strip the info card overlaps

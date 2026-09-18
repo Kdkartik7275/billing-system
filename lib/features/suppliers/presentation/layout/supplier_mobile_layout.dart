@@ -3,6 +3,7 @@ import 'package:billing_system/features/suppliers/presentation/widgets/add_new_s
 import 'package:billing_system/features/suppliers/presentation/widgets/add_supplier_button.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/due_payment_card.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/due_payment_dialog.dart';
+import 'package:billing_system/features/suppliers/presentation/widgets/supplier_detail_dialog.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/supplier_list_card.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/supplier_search_bar.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/supplier_stats_card.dart';
@@ -61,7 +62,8 @@ class SupplierMobileLayout extends GetView<SuppliersController> {
             return DuePaymentsCard(
               payments: payments,
               onViewAll: () {},
-              onTapPayment: (payment) => showDuePaymentDetailDialog(context, payment: payment),
+              onTapPayment: (payment) =>
+                  showDuePaymentDetailDialog(context, payment: payment),
             );
           }),
 
@@ -71,7 +73,21 @@ class SupplierMobileLayout extends GetView<SuppliersController> {
 
           const SizedBox(height: 16),
 
-          Obx(() => SupplierListCard(suppliers: controller.supplierListItems)),
+          Obx(
+            () => SupplierListCard(
+              suppliers: controller.supplierListItems,
+              onTapSupplier: (supplier) {
+                showSupplierDetailDialog(
+                  context,
+                  supplier: supplier,
+                  onCall: () {
+                    // e.g. url_launcher: launchUrl(Uri.parse('tel:${supplier.phone}'))
+                  },
+                 
+                );
+              },
+            ),
+          ),
         ],
       ),
     );

@@ -17,10 +17,17 @@ class LowStockAlerts extends StatelessWidget {
     return ChartCard(
       padding: const EdgeInsets.all(16),
       child: Obx(() {
+        final outOfStockItems = controller.products
+            .where(
+              (p) => controller.stockStatusFor(p) == StockStatus.outOfStock,
+            )
+            .toList();
         final lowStockItems = controller.lowStockProducts;
-        final hasLowStock = lowStockItems.isNotEmpty;
-        // Show a preview of up to 4 items inline; rest via "View All"
-        final previewItems = lowStockItems.take(4).toList();
+
+        // Out of stock first — it's the more urgent state.
+        final combined = [...outOfStockItems, ...lowStockItems];
+        final hasIssues = combined.isNotEmpty;
+        final previewItems = combined.take(4).toList();
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -35,36 +42,35 @@ class LowStockAlerts extends StatelessWidget {
                     Icon(
                       Icons.error_outline_rounded,
                       size: 18,
-                      color: hasLowStock ? Colors.red : Colors.amber.shade700,
+                      color: hasIssues ? Colors.red : Colors.amber.shade700,
                     ),
                     const SizedBox(width: 6),
-                    Text('Low Stock Alerts', style: tt.titleMedium),
+                    Text('Stock Alerts', style: tt.titleMedium),
                   ],
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
+                if (hasIssues)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (outOfStockItems.isNotEmpty) ...[
+                        _CountPill(
+                          count: outOfStockItems.length,
+                          color: Colors.red,
+                        ),
+                        const SizedBox(width: 6),
+                      ],
+                      if (lowStockItems.isNotEmpty)
+                        _CountPill(
+                          count: lowStockItems.length,
+                          color: Colors.orange,
+                        ),
+                    ],
                   ),
-                  decoration: BoxDecoration(
-                    color: hasLowStock
-                        ? Colors.red.withValues(alpha: 0.08)
-                        : Colors.amber.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    '${lowStockItems.length} Item${lowStockItems.length == 1 ? '' : 's'}',
-                    style: tt.bodySmall?.copyWith(
-                      color: hasLowStock ? Colors.red : Colors.orange,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
               ],
             ),
             const SizedBox(height: 12),
 
-            if (!hasLowStock)
+            if (!hasIssues)
               Container(
                 height: 80,
                 width: double.infinity,
@@ -88,18 +94,18 @@ class LowStockAlerts extends StatelessWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 padding: EdgeInsets.zero,
                 itemCount: previewItems.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
+                separatorBuilder: (_, _) => const Divider(height: 1),
                 itemBuilder: (context, index) {
                   final product = previewItems[index];
-                  return _LowStockTile(product: product);
+                  return _StockAlertTile(product: product);
                 },
               ),
-              if (lowStockItems.length > previewItems.length) ...[
+              if (combined.length > previewItems.length) ...[
                 const SizedBox(height: 4),
                 Center(
                   child: TextButton.icon(
                     onPressed: () =>
-                        _showLowStockSheet(context, controller, lowStockItems),
+                        _showStockAlertsSheet(context, controller, combined),
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       minimumSize: const Size(0, 36),
@@ -117,10 +123,10 @@ class LowStockAlerts extends StatelessWidget {
     );
   }
 
-  void _showLowStockSheet(
+  void _showStockAlertsSheet(
     BuildContext context,
     InventoryController controller,
-    List<ProductEntity> lowStockItems,
+    List<ProductEntity> combined,
   ) {
     showModalBottomSheet(
       context: context,
@@ -164,7 +170,7 @@ class LowStockAlerts extends StatelessWidget {
                               color: Colors.red,
                             ),
                             const SizedBox(width: 8),
-                            Text('Low Stock Items', style: tt.titleMedium),
+                            Text('Stock Alerts', style: tt.titleMedium),
                           ],
                         ),
                         Container(
@@ -177,7 +183,7 @@ class LowStockAlerts extends StatelessWidget {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            '${lowStockItems.length} Item${lowStockItems.length == 1 ? '' : 's'}',
+                            '${combined.length} Item${combined.length == 1 ? '' : 's'}',
                             style: tt.bodySmall?.copyWith(
                               color: Colors.red,
                               fontWeight: FontWeight.w600,
@@ -195,11 +201,11 @@ class LowStockAlerts extends StatelessWidget {
                         horizontal: 20,
                         vertical: 4,
                       ),
-                      itemCount: lowStockItems.length,
-                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      itemCount: combined.length,
+                      separatorBuilder: (_, _) => const Divider(height: 1),
                       itemBuilder: (context, index) {
-                        final product = lowStockItems[index];
-                        return _LowStockTile(product: product);
+                        final product = combined[index];
+                        return _StockAlertTile(product: product);
                       },
                     ),
                   ),
@@ -214,8 +220,33 @@ class LowStockAlerts extends StatelessWidget {
   }
 }
 
-class _LowStockTile extends GetView<InventoryController> {
-  const _LowStockTile({required this.product});
+class _CountPill extends StatelessWidget {
+  final int count;
+  final Color color;
+
+  const _CountPill({required this.count, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        '$count',
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: color,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _StockAlertTile extends GetView<InventoryController> {
+  const _StockAlertTile({required this.product});
 
   final ProductEntity product;
 
@@ -225,59 +256,93 @@ class _LowStockTile extends GetView<InventoryController> {
     final isOutOfStock =
         controller.stockStatusFor(product) == StockStatus.outOfStock;
     final statusColor = isOutOfStock ? Colors.red : Colors.orange;
+    final statusLabel = isOutOfStock ? 'Out of Stock' : 'Low Stock';
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              color: statusColor,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 12),
-
-          // Product info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  product.name,
-                  style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  'SKU: ${product.sku} · ${controller.categoryName(product.categoryId)}',
-                  style: tt.bodySmall?.copyWith(
-                    color: Colors.grey.shade600,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Stock count badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              '${controller.stockQuantityFor(product.id).toInt()} ${controller.unitName(product.unitId)}',
-              style: tt.bodySmall?.copyWith(
+    return GestureDetector(
+      onTap: () => controller.selectProduct(product),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
                 color: statusColor,
-                fontWeight: FontWeight.w600,
+                shape: BoxShape.circle,
               ),
             ),
-          ),
-        ],
+            const SizedBox(width: 12),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.name,
+                    style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 1,
+                        ),
+                        decoration: BoxDecoration(
+                          color: statusColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          statusLabel,
+                          style: tt.bodySmall?.copyWith(
+                            color: statusColor,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'SKU: ${product.sku} · ${controller.categoryName(product.categoryId)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: tt.bodySmall?.copyWith(
+                            color: Colors.grey.shade600,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(width: 8),
+
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: statusColor.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                isOutOfStock
+                    ? '0 ${controller.unitName(product.unitId)}'
+                    : '${controller.stockQuantityFor(product.id).toInt()} ${controller.unitName(product.unitId)}',
+                style: tt.bodySmall?.copyWith(
+                  color: statusColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

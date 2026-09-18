@@ -1,4 +1,5 @@
 import 'package:billing_system/features/inventory/data/models/stock/purchase_model.dart';
+import 'package:billing_system/features/inventory/data/models/stock/purchase_payment_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_batch_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_movement_model.dart';
@@ -58,10 +59,13 @@ abstract interface class StockLocalDataSource {
   // ---------- Purchase ----------
 
   Future<List<PurchaseModel>> getAllPurchases();
+  Future<List<PurchaseModel>> getSupplierPurchases(String supplierId);
 
   Future<List<PurchaseModel>> getPurchasesForProduct(String productId);
 
   Future<PurchaseModel> createPurchase(PurchaseModel purchase);
+
+  Future<PurchaseModel> updatePurchase(PurchaseModel purchase);
 
   Future<void> replacePurchasesForProduct(
     String productId,
@@ -69,6 +73,22 @@ abstract interface class StockLocalDataSource {
   );
 
   Future<void> clearPurchases();
+
+  // ---------- Purchase Payment ----------
+
+  Future<List<PurchasePaymentModel>> getAllPurchasePayments();
+
+  Future<List<PurchasePaymentModel>> getPurchasePaymentsForPurchase(
+    String purchaseId,
+  );
+
+  Future<PurchasePaymentModel> createPurchasePayment(
+    PurchasePaymentModel payment,
+  );
+  Future<List<PurchasePaymentModel>> getPurchasePaymentsBySupplier(
+    String supplierId,
+  );
+  Future<void> clearPurchasePayments();
 }
 
 class StockLocalDataSourceImpl implements StockLocalDataSource {
@@ -76,6 +96,7 @@ class StockLocalDataSourceImpl implements StockLocalDataSource {
   final Box<StockMovementModel> movementBox;
   final Box<StockBatchModel> batchBox;
   final Box<PurchaseModel> purchaseBox;
+  final Box<PurchasePaymentModel> purchasePaymentBox;
 
   final Box metaBox;
 
@@ -84,7 +105,7 @@ class StockLocalDataSourceImpl implements StockLocalDataSource {
     required this.movementBox,
     required this.batchBox,
     required this.purchaseBox,
-
+    required this.purchasePaymentBox,
     required this.metaBox,
   });
 
@@ -244,6 +265,12 @@ class StockLocalDataSourceImpl implements StockLocalDataSource {
   }
 
   @override
+  Future<PurchaseModel> updatePurchase(PurchaseModel purchase) async {
+    await purchaseBox.put(purchase.id, purchase);
+    return purchase;
+  }
+
+  @override
   Future<List<PurchaseModel>> getAllPurchases() async {
     return purchaseBox.values.toList();
   }
@@ -271,8 +298,53 @@ class StockLocalDataSourceImpl implements StockLocalDataSource {
   }
 
   @override
+  Future<List<PurchaseModel>> getSupplierPurchases(String supplierId) async {
+    return purchaseBox.values.where((p) => p.supplierId == supplierId).toList();
+  }
+
+  @override
   Future<void> clearPurchases() async {
     await purchaseBox.clear();
+  }
+
+  // ======================================================
+  // Purchase Payments
+  // ======================================================
+
+  @override
+  Future<PurchasePaymentModel> createPurchasePayment(
+    PurchasePaymentModel payment,
+  ) async {
+    await purchasePaymentBox.put(payment.id, payment);
+    return payment;
+  }
+
+  @override
+  Future<List<PurchasePaymentModel>> getAllPurchasePayments() async {
+    return purchasePaymentBox.values.toList();
+  }
+
+  @override
+  Future<List<PurchasePaymentModel>> getPurchasePaymentsForPurchase(
+    String purchaseId,
+  ) async {
+    return purchasePaymentBox.values
+        .where((e) => e.purchaseId == purchaseId)
+        .toList();
+  }
+
+  @override
+  Future<void> clearPurchasePayments() async {
+    await purchasePaymentBox.clear();
+  }
+
+  @override
+  Future<List<PurchasePaymentModel>> getPurchasePaymentsBySupplier(
+    String supplierId,
+  ) async {
+    return purchasePaymentBox.values
+        .where((p) => p.supplierId == supplierId)
+        .toList();
   }
 
   // ======================================================
@@ -286,6 +358,7 @@ class StockLocalDataSourceImpl implements StockLocalDataSource {
       movementBox.clear(),
       batchBox.clear(),
       purchaseBox.clear(),
+      purchasePaymentBox.clear(),
     ]);
   }
 }

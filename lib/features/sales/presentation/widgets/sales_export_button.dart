@@ -28,16 +28,12 @@ class SalesExportButton extends StatelessWidget {
       final isExporting = controller.isExporting.value;
 
       return PopupMenuButton<_SalesExportPreset>(
-        // Disabling via `enabled` rather than hiding keeps the header layout
-        // stable while a report is building.
         enabled: !isExporting,
         tooltip: isExporting ? 'Preparing report…' : 'Export sales report',
         position: PopupMenuPosition.under,
         offset: const Offset(0, 6),
         elevation: 6,
-        // Explicit white + a fixed border, rather than pulling from
-        // Theme.of(context).colorScheme, so the menu stays a light card
-        // even though the app's own ColorScheme/PopupMenuTheme is dark.
+
         color: Colors.white,
         shadowColor: Colors.black.withValues(alpha: 0.15),
         surfaceTintColor: Colors.transparent,

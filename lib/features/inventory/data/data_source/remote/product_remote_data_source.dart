@@ -31,7 +31,7 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
 
   ProductRemoteDataSourceImpl({required this.firestore});
 
-  static const _collection = 'prods';
+  static const _collection = 'products';
 
   @override
   Future<ProductModel> addProduct(ProductModel product) async {

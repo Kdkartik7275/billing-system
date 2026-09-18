@@ -1,7 +1,9 @@
 import 'package:billing_system/features/suppliers/presentation/controller/suppliers_controller.dart';
+import 'package:billing_system/features/suppliers/presentation/widgets/add_new_supplier_dialog.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/add_supplier_button.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/due_payment_card.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/due_payment_dialog.dart';
+import 'package:billing_system/features/suppliers/presentation/widgets/supplier_detail_dialog.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/supplier_list_card.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/supplier_search_bar.dart';
 import 'package:billing_system/features/suppliers/presentation/widgets/supplier_stats_card.dart';
@@ -21,12 +23,16 @@ class SupplierWebLayout extends GetView<SuppliersController> {
           children: [
             Expanded(
               child: SupplierSearchBar(
-                onSearchChanged: (_) {},
+                onSearchChanged: controller.updateSearch,
                 onFilterTap: () {},
               ),
             ),
             const SizedBox(width: 16),
-            AddSupplierButton(onPressed: () {}, expand: false, compact: false),
+            AddSupplierButton(
+              onPressed: () => showAddSupplierDialog(context),
+              expand: false,
+              compact: false,
+            ),
           ],
         ),
         const SizedBox(height: 24),
@@ -68,7 +74,20 @@ class SupplierWebLayout extends GetView<SuppliersController> {
                     ],
                   ),
                   const SizedBox(height: 14),
-                  SupplierListCard(suppliers: controller.supplierListItems),
+                  Obx(
+                    () => SupplierListCard(
+                      suppliers: controller.supplierListItems,
+                      onTapSupplier: (supplier) {
+                        showSupplierDetailDialog(
+                          context,
+                          supplier: supplier,
+                          onCall: () {
+                            // e.g. url_launcher: launchUrl(Uri.parse('tel:${supplier.phone}'))
+                          },
+                        );
+                      },
+                    ),
+                  ),
                 ],
               ),
             ),

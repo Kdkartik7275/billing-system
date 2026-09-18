@@ -23,7 +23,7 @@ class SalesWebLayout extends GetView<SalesController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(
                 width: 220,

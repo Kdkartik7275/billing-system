@@ -5,6 +5,7 @@ class DuePayment {
   final Color avatarColor;
   final Color avatarBgColor;
   final String supplierName;
+  final String supplierId;
   final String amount;
   final String statusText;
   final Color statusColor;
@@ -15,6 +16,7 @@ class DuePayment {
     required this.avatarColor,
     required this.avatarBgColor,
     required this.supplierName,
+    required this.supplierId,
     required this.amount,
     required this.statusText,
     required this.statusColor,

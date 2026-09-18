@@ -152,7 +152,7 @@ class SyncDetailsSheet extends StatelessWidget {
                     ),
                     onPressed: syncing ? null : () => controller.syncBills(),
                     child: Text(
-                      syncing ? 'Syncing...' : 'Retry now',
+                      syncing ? 'Syncing...' : 'Sync now',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,

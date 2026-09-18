@@ -18,6 +18,7 @@ import 'package:billing_system/features/inventory/data/models/product_settings_m
 import 'package:billing_system/features/inventory/data/models/product_tax_model.dart';
 import 'package:billing_system/features/inventory/data/models/product_variant_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/purchase_model.dart';
+import 'package:billing_system/features/inventory/data/models/stock/purchase_payment_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_batch_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_movement_model.dart';
@@ -98,6 +99,7 @@ class Bootstrap {
       ..registerAdapter(UnitModelAdapter())
       ..registerAdapter(SupplierModelAdapter())
       ..registerAdapter(PurchaseModelAdapter())
+      ..registerAdapter(PurchasePaymentModelAdapter())
       // BILLING
       ..registerAdapter(BillStatusAdapter())
       ..registerAdapter(PaymentMethodAdapter())
@@ -144,6 +146,7 @@ class Bootstrap {
       'stock_batch',
       'suppliers',
       'purchases',
+      'purchase_payments',
       'current_user',
       'current_shop',
       'firebase_config',
@@ -215,6 +218,8 @@ class Bootstrap {
       Hive.openBox<SupplierModel>('suppliers'),
 
       Hive.openBox<PurchaseModel>('purchases'),
+
+      Hive.openBox<PurchasePaymentModel>('purchase_payments'),
 
       // --------------------------------------------------------
       // BILLING

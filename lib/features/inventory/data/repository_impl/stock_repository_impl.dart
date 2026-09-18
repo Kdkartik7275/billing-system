@@ -7,6 +7,7 @@ import 'package:billing_system/features/inventory/data/models/stock/stock_batch_
 import 'package:billing_system/features/inventory/data/models/stock/stock_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_movement_model.dart';
 import 'package:billing_system/features/inventory/domain/entities/purchase_entity.dart';
+import 'package:billing_system/features/inventory/domain/entities/purchase_payment_entity.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_batch_entity.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_entity.dart';
 import 'package:billing_system/features/inventory/domain/entities/stock_movement_entity.dart';
@@ -297,10 +298,7 @@ class StockRepositoryImpl implements StockRepository {
         );
 
         applied.add(
-          AppliedStockReduction(
-            productId: entry.key,
-            newQuantity: newQuantity,
-          ),
+          AppliedStockReduction(productId: entry.key, newQuantity: newQuantity),
         );
       }
 
@@ -552,5 +550,103 @@ class StockRepositoryImpl implements StockRepository {
   ) {
     // TODO: implement getPurchasesForProductSince
     throw UnimplementedError();
+  }
+
+  // ==========================================================
+  // Purchase payment — remote first (source of truth for due amounts),
+  // then reflect the updated purchase in the local cache.
+  // ==========================================================
+
+  @override
+  ResultFuture<(PurchaseEntity, PurchasePaymentEntity)> makePurchasePayment({
+    required String purchaseId,
+    required double amount,
+    required String paymentMethod,
+    String? notes,
+  }) async {
+    try {
+      if (!await connectionChecker.isConnected) {
+        return left(FirebaseFailure(message: 'No Internet Connection'));
+      }
+
+      final result = await remoteDataSource.makePurchasePayment(
+        purchaseId: purchaseId,
+        amount: amount,
+        paymentMethod: paymentMethod,
+        notes: notes,
+      );
+
+      final updatedPurchase = result.$1;
+      final payment = result.$2;
+
+      await localDataSource.updatePurchase(updatedPurchase);
+      await localDataSource.createPurchasePayment(payment);
+
+      return right((updatedPurchase.toEntity(), payment.toEntity()));
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultFuture<List<PurchasePaymentEntity>> getPurchasePaymentsBySupplier(
+    String supplierId,
+  ) async {
+    try {
+      final localPurchases = await localDataSource
+          .getPurchasePaymentsBySupplier(supplierId);
+
+      if (localPurchases.isNotEmpty) {
+        return right(
+          localPurchases.map((purchase) => purchase.toEntity()).toList(),
+        );
+      }
+      if (!await connectionChecker.isConnected) {
+        return right([]);
+      }
+      final remotePurchases = await remoteDataSource
+          .getPurchasePaymentsBySupplier(supplierId);
+
+      for (var purchase in remotePurchases) {
+        await localDataSource.createPurchasePayment(purchase);
+      }
+      return right(
+        remotePurchases.map((purchase) => purchase.toEntity()).toList(),
+      );
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultFuture<List<PurchaseEntity>> getSupplierPurchases(
+    String supplierId,
+  ) async {
+    try {
+      final localPurchases = await localDataSource.getSupplierPurchases(
+        supplierId,
+      );
+
+      if (localPurchases.isNotEmpty) {
+        return right(
+          localPurchases.map((purchase) => purchase.toEntity()).toList(),
+        );
+      }
+      if (!await connectionChecker.isConnected) {
+        return right([]);
+      }
+      final remotePurchases = await remoteDataSource.getSupplierPurchases(
+        supplierId,
+      );
+
+      for (var purchase in remotePurchases) {
+        await localDataSource.createPurchase(purchase);
+      }
+      return right(
+        remotePurchases.map((purchase) => purchase.toEntity()).toList(),
+      );
+    } catch (e) {
+      return left(FirebaseFailure(message: e.toString()));
+    }
   }
 }

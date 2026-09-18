@@ -15,7 +15,13 @@ class SupplierPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(
-      SuppliersController(getSuppliersUsecase: sl(), getPurchasesUsecase: sl()),
+      SuppliersController(
+        getSuppliersUsecase: sl(),
+        getPurchasesUsecase: sl(),
+        makePurchasePaymentUsecase: sl(),
+        getPurchasePaymentsBySupplierUsecase: sl(),
+        getSupplierPurchasesUsecase: sl()
+      ),
     );
     return Obx(
       () => LoadingOverlay(

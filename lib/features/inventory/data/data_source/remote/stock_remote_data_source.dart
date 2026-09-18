@@ -3,6 +3,7 @@ import 'dart:core';
 import 'package:billing_system/core/exceptions/firebase_exception.dart';
 import 'package:billing_system/core/services/crash/crashlytics_service.dart';
 import 'package:billing_system/features/inventory/data/models/stock/purchase_model.dart';
+import 'package:billing_system/features/inventory/data/models/stock/purchase_payment_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_batch_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_movement_model.dart';
@@ -96,10 +97,22 @@ abstract interface class StockRemoteDataSource {
   });
 
   Future<List<PurchaseModel>> getAllPurchases();
+  Future<List<PurchaseModel>> getSupplierPurchases(String supplierId);
 
   Future<List<PurchaseModel>> getPurchasesForProductSince(
     String productId,
     DateTime since,
+  );
+
+  Future<(PurchaseModel, PurchasePaymentModel)> makePurchasePayment({
+    required String purchaseId,
+    required double amount,
+    required String paymentMethod,
+    String? notes,
+  });
+
+  Future<List<PurchasePaymentModel>> getPurchasePaymentsBySupplier(
+    String supplierId,
   );
 }
 
@@ -112,6 +125,7 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
   static const _movementCollection = 'stock_movements';
   static const _batchCollection = 'stock_batches';
   static const _purchaseCollection = 'purchases';
+  static const _purchasePaymentCollection = 'purchase_payments';
 
   // ==========================================================
   // Stock
@@ -763,6 +777,159 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
         e,
         st,
         reason: 'StockRemoteDataSourceImpl.sellStock',
+      );
+      throw TFirebaseException('unknown');
+    }
+  }
+
+  // ==========================================================
+  // Purchase Payment
+  // ==========================================================
+
+  @override
+  Future<(PurchaseModel, PurchasePaymentModel)> makePurchasePayment({
+    required String purchaseId,
+    required double amount,
+    required String paymentMethod,
+    String? notes,
+  }) async {
+    try {
+      late PurchaseModel updatedPurchase;
+      late PurchasePaymentModel payment;
+
+      await firestore.runTransaction((transaction) async {
+        // ---------------- READ FIRST (Firestore transaction rule) ----------------
+        final purchaseRef = firestore
+            .collection(_purchaseCollection)
+            .doc(purchaseId);
+
+        final purchaseSnapshot = await transaction.get(purchaseRef);
+
+        if (!purchaseSnapshot.exists) {
+          throw Exception('Purchase not found');
+        }
+
+        final purchase = PurchaseModel.fromJson(purchaseSnapshot.data()!);
+
+        // ---------------- VALIDATE ----------------
+        if (amount <= 0) {
+          throw Exception('Payment amount must be greater than zero');
+        }
+
+        final alreadyPaid = purchase.paidAmount ?? 0.0;
+        final dueAmount = purchase.totalAmount - alreadyPaid;
+
+        // Guard against floating point noise (e.g. 199.999999999998)
+        // making a "pay in full" payment look like it slightly
+        // overshoots the due amount.
+        const epsilon = 0.01;
+        if (amount > dueAmount + epsilon) {
+          throw Exception(
+            'Payment amount ($amount) exceeds the due amount '
+            '($dueAmount) for this purchase',
+          );
+        }
+
+        // ---------------- WRITES ----------------
+        final newPaidAmount = alreadyPaid + amount;
+
+        updatedPurchase = purchase.copyWith(paidAmount: newPaidAmount);
+
+        transaction.update(purchaseRef, updatedPurchase.toJson());
+
+        final paymentRef = firestore
+            .collection(_purchasePaymentCollection)
+            .doc();
+
+        final now = DateTime.now();
+
+        payment = PurchasePaymentModel(
+          id: paymentRef.id,
+          purchaseId: purchase.id,
+          supplierId: purchase.supplierId,
+          amount: amount,
+          paymentDate: now,
+          paymentMethod: paymentMethod,
+          referenceNumber: null,
+          notes: notes,
+          createdAt: now,
+        );
+
+        transaction.set(paymentRef, payment.toJson());
+      });
+
+      return (updatedPurchase, payment);
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.makePurchasePayment',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.makePurchasePayment',
+      );
+      throw TFirebaseException('unknown');
+    }
+  }
+
+  @override
+  Future<List<PurchasePaymentModel>> getPurchasePaymentsBySupplier(
+    String supplierId,
+  ) async {
+    try {
+      final snapshot = await firestore
+          .collection(_purchasePaymentCollection)
+          .where('supplierId', isEqualTo: supplierId)
+          .orderBy('paymentDate', descending: true)
+          .get();
+
+      return snapshot.docs
+          .map((e) => PurchasePaymentModel.fromJson(e.data()))
+          .toList();
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.getPurchasePaymentsByPurchaseId',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.getPurchasePaymentsByPurchaseId',
+      );
+      throw TFirebaseException('unknown');
+    }
+  }
+
+  @override
+  Future<List<PurchaseModel>> getSupplierPurchases(String supplierId) async {
+    try {
+      final snapshot = await firestore
+          .collection(_purchaseCollection)
+          .where('supplierId', isEqualTo: supplierId)
+          .get();
+
+      return snapshot.docs
+          .map((e) => PurchaseModel.fromJson(e.data()))
+          .toList();
+    } on FirebaseException catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.getAllPurchases',
+      );
+      throw TFirebaseException(e.code);
+    } catch (e, st) {
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'StockRemoteDataSourceImpl.getAllPurchases',
       );
       throw TFirebaseException('unknown');
     }

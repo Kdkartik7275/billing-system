@@ -56,6 +56,7 @@ import 'package:billing_system/features/inventory/data/models/brand/brand_model.
 import 'package:billing_system/features/inventory/data/models/category/category_model.dart';
 import 'package:billing_system/features/inventory/data/models/product_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/purchase_model.dart';
+import 'package:billing_system/features/inventory/data/models/stock/purchase_payment_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_batch_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_model.dart';
 import 'package:billing_system/features/inventory/data/models/stock/stock_movement_model.dart';
@@ -100,10 +101,13 @@ import 'package:billing_system/features/inventory/domain/usecases/stock/create_s
 import 'package:billing_system/features/inventory/domain/usecases/stock/get_product_stock_batches_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/get_product_stock_movements_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/get_product_stocks_usecase.dart';
+import 'package:billing_system/features/inventory/domain/usecases/stock/get_purchase_payments_by_supplier.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/get_purchases_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/get_stock_batches_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/get_stocks_movement_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/get_stocks_usecase.dart';
+import 'package:billing_system/features/inventory/domain/usecases/stock/get_supplier_purchases_usecase.dart';
+import 'package:billing_system/features/inventory/domain/usecases/stock/make_purchase_payment_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/purchase_stock_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/stock/sell_stock_usecase.dart';
 import 'package:billing_system/features/inventory/domain/usecases/supplier/add_supplier_usecase.dart';

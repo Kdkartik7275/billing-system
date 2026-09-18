@@ -2,7 +2,7 @@ import 'package:billing_system/core/exceptions/firebase_exception.dart';
 import 'package:billing_system/core/services/crash/crashlytics_service.dart';
 import 'package:billing_system/features/billing/data/models/bill_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 
 abstract interface class BillRemoteDataSource {
   Future<List<BillModel>> getAllBills();
@@ -80,7 +80,7 @@ class BillRemoteDataSourceImpl implements BillRemoteDataSource {
           .collection(_collection)
           .orderBy('createdAt', descending: true)
           .get();
-
+      debugPrint("Bills Length ${snapshot.docs.length.toString()}");
       return snapshot.docs
           .map((doc) => BillModel.fromJson(doc.data()))
           .toList();
@@ -138,7 +138,7 @@ class BillRemoteDataSourceImpl implements BillRemoteDataSource {
           .where('createdAt', isLessThanOrEqualTo: end.toIso8601String())
           .orderBy('createdAt', descending: true)
           .get();
-
+      debugPrint("Bills Length ${snapshot.docs.length.toString()}");
       return snapshot.docs
           .map((doc) => BillModel.fromJson(doc.data()))
           .toList();
@@ -197,7 +197,7 @@ class BillRemoteDataSourceImpl implements BillRemoteDataSource {
           .where('createdAt', isLessThan: end.toIso8601String())
           .orderBy('createdAt', descending: true)
           .get();
-
+      debugPrint("Bills Length ${snapshot.docs.length.toString()}");
       return snapshot.docs
           .map((doc) => BillModel.fromJson(doc.data()))
           .toList();

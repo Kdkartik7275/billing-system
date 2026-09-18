@@ -101,9 +101,7 @@ class SalesController extends GetxController {
 
   Future<void> selectDate(DateTime date) async {
     selectedDate.value = date;
-
     selectedFilter.value = SalesFilter.all;
-
     await loadBills();
   }
 

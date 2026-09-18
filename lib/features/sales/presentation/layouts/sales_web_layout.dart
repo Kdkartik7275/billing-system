@@ -61,7 +61,18 @@ class SalesWebLayout extends GetView<SalesController> {
 
           const SizedBox(height: 20),
 
-          SalesStatsBar(controller: controller),
+          Obx(() {
+            if (controller.isLoading.value) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 40),
+                child: Center(
+                  child: CircularProgressIndicator(strokeWidth: 2.5),
+                ),
+              );
+            }
+
+            return SalesStatsBar(controller: controller);
+          }),
 
           const SizedBox(height: 24),
 
